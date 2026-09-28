@@ -49,3 +49,23 @@ git push origin --delete <branch>   # Remote-Branch löschen
 - Branches klein und kurzlebig halten.
 - Den Default-Branch mit **Branch Protection Rules** schützen (Reviews und Checks erforderlich).
 - Bei Konflikten beim Mergen: Dateien manuell anpassen, dann erneut committen.
+
+## Claude Cowork vs. Claude Code
+
+Beide Produkte von Anthropic basieren auf derselben Agenten-Technik, richten sich aber an unterschiedliche Aufgaben.
+
+| | Claude Code | Claude Cowork |
+| --- | --- | --- |
+| Zielgruppe | Entwickler:innen | Wissensarbeit allgemein (Dokumente, Recherche, Dateien, Office-Aufgaben) |
+| Typische Aufgaben | Code schreiben, Fehler beheben, Tests, Git/Branches, Pull Requests | Berichte, Tabellen, Präsentationen, Dateien ordnen, Zusammenfassungen |
+| Arbeitsumgebung | Repository und Terminal | Ordner und Dateien, die man freigibt, plus verbundene Dienste (Connectoren) |
+| Oberflächen | Terminal (CLI), IDE-Erweiterungen, Desktop-App, Web (claude.ai/code) | Claude-Desktop-App |
+
+### Ist Claude Code jetzt die Cloud-Version?
+
+Nein, nicht ausschließlich. Claude Code läuft **lokal** (Terminal, IDE, Desktop-App) und **in der Cloud** (Claude Code im Web). Die Cloud-Variante ist nur eine von mehreren Möglichkeiten, Claude Code zu nutzen:
+
+- **Lokal**: Claude arbeitet direkt auf dem eigenen Rechner mit den dortigen Dateien.
+- **Cloud (Web)**: Claude arbeitet in einem isolierten Container, in dem das Repository frisch geklont wird. Das ist praktisch für Aufgaben im Hintergrund, auch vom Handy aus. Änderungen müssen gepusht werden (z. B. auf einen Branch), da der Container nach der Sitzung verworfen wird.
+
+Cowork ist also nicht die „Desktop-Version" und Claude Code nicht die „Cloud-Version": Der eigentliche Unterschied liegt im Einsatzzweck (Wissensarbeit vs. Softwareentwicklung), nicht im Ausführungsort.
