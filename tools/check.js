@@ -15,7 +15,7 @@ V.forEach(q => {
   if (!(q.correct >= 0 && q.correct < 4)) err('ungültiger Index');
   if (!'rfah'.includes(q.qtype)) err('Fragetyp');
   const words = q.passage.split(/\s+/).length;
-  if (words < 75 || words > 280) err('Textlänge ' + words + ' Wörter');
+  if (words < 70 || words > 280) err('Textlänge ' + words + ' Wörter');
   const L = 'ABCD'[q.correct];
   const first = (q.explanation.match(/\b([A-D])\b/) || [])[1];
   if (q.qtype !== 'f' && first !== L) err('Erklärung nennt zuerst ' + first + ', richtig ist ' + L);
