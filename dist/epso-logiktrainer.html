@@ -1,0 +1,2595 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EPSO Logiktrainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+/* Layout: TAO-ähnliche Prüfungsoberfläche – feste Kopfleiste (EU-Blau), Navigationsleiste,
+   zweispaltiger Aufgabenbereich (Material links, Frage rechts), Fußleiste mit Zurück/Weiter. */
+:root {
+  --bg: #eef1f6;
+  --surface: #ffffff;
+  --surface-2: #f5f7fb;
+  --fg: #1d2433;
+  --muted: #5b6475;
+  --line: #d3d9e4;
+  --brand: #003399;
+  --brand-ink: #ffffff;
+  --brand-2: #0b4fb8;
+  --accent: #ffcc00;
+  --focus: #2f6fe0;
+  --ok: #1f7a3a;
+  --ok-bg: #e4f3e8;
+  --bad: #b3261e;
+  --bad-bg: #fbe7e5;
+  --flag: #c46a00;
+  --sel: #dde8fb;
+  --font-ui: 'Source Sans 3', 'Segoe UI', Arial, sans-serif;
+  --font-text: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --font-num: 'Source Sans 3', Arial, sans-serif;
+  --radius: 6px;
+  --text-scale: 1;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11161f; --surface: #1a212d; --surface-2: #212a38; --fg: #e6eaf2; --muted: #9aa4b6;
+    --line: #313c4f; --brand: #0d2f7a; --brand-ink: #ffffff; --brand-2: #6f9cf0; --accent: #ffd43b;
+    --focus: #7ea6f5; --ok: #6fcf8a; --ok-bg: #1b3526; --bad: #ff8a80; --bad-bg: #3d1f1d; --flag: #ffb454; --sel: #253655;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11161f; --surface: #1a212d; --surface-2: #212a38; --fg: #e6eaf2; --muted: #9aa4b6;
+  --line: #313c4f; --brand: #0d2f7a; --brand-ink: #ffffff; --brand-2: #6f9cf0; --accent: #ffd43b;
+  --focus: #7ea6f5; --ok: #6fcf8a; --ok-bg: #1b3526; --bad: #ff8a80; --bad-bg: #3d1f1d; --flag: #ffb454; --sel: #253655;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  font-size: calc(16px * var(--text-scale));
+  line-height: 1.5;
+}
+button { font: inherit; color: inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+h1, h2, h3 { text-wrap: balance; line-height: 1.2; margin: 0; }
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* ---------- Kopfleiste ---------- */
+.topbar {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 20;
+  background: var(--brand);
+  color: var(--brand-ink);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  flex-wrap: wrap;
+}
+.topbar .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.topbar .stars { flex: none; }
+.topbar .title { font-weight: 600; font-size: 1.02rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topbar .sub { font-size: 0.82rem; opacity: 0.85; }
+.topbar .spacer { flex: 1; }
+.timer {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.timer.low { background: var(--accent); color: #1d2433; }
+.tb-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  color: var(--brand-ink);
+  border-radius: var(--radius);
+  padding: 5px 12px;
+  cursor: pointer;
+}
+.tb-btn:hover { background: rgba(255, 255, 255, 0.12); }
+
+/* ---------- Navigationsleiste ---------- */
+.navbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.qnav { display: flex; flex-wrap: wrap; gap: 6px; }
+.qdot {
+  position: relative;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--brand-2);
+  background: var(--surface);
+  color: var(--brand-2);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+  display: grid; place-items: center;
+}
+.qdot.answered { background: var(--brand-2); color: var(--surface); }
+.qdot.current { box-shadow: 0 0 0 3px var(--accent); }
+.qdot.flagged::after {
+  content: '';
+  position: absolute; top: -5px; right: -4px;
+  width: 10px; height: 13px;
+  background: var(--flag);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 72%, 0 100%);
+}
+.qdot.right { border-color: var(--ok); background: var(--ok); color: var(--surface); }
+.qdot.wrong { border-color: var(--bad); background: var(--bad); color: var(--surface); }
+.legend { display: flex; gap: 14px; font-size: 0.8rem; color: var(--muted); flex-wrap: wrap; }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.legend i { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--brand-2); display: inline-block; }
+.legend i.fill { background: var(--brand-2); }
+.legend i.flag { border: none; border-radius: 0; background: var(--flag); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 72%, 0 100%); }
+
+/* ---------- Werkzeugleiste ---------- */
+.toolbar {
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+  padding: 8px 16px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+}
+.tool {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 0.88rem;
+}
+.tool:hover { border-color: var(--brand-2); }
+.tool[aria-pressed="true"] { background: var(--sel); border-color: var(--brand-2); }
+.tool svg { width: 16px; height: 16px; }
+.tool .flagicon { fill: var(--flag); }
+.qcounter { margin-left: auto; color: var(--muted); font-size: 0.88rem; font-variant-numeric: tabular-nums; }
+
+/* ---------- Aufgabenbereich ---------- */
+.stage {
+  padding-block: 16px 96px;
+  padding-inline: 16px;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.split.single { grid-template-columns: minmax(0, 1fr); }
+@media (max-width: 860px) { .split { grid-template-columns: minmax(0, 1fr); } }
+.pane {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  min-width: 0;
+}
+.pane.material { max-height: calc(100vh - 230px); overflow: auto; }
+@media (max-width: 860px) { .pane.material { max-height: none; } }
+.passage {
+  font-family: var(--font-text);
+  font-size: 1.02rem;
+  line-height: 1.68;
+  max-width: 68ch;
+}
+.passage p { margin: 0 0 0.85em; }
+.stem { font-weight: 600; font-size: 1.05rem; margin: 0 0 14px; }
+.options { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.opt {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 8px 8px 8px 10px;
+  cursor: pointer;
+}
+.opt:hover { border-color: var(--brand-2); }
+.opt.selected { background: var(--sel); border-color: var(--brand-2); }
+.opt .letter {
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 2px solid var(--brand-2);
+  display: grid; place-items: center;
+  font-weight: 700; color: var(--brand-2);
+}
+.opt.selected .letter { background: var(--brand-2); color: var(--surface); }
+.opt .otext { min-width: 0; }
+.opt.eliminated .otext { text-decoration: line-through; color: var(--muted); opacity: 0.65; }
+.opt.eliminated .otext .fig { opacity: 0.35; }
+.opt.correct { border-color: var(--ok); background: var(--ok-bg); }
+.opt.incorrect { border-color: var(--bad); background: var(--bad-bg); }
+.elim {
+  border: 1px solid transparent; background: transparent; border-radius: var(--radius);
+  width: 34px; height: 34px; cursor: pointer; color: var(--muted);
+  display: grid; place-items: center;
+}
+.elim:hover { border-color: var(--line); color: var(--fg); }
+.elim svg { width: 18px; height: 18px; }
+
+.options.figs { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+@media (max-width: 640px) { .options.figs { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.options.figs .opt { grid-template-columns: minmax(0, 1fr); justify-items: center; padding: 8px; gap: 6px; }
+.options.figs .opt .elim { width: 28px; height: 28px; }
+.optfoot { display: flex; align-items: center; gap: 6px; }
+
+/* Abstrakte Figuren – immer auf weißem Grund wie im Test */
+.fig-series { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; max-width: 760px; }
+@media (max-width: 640px) { .fig-series { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.fig-cell { margin: 0; display: grid; gap: 4px; justify-items: center; }
+.fig-cell figcaption { font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.fig { width: 100%; max-width: 120px; height: auto; display: block; border-radius: 2px; }
+
+/* Tabellen und Diagramme */
+.data-wrap { overflow-x: auto; margin-bottom: 8px; }
+table.data { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; font-size: 0.93rem; }
+table.data caption { text-align: left; font-weight: 700; padding-bottom: 8px; caption-side: top; }
+table.data th, table.data td { border: 1px solid var(--line); padding: 6px 9px; text-align: right; white-space: nowrap; }
+table.data thead th { background: var(--surface-2); font-weight: 600; text-align: center; white-space: normal; }
+table.data .rowhead { text-align: left; }
+.data-note { font-size: 0.82rem; color: var(--muted); margin: 6px 0 0; }
+svg.chart { width: 100%; max-width: 680px; height: auto; background: var(--surface); }
+.ch-title { font: 700 13px var(--font-ui); fill: var(--fg); }
+.ch-axis { font: 11px var(--font-ui); fill: var(--muted); }
+.ch-val { font: 600 10px var(--font-ui); fill: var(--fg); }
+.ch-grid { stroke: var(--line); stroke-width: 1; }
+.ch-s0 { fill: #7ea3dc; }
+.ch-s1 { fill: #2f5fb3; }
+.ch-s2 { fill: #0b2a66; }
+:root[data-theme="dark"] .ch-s2 { fill: #c9d8f5; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ch-s2 { fill: #c9d8f5; } }
+
+/* Feedback im Übungsmodus */
+.feedback {
+  margin-top: 14px;
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+}
+.feedback.good { border-color: var(--ok); }
+.feedback.badf { border-color: var(--bad); }
+.feedback h3 { font-size: 1rem; margin-bottom: 6px; }
+.feedback.good h3 { color: var(--ok); }
+.feedback.badf h3 { color: var(--bad); }
+.feedback p { margin: 0; }
+
+/* ---------- Fußleiste ---------- */
+.footer {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 15;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+  display: flex; gap: 10px; justify-content: space-between; align-items: center;
+}
+.btn {
+  border: 1px solid var(--brand-2);
+  background: var(--surface);
+  color: var(--brand-2);
+  border-radius: var(--radius);
+  padding: 9px 18px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn:hover { background: var(--sel); }
+.btn.primary { background: var(--brand-2); color: var(--surface); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.danger { border-color: var(--bad); color: var(--bad); }
+.btn:disabled { opacity: 0.45; cursor: default; }
+.btnrow { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ---------- Taschenrechner ---------- */
+.calc {
+  position: fixed; right: 16px; bottom: 76px; z-index: 30;
+  width: 250px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  padding: 10px;
+}
+.calc header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; cursor: move; user-select: none; }
+.calc header button { border: none; background: transparent; cursor: pointer; font-size: 1.1rem; color: var(--muted); }
+.calc .disp {
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px;
+  padding: 6px 8px; text-align: right; font-variant-numeric: tabular-nums;
+  min-height: 52px; overflow: hidden;
+}
+.calc .disp .expr { font-size: 0.78rem; color: var(--muted); min-height: 1.1em; word-break: break-all; }
+.calc .disp .val { font-size: 1.35rem; font-weight: 600; word-break: break-all; }
+.calc .keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
+.calc .keys button {
+  border: 1px solid var(--line); background: var(--surface-2); border-radius: 4px;
+  padding: 9px 0; cursor: pointer; font-weight: 600; font-variant-numeric: tabular-nums;
+}
+.calc .keys button:hover { border-color: var(--brand-2); }
+.calc .keys .op { color: var(--brand-2); }
+.calc .keys .eq { background: var(--brand-2); color: var(--surface); border-color: var(--brand-2); }
+
+/* ---------- Startseite / Ergebnisse ---------- */
+.page { max-width: 1080px; margin: 0 auto; padding-block: 24px 64px; padding-inline: 16px; display: grid; gap: 22px; }
+.hero { display: grid; gap: 8px; }
+.eyebrow { text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.75rem; font-weight: 700; color: var(--brand-2); }
+.hero h1 { font-size: clamp(1.6rem, 3.2vw, 2.3rem); font-weight: 700; }
+.hero p { margin: 0; color: var(--muted); max-width: 70ch; }
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 760px) { .facts { grid-template-columns: minmax(0, 1fr); } }
+.fact {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px;
+  display: grid; gap: 4px; align-content: start;
+}
+.fact h3 { font-size: 1rem; }
+.fact .big { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--brand-2); }
+.fact .small { font-size: 0.85rem; color: var(--muted); }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; display: grid; gap: 14px; min-width: 0; }
+.panel h2 { font-size: 1.2rem; }
+.panel .lead { margin: 0; color: var(--muted); font-size: 0.93rem; }
+.modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 760px) { .modes { grid-template-columns: minmax(0, 1fr); } }
+.mode {
+  text-align: left; border: 1px solid var(--line); background: var(--surface-2); border-radius: var(--radius);
+  padding: 14px 16px; cursor: pointer; display: grid; gap: 4px;
+}
+.mode:hover { border-color: var(--brand-2); }
+.mode strong { font-size: 1.02rem; }
+.mode span { color: var(--muted); font-size: 0.88rem; }
+.form { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.field { display: grid; gap: 4px; font-size: 0.88rem; }
+.field label { font-weight: 600; }
+.field select, .field input, textarea {
+  font: inherit; padding: 7px 9px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface); color: var(--fg);
+}
+.checks { display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: 0.9rem; }
+.checks label { display: inline-flex; align-items: center; gap: 6px; }
+textarea { width: 100%; min-height: 140px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.82rem; }
+.muted { color: var(--muted); }
+.small { font-size: 0.85rem; }
+.notice { border-left: 4px solid var(--accent); background: var(--surface); padding: 10px 14px; border-radius: 0 var(--radius) var(--radius) 0; font-size: 0.92rem; }
+
+.stats-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 0.92rem; }
+.stats-table th, .stats-table td { padding: 7px 8px; border-bottom: 1px solid var(--line); text-align: left; }
+.stats-table td.num, .stats-table th.num { text-align: right; }
+.bar { height: 8px; background: var(--surface-2); border-radius: 4px; position: relative; overflow: hidden; min-width: 80px; }
+.bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--brand-2); border-radius: 4px; }
+.bar b { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--flag); }
+.pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; }
+.pill.pass { background: var(--ok-bg); color: var(--ok); }
+.pill.fail { background: var(--bad-bg); color: var(--bad); }
+.pill.src { background: var(--surface-2); color: var(--muted); font-weight: 600; border: 1px solid var(--line); }
+
+.reslist { display: grid; gap: 10px; }
+.resitem { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.resitem summary { padding: 10px 14px; cursor: pointer; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.resitem .body { padding: 0 14px 14px; display: grid; gap: 12px; }
+.mark { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 0.8rem; color: var(--surface); flex: none; }
+.mark.r { background: var(--ok); }
+.mark.w { background: var(--bad); }
+.mark.n { background: var(--muted); }
+
+.review-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.review-cell { border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 10px; background: var(--surface); cursor: pointer; text-align: left; display: flex; justify-content: space-between; gap: 6px; }
+.review-cell:hover { border-color: var(--brand-2); }
+.review-cell .st { font-size: 0.8rem; color: var(--muted); }
+.review-cell.unanswered .st { color: var(--bad); font-weight: 600; }
+
+.confirm { border: 1px solid var(--bad); background: var(--bad-bg); border-radius: var(--radius); padding: 12px 14px; display: grid; gap: 10px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .opt, .qdot, .btn, .mode { transition: background-color 0.12s, border-color 0.12s, box-shadow 0.12s; }
+}
+@media (max-width: 520px) {
+  .topbar .title { font-size: 0.92rem; }
+  .legend { display: none; }
+  .btn { padding: 9px 12px; }
+}
+
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* util.js */
+/* Gemeinsame Hilfsfunktionen: Zufallszahlen mit Seed, Formatierung, Antwortoptionen. */
+(function (root) {
+  'use strict';
+
+  // Mulberry32: kleiner, schneller PRNG. Gleicher Seed -> gleiche Aufgabe.
+  function rng(seed) {
+    let a = seed >>> 0;
+    const next = function () {
+      a = (a + 0x6d2b79f5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    next.int = (min, max) => min + Math.floor(next() * (max - min + 1));
+    next.float = (min, max) => min + next() * (max - min);
+    next.pick = (arr) => arr[Math.floor(next() * arr.length)];
+    next.shuffle = (arr) => {
+      const a2 = arr.slice();
+      for (let i = a2.length - 1; i > 0; i--) {
+        const j = Math.floor(next() * (i + 1));
+        [a2[i], a2[j]] = [a2[j], a2[i]];
+      }
+      return a2;
+    };
+    next.sample = (arr, n) => next.shuffle(arr).slice(0, n);
+    next.chance = (p) => next() < p;
+    return next;
+  }
+
+  function newSeed() {
+    return Math.floor(Math.random() * 2147483647) + 1;
+  }
+
+  function round(x, dec) {
+    const f = Math.pow(10, dec);
+    return Math.round(x * f) / f;
+  }
+
+  const nfCache = {};
+  function fmt(x, dec) {
+    dec = dec || 0;
+    if (!nfCache[dec]) {
+      nfCache[dec] = new Intl.NumberFormat('de-DE', {
+        minimumFractionDigits: dec,
+        maximumFractionDigits: dec,
+      });
+    }
+    let s = nfCache[dec].format(x);
+    if (/^-0(,0+)?$/.test(s)) s = s.slice(1);
+    return s;
+  }
+
+  /**
+   * Baut Antwortoptionen für eine Zahlenaufgabe.
+   * correct: richtiger Wert; traps: typische Fehlerwerte; dec: Nachkommastellen;
+   * n: Anzahl Optionen. Liefert { options: [string], correct: index }.
+   */
+  function numericOptions(r, correct, traps, dec, opts) {
+    opts = opts || {};
+    const n = opts.n || 5;
+    const pre = opts.prefix || '';
+    const suf = opts.suffix || '';
+    const label = (v) => pre + fmt(v, dec) + suf;
+    const cLabel = label(correct);
+    const seen = new Set([cLabel]);
+    const values = [];
+    const tryAdd = (v) => {
+      if (!isFinite(v)) return;
+      if (opts.positive && v <= 0) return;
+      const l = label(v);
+      if (seen.has(l)) return;
+      // Distraktoren sollen sich erkennbar unterscheiden, aber nicht trivial weit weg sein.
+      const rel = Math.abs(v - correct) / Math.max(Math.abs(correct), 1e-9);
+      if (rel < (opts.minRel || 0.012)) return;
+      if (rel > (opts.maxRel || 1.8)) return;
+      seen.add(l);
+      values.push(v);
+    };
+    r.shuffle(traps).forEach(tryAdd);
+    let guard = 0;
+    const spreads = [0.03, 0.05, 0.08, 0.1, 0.12, 0.15, 0.2, 0.25];
+    while (values.length < n - 1 && guard++ < 200) {
+      const s = r.pick(spreads) * (r.chance(0.5) ? 1 : -1);
+      tryAdd(correct * (1 + s) + (correct === 0 ? s * 10 : 0));
+    }
+    const chosen = values.slice(0, n - 1);
+    chosen.push(correct);
+    chosen.sort((a, b) => a - b);
+    return {
+      options: chosen.map(label),
+      correct: chosen.indexOf(correct),
+    };
+  }
+
+  // Optionen aus Texten (z. B. Ländernamen), zufällig angeordnet.
+  function textOptions(r, correct, wrong, n) {
+    const list = r.shuffle([correct].concat(r.sample(wrong, (n || 5) - 1)));
+    return { options: list, correct: list.indexOf(correct) };
+  }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  }
+
+  root.EPSO_UTIL = { rng, newSeed, round, fmt, numericOptions, textOptions, esc };
+  if (typeof module !== 'undefined') module.exports = root.EPSO_UTIL;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* gen-numerical.js */
+/* Generator für Aufgaben zum Zahlenlogischen Denken im EPSO-Stil.
+   Jede Aufgabe: Tabelle oder Diagramm + Frage + 5 Antwortoptionen.
+   Alle Lösungen werden aus den angezeigten (gerundeten) Werten berechnet. */
+(function (root) {
+  'use strict';
+  const U = root.EPSO_UTIL || (typeof require !== 'undefined' ? require('./util.js') : null);
+  const { fmt, round, numericOptions, textOptions, esc } = U;
+
+  // Länder mit plausiblen Basiswerten (Bevölkerung Mio., BIP Mrd. EUR, Stromerzeugung TWh)
+  const COUNTRIES = [
+    { n: 'Deutschland', pop: 83.4, gdp: 4120, twh: 510, exp: 1600 },
+    { n: 'Frankreich', pop: 68.2, gdp: 2800, twh: 490, exp: 650 },
+    { n: 'Italien', pop: 58.9, gdp: 2090, twh: 270, exp: 620 },
+    { n: 'Spanien', pop: 48.3, gdp: 1460, twh: 270, exp: 390 },
+    { n: 'Polen', pop: 36.7, gdp: 750, twh: 165, exp: 350 },
+    { n: 'Rumänien', pop: 19.0, gdp: 320, twh: 57, exp: 95 },
+    { n: 'Niederlande', pop: 17.9, gdp: 1030, twh: 120, exp: 710 },
+    { n: 'Belgien', pop: 11.8, gdp: 580, twh: 90, exp: 430 },
+    { n: 'Tschechien', pop: 10.9, gdp: 300, twh: 75, exp: 210 },
+    { n: 'Schweden', pop: 10.6, gdp: 540, twh: 165, exp: 190 },
+    { n: 'Portugal', pop: 10.5, gdp: 265, twh: 50, exp: 80 },
+    { n: 'Griechenland', pop: 10.4, gdp: 220, twh: 50, exp: 55 },
+    { n: 'Ungarn', pop: 9.6, gdp: 195, twh: 35, exp: 140 },
+    { n: 'Österreich', pop: 9.1, gdp: 475, twh: 72, exp: 200 },
+    { n: 'Bulgarien', pop: 6.4, gdp: 95, twh: 45, exp: 45 },
+    { n: 'Dänemark', pop: 5.9, gdp: 390, twh: 33, exp: 140 },
+    { n: 'Finnland', pop: 5.6, gdp: 275, twh: 80, exp: 80 },
+    { n: 'Slowakei', pop: 5.4, gdp: 130, twh: 30, exp: 110 },
+    { n: 'Irland', pop: 5.3, gdp: 510, twh: 32, exp: 230 },
+    { n: 'Kroatien', pop: 3.9, gdp: 78, twh: 15, exp: 25 },
+    { n: 'Litauen', pop: 2.9, gdp: 72, twh: 5, exp: 40 },
+    { n: 'Slowenien', pop: 2.1, gdp: 63, twh: 15, exp: 50 },
+    { n: 'Lettland', pop: 1.9, gdp: 40, twh: 6, exp: 20 },
+    { n: 'Estland', pop: 1.4, gdp: 38, twh: 8, exp: 20 },
+  ];
+
+
+  // Präpositionen mit Artikel für Länder und Regionen
+  const ART = {
+    'Niederlande': ['in den Niederlanden', 'der Niederlande'],
+    'Schweiz': ['in der Schweiz', 'der Schweiz'],
+    'Slowakei': ['in der Slowakei', 'der Slowakei'],
+    'Vereinigtes Königreich': ['im Vereinigten Königreich', 'des Vereinigten Königreichs'],
+    'Balearen': ['auf den Balearen', 'der Balearen'],
+    'Kreta': ['auf Kreta', 'von Kreta'],
+    'Toskana': ['in der Toskana', 'der Toskana'],
+    'Provence': ['in der Provence', 'der Provence'],
+    'Algarve': ['an der Algarve', 'der Algarve'],
+  };
+  const IN = (n) => (ART[n] ? ART[n][0] : 'in ' + n);
+  const VON = (n) => (ART[n] ? ART[n][1] : 'von ' + n);
+
+
+  function table(caption, head, rows, note) {
+    let h = '<div class="data-wrap"><table class="data"><caption>' + caption + '</caption><thead><tr>';
+    head.forEach((c, i) => (h += '<th' + (i === 0 ? ' class="rowhead"' : '') + '>' + c + '</th>'));
+    h += '</tr></thead><tbody>';
+    rows.forEach((r) => {
+      h += '<tr>';
+      r.forEach((c, i) => (h += i === 0 ? '<th class="rowhead" scope="row">' + c + '</th>' : '<td>' + c + '</td>'));
+      h += '</tr>';
+    });
+    h += '</tbody></table>';
+    if (note) h += '<p class="data-note">' + note + '</p>';
+    return h + '</div>';
+  }
+
+  // Gruppiertes Balkendiagramm als SVG (Werte stehen über den Balken).
+  function barChart(title, groups, series, values, unit, dec) {
+    // values[g][s]
+    const W = 620, H = 300, padL = 50, padR = 10, padT = 34, padB = 58;
+    const all = values.flat();
+    const maxV = Math.max.apply(null, all);
+    const step = niceStep(maxV / 5);
+    const top = Math.ceil(maxV / step) * step;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+    const gw = plotW / groups.length;
+    const bw = Math.min(34, (gw * 0.8) / series.length);
+    const y = (v) => padT + plotH - (v / top) * plotH;
+    let s = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(title) + '">';
+    s += '<text x="' + W / 2 + '" y="16" text-anchor="middle" class="ch-title">' + esc(title) + '</text>';
+    for (let v = 0; v <= top + 1e-9; v += step) {
+      s += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + y(v) + '" y2="' + y(v) + '" class="ch-grid"/>';
+      s += '<text x="' + (padL - 6) + '" y="' + (y(v) + 4) + '" text-anchor="end" class="ch-axis">' + fmt(v, step < 1 ? 1 : 0) + '</text>';
+    }
+    groups.forEach((g, gi) => {
+      const gx = padL + gi * gw + (gw - bw * series.length) / 2;
+      series.forEach((_, si) => {
+        const v = values[gi][si];
+        const x = gx + si * bw;
+        s += '<rect x="' + (x + 1) + '" y="' + y(v) + '" width="' + (bw - 2) + '" height="' + (y(0) - y(v)) + '" class="ch-s' + si + '"/>';
+        s += '<text x="' + (x + bw / 2) + '" y="' + (y(v) - 4) + '" text-anchor="middle" class="ch-val">' + fmt(v, dec) + '</text>';
+      });
+      s += '<text x="' + (padL + gi * gw + gw / 2) + '" y="' + (H - padB + 16) + '" text-anchor="middle" class="ch-axis">' + esc(g) + '</text>';
+    });
+    // Legende
+    let lx = padL;
+    series.forEach((se, si) => {
+      s += '<rect x="' + lx + '" y="' + (H - 18) + '" width="12" height="12" class="ch-s' + si + '"/>';
+      s += '<text x="' + (lx + 16) + '" y="' + (H - 8) + '" class="ch-axis">' + esc(se) + '</text>';
+      lx += 26 + se.length * 7;
+    });
+    s += '<text x="8" y="' + (padT - 10) + '" class="ch-axis">' + esc(unit) + '</text>';
+    return '<div class="data-wrap">' + s + '</svg></div>';
+  }
+
+  function niceStep(raw) {
+    const p = Math.pow(10, Math.floor(Math.log10(raw)));
+    const m = raw / p;
+    return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10) * p;
+  }
+
+  function pct(a, b) {
+    return (b / a - 1) * 100;
+  }
+
+  function q(section, stem, data, opt, explanation, meta) {
+    return Object.assign(
+      {
+        section: 'numerical',
+        stem,
+        data,
+        options: opt.options,
+        correct: opt.correct,
+        explanation,
+      },
+      meta || {}
+    );
+  }
+
+  // ---------- Vorlage 1: Bevölkerungsentwicklung ----------
+  function tplPopulation(r) {
+    const cs = r.sample(COUNTRIES.slice(0, 20), 5);
+    const y0 = r.int(2018, 2021);
+    const years = [y0, y0 + 1, y0 + 2, y0 + 3];
+    const data = cs.map((c) => {
+      let v = c.pop * r.float(0.97, 1.02);
+      const g = r.float(-0.012, 0.016);
+      return years.map(() => {
+        const cur = round(v, 1);
+        v = v * (1 + g + r.float(-0.004, 0.004));
+        return cur;
+      });
+    });
+    const tbl = table(
+      'Bevölkerung ausgewählter EU-Mitgliedstaaten (in Millionen, jeweils zum 1. Januar)',
+      ['Land'].concat(years.map(String)),
+      cs.map((c, i) => [c.n].concat(data[i].map((v) => fmt(v, 1))))
+    );
+    const type = r.int(0, 4);
+    const i = r.int(0, 4);
+    const C = cs[i].n;
+    if (type === 0) {
+      const a = data[i][0], b = data[i][3];
+      const c = pct(a, b);
+      if (Math.abs(c) < 0.8) return tplPopulation(r);
+      const opt = numericOptions(r, round(c, 1), [((b - a) / b) * 100, c * 3, -c, (b / a) * 10, c / 3, c + 1], 1, { suffix: ' %', minRel: 0.05 });
+      return q('numerical', 'Um wie viel Prozent hat sich die Bevölkerung ' + VON(C) + ' zwischen ' + years[0] + ' und ' + years[3] + ' verändert?', tbl, opt,
+        '(' + fmt(b, 1) + ' − ' + fmt(a, 1) + ') ÷ ' + fmt(a, 1) + ' × 100 = ' + fmt(c, 2) + ' % ≈ ' + fmt(round(c, 1), 1) + ' %. Bezugsgröße ist immer der Ausgangswert (' + years[0] + ').');
+    }
+    if (type === 1) {
+      const yi = r.int(0, 3);
+      const tot = data.reduce((s, row) => s + row[yi], 0);
+      const c = (data[i][yi] / tot) * 100;
+      const others = tot - data[i][yi];
+      const opt = numericOptions(r, round(c, 1), [(data[i][yi] / others) * 100, (data[i][(yi + 1) % 4] / tot) * 100, 100 / 5, c * 1.1, c * 0.9], 1, { suffix: ' %' });
+      return q('numerical', 'Welcher Anteil an der Gesamtbevölkerung der fünf aufgeführten Länder entfiel ' + years[yi] + ' auf ' + C + '?', tbl, opt,
+        'Summe ' + years[yi] + ': ' + fmt(tot, 1) + ' Mio. Anteil ' + C + ': ' + fmt(data[i][yi], 1) + ' ÷ ' + fmt(tot, 1) + ' × 100 = ' + fmt(c, 2) + ' %.');
+    }
+    if (type === 2) {
+      const a = data[i][2], b = data[i][3];
+      const g = b / a;
+      const c = b * g * g;
+      const opt = numericOptions(r, round(c, 2), [b * g, b + 2 * (b - a), b * g * g * g, a * g * g, b * (1 + 2 * (g - 1)) + 0.01], 2, { suffix: ' Mio.', minRel: 0.0015, maxRel: 0.2 });
+      return q('numerical', 'Angenommen, die Bevölkerung ' + VON(C) + ' verändert sich ab ' + years[3] + ' jedes Jahr um denselben Prozentsatz wie zwischen ' + years[2] + ' und ' + years[3] + '. Wie hoch wäre sie dann am 1. Januar ' + (years[3] + 2) + '?', tbl, opt,
+        'Wachstumsfaktor: ' + fmt(b, 1) + ' ÷ ' + fmt(a, 1) + ' = ' + fmt(g, 5) + '. Zwei weitere Jahre: ' + fmt(b, 1) + ' × ' + fmt(g, 5) + '² = ' + fmt(c, 3) + ' Mio.');
+    }
+    if (type === 3) {
+      const growth = data.map((row) => pct(row[0], row[3]));
+      const sorted = growth.slice().sort((x, y) => y - x);
+      if (sorted[0] - sorted[1] < 0.25) return tplPopulation(r);
+      const best = growth.indexOf(sorted[0]);
+      const opt = { options: cs.map((c) => c.n), correct: best };
+      return q('numerical', 'Welches Land verzeichnete zwischen ' + years[0] + ' und ' + years[3] + ' das stärkste relative Bevölkerungswachstum (bzw. den geringsten Rückgang)?', tbl, opt,
+        'Veränderungen ' + years[0] + '→' + years[3] + ': ' + cs.map((c, k) => c.n + ' ' + fmt(growth[k], 2) + ' %').join('; ') + '. Maßgeblich ist die relative, nicht die absolute Veränderung.');
+    }
+    // type 4: Differenz von zwei Ländern in Prozentpunkten
+    let j = (i + r.int(1, 4)) % 5;
+    const gi = pct(data[i][0], data[i][3]), gj = pct(data[j][0], data[j][3]);
+    if (Math.abs(gi - gj) < 0.3) return tplPopulation(r);
+    const c = Math.abs(gi - gj);
+    const absDiff = Math.abs((data[i][3] - data[i][0]) - (data[j][3] - data[j][0]));
+    const opt = numericOptions(r, round(c, 1), [absDiff, c * 2, Math.abs(gi + gj), c / 2, Math.abs(gi) + 1], 1, { suffix: ' Prozentpunkte', positive: true, minRel: 0.06, maxRel: 3 });
+    return q('numerical', 'Um wie viele Prozentpunkte unterschied sich die relative Bevölkerungsveränderung zwischen ' + years[0] + ' und ' + years[3] + ' ' + IN(C) + ' von der ' + IN(cs[j].n) + '?', tbl, opt,
+      C + ': ' + fmt(gi, 2) + ' %; ' + cs[j].n + ': ' + fmt(gj, 2) + ' %. Differenz: ' + fmt(c, 2) + ' Prozentpunkte.');
+  }
+
+  // ---------- Vorlage 2: Außenhandel ----------
+  function tplTrade(r) {
+    const cs = r.sample(COUNTRIES, 4);
+    const y1 = r.int(2019, 2024), y2 = y1 + 1;
+    const rows = cs.map((c) => {
+      const e1 = round(c.exp * r.float(0.85, 1.1), 1);
+      const i1 = round(e1 * r.float(0.82, 1.12), 1);
+      const e2 = round(e1 * r.float(0.93, 1.12), 1);
+      const i2 = round(i1 * r.float(0.93, 1.12), 1);
+      return { c: c.n, e1, i1, e2, i2 };
+    });
+    const tbl = table(
+      'Warenausfuhren und -einfuhren (in Mrd. EUR)',
+      ['Land', 'Ausfuhren ' + y1, 'Einfuhren ' + y1, 'Ausfuhren ' + y2, 'Einfuhren ' + y2],
+      rows.map((x) => [x.c, fmt(x.e1, 1), fmt(x.i1, 1), fmt(x.e2, 1), fmt(x.i2, 1)]),
+      'Handelsbilanz = Ausfuhren − Einfuhren'
+    );
+    const t = r.int(0, 3);
+    const k = r.int(0, 3);
+    const x = rows[k];
+    if (t === 0) {
+      const c = x.e2 / x.i2;
+      const opt = numericOptions(r, round(c, 2), [x.i2 / x.e2, x.e1 / x.i1, x.e2 / x.i1, x.e1 / x.i2], 2, { minRel: 0.01, maxRel: 0.5 });
+      return q('numerical', 'Wie hoch war ' + y2 + ' ' + IN(x.c) + ' das Verhältnis von Ausfuhren zu Einfuhren?', tbl, opt,
+        fmt(x.e2, 1) + ' ÷ ' + fmt(x.i2, 1) + ' = ' + fmt(c, 3) + '.');
+    }
+    if (t === 1) {
+      const tot = rows.reduce((s, z) => s + z.e2, 0);
+      const c = (x.e2 / tot) * 100;
+      const totAll = rows.reduce((s, z) => s + z.e2 + z.i2, 0);
+      const opt = numericOptions(r, round(c, 1), [(x.e1 / rows.reduce((s, z) => s + z.e1, 0)) * 100, ((x.e2 + x.i2) / totAll) * 100, (x.e2 / (tot - x.e2)) * 100, c + 2.5], 1, { suffix: ' %' });
+      return q('numerical', 'Welchen Anteil hatten die Ausfuhren ' + VON(x.c) + ' im Jahr ' + y2 + ' an den gesamten Ausfuhren der vier aufgeführten Länder?', tbl, opt,
+        'Summe der Ausfuhren ' + y2 + ': ' + fmt(tot, 1) + ' Mrd. EUR. ' + fmt(x.e2, 1) + ' ÷ ' + fmt(tot, 1) + ' × 100 = ' + fmt(c, 2) + ' %.');
+    }
+    if (t === 2) {
+      // Veränderung der Handelsbilanz in Mrd. EUR
+      const b1 = x.e1 - x.i1, b2 = x.e2 - x.i2;
+      const c = b2 - b1;
+      if (Math.abs(c) < 0.5) return tplTrade(r);
+      const opt = numericOptions(r, round(c, 1), [(x.e2 - x.e1) + (x.i2 - x.i1), -(c), b2, b1, (x.e2 - x.e1), c + (c > 0 ? 5 : -5)], 1, { suffix: ' Mrd. EUR', minRel: 0.03, maxRel: 6 });
+      return q('numerical', 'Um wie viel hat sich die Handelsbilanz ' + VON(x.c) + ' zwischen ' + y1 + ' und ' + y2 + ' verändert?', tbl, opt,
+        'Bilanz ' + y1 + ': ' + fmt(x.e1, 1) + ' − ' + fmt(x.i1, 1) + ' = ' + fmt(b1, 1) + '. Bilanz ' + y2 + ': ' + fmt(x.e2, 1) + ' − ' + fmt(x.i2, 1) + ' = ' + fmt(b2, 1) + '. Veränderung: ' + fmt(c, 1) + ' Mrd. EUR (negativ = Verschlechterung).');
+    }
+    // Projektion mit vorgegebener Rate
+    const g = r.pick([2.5, 3, 3.5, 4, 4.5, 5, 6]);
+    const n = r.pick([2, 3]);
+    const c = x.e2 * Math.pow(1 + g / 100, n);
+    const opt = numericOptions(r, round(c, 1), [x.e2 * (1 + (g * n) / 100), x.e2 * Math.pow(1 + g / 100, n - 1), x.e1 * Math.pow(1 + g / 100, n), x.e2 * Math.pow(1 + g / 100, n + 1)], 1, { suffix: ' Mrd. EUR', minRel: 0.002, maxRel: 0.3 });
+    return q('numerical', 'Angenommen, die Ausfuhren ' + VON(x.c) + ' steigen ab ' + y2 + ' jährlich um ' + fmt(g, 1) + ' %. Wie hoch wären sie im Jahr ' + (y2 + n) + '?', tbl, opt,
+      fmt(x.e2, 1) + ' × ' + fmt(1 + g / 100, 3) + '^' + n + ' = ' + fmt(c, 2) + ' Mrd. EUR. Achtung: Zinseszinseffekt, nicht einfach ' + n + ' × ' + fmt(g, 1) + ' % addieren.');
+  }
+
+  // ---------- Vorlage 3: Strommix (Prozentanteile × Gesamtwert) ----------
+  function tplEnergy(r) {
+    const cs = r.sample(COUNTRIES.slice(0, 18), 4);
+    const src = ['Wind', 'Solar', 'Wasserkraft', 'Kernenergie', 'Fossile'];
+    const year = r.int(2021, 2025);
+    const rows = cs.map((c) => {
+      const tot = round(c.twh * r.float(0.9, 1.1), 0);
+      let w = src.map(() => r.float(2, 30));
+      const sum = w.reduce((a, b) => a + b, 0);
+      let sh = w.map((v) => Math.round((v / sum) * 100));
+      sh[4] += 100 - sh.reduce((a, b) => a + b, 0);
+      if (sh[4] < 1) return null;
+      return { c: c.n, tot, sh };
+    });
+    if (rows.some((x) => !x)) return tplEnergy(r);
+    const tbl = table(
+      'Bruttostromerzeugung ' + year + ' nach Energieträgern',
+      ['Land', 'Gesamt (TWh)'].concat(src.map((s) => s + ' (%)')),
+      rows.map((x) => [x.c, fmt(x.tot, 0)].concat(x.sh.map((v) => fmt(v, 0))))
+    );
+    const t = r.int(0, 3);
+    const a = r.int(0, 3);
+    let b = (a + r.int(1, 3)) % 4;
+    const si = r.int(0, 3);
+    const A = rows[a], B = rows[b];
+    if (t === 0) {
+      const va = (A.tot * A.sh[si]) / 100, vb = (B.tot * B.sh[si]) / 100;
+      const c = va - vb;
+      if (Math.abs(c) < 1) return tplEnergy(r);
+      const opt = numericOptions(r, round(Math.abs(c), 1), [Math.abs(A.sh[si] - B.sh[si]), Math.abs(((A.sh[si] - B.sh[si]) * (A.tot + B.tot)) / 200), Math.abs(c) * 1.2, Math.abs(va + vb) / 2], 1, { suffix: ' TWh', maxRel: 5 });
+      return q('numerical', 'Wie viele TWh Strom wurden ' + year + ' ' + IN(A.c) + ' ' + (c > 0 ? 'mehr' : 'weniger') + ' aus ' + src[si] + ' erzeugt als ' + IN(B.c) + '?', tbl, opt,
+        A.c + ': ' + fmt(A.tot, 0) + ' × ' + A.sh[si] + ' % = ' + fmt(va, 2) + ' TWh. ' + B.c + ': ' + fmt(B.tot, 0) + ' × ' + B.sh[si] + ' % = ' + fmt(vb, 2) + ' TWh. Differenz: ' + fmt(Math.abs(c), 2) + ' TWh. Prozentanteile verschiedener Gesamtmengen dürfen nicht direkt verglichen werden.');
+    }
+    if (t === 1) {
+      const va = (A.tot * A.sh[si]) / 100, vb = (B.tot * B.sh[si]) / 100;
+      const c = (va / vb) * 100;
+      const opt = numericOptions(r, round(c, 1), [(A.sh[si] / B.sh[si]) * 100, (vb / va) * 100, (A.tot / B.tot) * 100, c - 100], 1, { suffix: ' %', maxRel: 3 });
+      return q('numerical', 'Die Stromerzeugung aus ' + src[si] + ' ' + IN(A.c) + ' entsprach wie viel Prozent der Stromerzeugung aus ' + src[si] + ' ' + IN(B.c) + '?', tbl, opt,
+        fmt(va, 2) + ' TWh ÷ ' + fmt(vb, 2) + ' TWh × 100 = ' + fmt(c, 2) + ' %.');
+    }
+    if (t === 2) {
+      const p = r.pick([5, 8, 10, 12, 15]);
+      const newShare = A.sh[si] + r.pick([3, 4, 5, 6]);
+      const c = (A.tot * (1 + p / 100) * newShare) / 100;
+      const opt = numericOptions(r, round(c, 1), [(A.tot * newShare) / 100, (A.tot * (1 + p / 100) * A.sh[si]) / 100, (A.tot * (A.sh[si] + p)) / 100, c * 1.08], 1, { suffix: ' TWh' });
+      return q('numerical', 'Angenommen, die Gesamtstromerzeugung ' + VON(A.c) + ' steigt im Folgejahr um ' + p + ' % und der Anteil ' + VON(src[si]) + ' erhöht sich auf ' + newShare + ' %. Wie viel Strom würde dann aus ' + src[si] + ' erzeugt?', tbl, opt,
+        fmt(A.tot, 0) + ' × ' + fmt(1 + p / 100, 2) + ' = ' + fmt(A.tot * (1 + p / 100), 2) + ' TWh; davon ' + newShare + ' % = ' + fmt(c, 2) + ' TWh.');
+    }
+    // Erneuerbare gesamt (Wind+Solar+Wasser) der vier Länder
+    const ren = rows.map((x) => (x.tot * (x.sh[0] + x.sh[1] + x.sh[2])) / 100);
+    const tot = rows.reduce((s, x) => s + x.tot, 0);
+    const c = (ren.reduce((s, v) => s + v, 0) / tot) * 100;
+    const naive = rows.reduce((s, x) => s + x.sh[0] + x.sh[1] + x.sh[2], 0) / 4;
+    if (Math.abs(naive - c) < 0.6) return tplEnergy(r);
+    const opt = numericOptions(r, round(c, 1), [naive, c + (c - naive), c * 0.9, c * 1.1], 1, { suffix: ' %' });
+    return q('numerical', 'Wie hoch war ' + year + ' der Anteil von Wind, Solar und Wasserkraft zusammen an der gesamten Stromerzeugung aller vier Länder?', tbl, opt,
+      'Erneuerbare je Land in TWh: ' + rows.map((x, k) => x.c + ' ' + fmt(ren[k], 2)).join('; ') + '. Summe ' + fmt(ren.reduce((s, v) => s + v, 0), 2) + '  von ' + fmt(tot, 0) + ' TWh = ' + fmt(c, 2) + ' %. Der einfache Durchschnitt der Prozentsätze (' + fmt(naive, 2) + ' %) ist falsch, weil die Länder unterschiedlich viel Strom erzeugen.');
+  }
+
+  // ---------- Vorlage 4: EU-Programme (Balkendiagramm) ----------
+  function tplBudget(r) {
+    const progs = r.sample(['Horizont Europa', 'Erasmus+', 'Digitales Europa', 'LIFE', 'CEF Verkehr', 'EU4Health', 'Kreatives Europa', 'InvestEU'], 4);
+    const y0 = r.int(2021, 2024);
+    const years = [y0, y0 + 1, y0 + 2];
+    const vals = progs.map(() => {
+      let v = r.int(8, 60) * 50;
+      return years.map(() => {
+        const cur = v;
+        v = Math.round((v * r.float(0.94, 1.15)) / 10) * 10;
+        return cur;
+      });
+    });
+    // values[g][s]: Gruppen = Programme, Serien = Jahre
+    const chart = barChart('Mittelbindungen ausgewählter EU-Programme (in Mio. EUR)', progs, years.map(String), vals, 'Mio. EUR', 0);
+    const t = r.int(0, 2);
+    const k = r.int(0, 3);
+    if (t === 0) {
+      const tot = vals.reduce((s, row) => s + row[2], 0);
+      const c = (vals[k][2] / tot) * 100;
+      const opt = numericOptions(r, round(c, 1), [(vals[k][2] / (tot - vals[k][2])) * 100, (vals[k][0] / vals.reduce((s, row) => s + row[0], 0)) * 100, 25, c * 1.12], 1, { suffix: ' %' });
+      return q('numerical', 'Welchen Anteil hatte ' + progs[k] + ' ' + years[2] + ' an den gesamten Mittelbindungen der vier dargestellten Programme?', chart, opt,
+        'Summe ' + years[2] + ': ' + fmt(tot, 0) + ' Mio. EUR. ' + fmt(vals[k][2], 0) + ' ÷ ' + fmt(tot, 0) + ' × 100 = ' + fmt(c, 2) + ' %.');
+    }
+    if (t === 1) {
+      const c = pct(vals[k][0], vals[k][2]);
+      if (Math.abs(c) < 1) return tplBudget(r);
+      const avg = (pct(vals[k][0], vals[k][1]) + pct(vals[k][1], vals[k][2]));
+      const opt = numericOptions(r, round(c, 1), [((vals[k][2] - vals[k][0]) / vals[k][2]) * 100, avg * 1.15, c / 2, -c], 1, { suffix: ' %', maxRel: 3 });
+      return q('numerical', 'Um wie viel Prozent veränderten sich die Mittelbindungen für ' + progs[k] + ' ' + VON(years[0]) + ' bis ' + years[2] + '?', chart, opt,
+        '(' + fmt(vals[k][2], 0) + ' − ' + fmt(vals[k][0], 0) + ') ÷ ' + fmt(vals[k][0], 0) + ' × 100 = ' + fmt(c, 2) + ' %.');
+    }
+    // Welche Steigerung wäre nötig, um Programm X im nächsten Jahr um Y% zu übertreffen
+    const tot1 = vals.reduce((s, row) => s + row[1], 0), tot2 = vals.reduce((s, row) => s + row[2], 0);
+    const c = pct(tot1, tot2);
+    const tot0 = vals.reduce((s, row) => s + row[0], 0);
+    if (Math.abs(c) < 0.5) return tplBudget(r);
+    const opt = numericOptions(r, round(c, 1), [pct(tot0, tot2), pct(tot0, tot1), ((tot2 - tot1) / tot2) * 100, c * 1.5], 1, { suffix: ' %', maxRel: 3 });
+    return q('numerical', 'Um wie viel Prozent veränderten sich die gesamten Mittelbindungen der vier Programme zwischen ' + years[1] + ' und ' + years[2] + '?', chart, opt,
+      'Summe ' + years[1] + ': ' + fmt(tot1, 0) + '; Summe ' + years[2] + ': ' + fmt(tot2, 0) + '. Veränderung: ' + fmt(c, 2) + ' %.');
+  }
+
+  // ---------- Vorlage 5: Preise und Wechselkurse ----------
+  function tplCurrency(r) {
+    const cur = r.sample([
+      { c: 'Polen', cur: 'PLN', rate: 4.3 },
+      { c: 'Tschechien', cur: 'CZK', rate: 25.0 },
+      { c: 'Ungarn', cur: 'HUF', rate: 395 },
+      { c: 'Schweden', cur: 'SEK', rate: 11.3 },
+      { c: 'Dänemark', cur: 'DKK', rate: 7.46 },
+      { c: 'Rumänien', cur: 'RON', rate: 4.98 },
+      { c: 'Vereinigtes Königreich', cur: 'GBP', rate: 0.85 },
+      { c: 'Schweiz', cur: 'CHF', rate: 0.94 },
+      { c: 'Norwegen', cur: 'NOK', rate: 11.6 },
+    ], 4);
+    const item = r.pick([
+      { n: 'Monatsfahrkarte ÖPNV', eur: 60 },
+      { n: 'Liter Milch', eur: 1.1 },
+      { n: 'Kinokarte', eur: 11 },
+      { n: 'Laptop (Standardmodell)', eur: 850 },
+      { n: 'Hotelübernachtung (Mittelklasse)', eur: 110 },
+    ]);
+    const dec = item.eur < 5 ? 2 : 0;
+    const rows = cur.map((x) => {
+      const rate = round(x.rate * r.float(0.97, 1.03), x.rate > 100 ? 1 : x.rate > 10 ? 2 : 3);
+      const price = round(item.eur * r.float(0.75, 1.3) * rate, x.rate > 100 ? -1 : dec);
+      return Object.assign({}, x, { rate, price });
+    });
+    const rateDec = (v) => (v > 100 ? 1 : v > 10 ? 2 : 3);
+    const tbl = table(
+      'Preis für: ' + item.n,
+      ['Land', 'Preis (Landeswährung)', 'Wechselkurs (1 EUR = …)'],
+      rows.map((x) => [x.c, fmt(x.price, x.rate > 100 ? 0 : dec) + ' ' + x.cur, fmt(x.rate, rateDec(x.rate)) + ' ' + x.cur])
+    );
+    const eur = rows.map((x) => x.price / x.rate);
+    const t = r.int(0, 2);
+    const a = r.int(0, 3);
+    const b = (a + r.int(1, 3)) % 4;
+    if (t === 0) {
+      const c = (eur[a] / eur[b] - 1) * 100;
+      if (Math.abs(c) < 2) return tplCurrency(r);
+      const opt = numericOptions(r, round(c, 1), [(1 - eur[b] / eur[a]) * 100, (rows[a].price / rows[b].price - 1) * 100, -c, c * 1.3], 1, { suffix: ' %', maxRel: 3 });
+      return q('numerical', 'Um wie viel Prozent ist der Artikel ' + IN(rows[a].c) + ' teurer bzw. billiger (negativ) als ' + IN(rows[b].c) + ', wenn beide Preise in Euro umgerechnet werden?', tbl, opt,
+        rows[a].c + ': ' + fmt(eur[a], 2) + ' EUR; ' + rows[b].c + ': ' + fmt(eur[b], 2) + ' EUR. (' + fmt(eur[a], 2) + ' ÷ ' + fmt(eur[b], 2) + ' − 1) × 100 = ' + fmt(c, 2) + ' %.');
+    }
+    if (t === 1) {
+      const n = r.pick([3, 4, 5, 6, 8, 12]);
+      const c = eur.reduce((s, v) => s + v, 0) / 4 * n;
+      const opt = numericOptions(r, round(c, 2), [(rows.reduce((s, x) => s + x.price * x.rate, 0) / 4 / 100) * n, eur.reduce((s, v) => s + v, 0) / 4 * (n - 1), c * 1.07, eur[a] * n], 2, { suffix: ' EUR', maxRel: 1 });
+      return q('numerical', 'Wie viel kosten ' + n + ' Einheiten des Artikels zum durchschnittlichen Euro-Preis der vier Länder?', tbl, opt,
+        'Euro-Preise: ' + rows.map((x, k) => x.c + ' ' + fmt(eur[k], 2)).join('; ') + '. Durchschnitt ' + fmt(eur.reduce((s, v) => s + v, 0) / 4, 3) + ' EUR × ' + n + ' = ' + fmt(c, 2) + ' EUR.');
+    }
+    // Wechselkursänderung
+    const ch = r.pick([-8, -6, -5, -4, 4, 5, 6, 8, 10]);
+    const newRate = rows[a].rate * (1 + ch / 100);
+    const c = rows[a].price / newRate;
+    const opt = numericOptions(r, round(c, 2), [rows[a].price / rows[a].rate * (1 + ch / 100), eur[a], rows[a].price / (rows[a].rate * (1 - ch / 100)), c * 1.1], 2, { suffix: ' EUR', minRel: 0.005, maxRel: 0.5 });
+    return q('numerical', 'Angenommen, der Kurs ' + VON(rows[a].cur) + ' verändert sich so, dass man für 1 EUR ' + Math.abs(ch) + ' % ' + (ch > 0 ? 'mehr' : 'weniger') + ' ' + rows[a].cur + ' erhält. Der Preis in Landeswährung bleibt gleich. Wie viel kostet der Artikel ' + IN(rows[a].c) + ' dann in Euro?', tbl, opt,
+      'Neuer Kurs: ' + fmt(rows[a].rate, 3) + ' × ' + fmt(1 + ch / 100, 2) + ' = ' + fmt(newRate, 4) + '. Preis: ' + fmt(rows[a].price, dec) + ' ÷ ' + fmt(newRate, 4) + ' = ' + fmt(c, 2) + ' EUR.');
+  }
+
+  // ---------- Vorlage 6: Personal nach Direktionen ----------
+  function tplStaff(r) {
+    const dirs = r.sample(['Direktion A – Haushalt', 'Direktion B – Recht', 'Direktion C – Personal', 'Direktion D – Politik', 'Direktion E – Kommunikation', 'Direktion F – IT'], 4);
+    const rows = dirs.map((d) => {
+      const n = r.int(12, 60) * 5;
+      const w = r.int(30, 70);
+      return { d, n, w, ad: r.int(35, 70) };
+    });
+    const year = r.int(2022, 2026);
+    const tbl = table(
+      'Personal einer EU-Agentur am 31.12.' + year,
+      ['Direktion', 'Beschäftigte', 'davon Frauen (%)', 'davon Funktionsgruppe AD (%)'],
+      rows.map((x) => [x.d, fmt(x.n, 0), fmt(x.w, 0), fmt(x.ad, 0)])
+    );
+    const t = r.int(0, 2);
+    const k = r.int(0, 3);
+    const x = rows[k];
+    if (t === 0) {
+      const women = rows.reduce((s, z) => s + (z.n * z.w) / 100, 0);
+      const tot = rows.reduce((s, z) => s + z.n, 0);
+      const c = (women / tot) * 100;
+      const naive = rows.reduce((s, z) => s + z.w, 0) / 4;
+      if (Math.abs(c - naive) < 0.5) return tplStaff(r);
+      const opt = numericOptions(r, round(c, 1), [naive, c + (c - naive) * 1.5, 100 - c, c * 1.1], 1, { suffix: ' %', maxRel: 1.5 });
+      return q('numerical', 'Wie hoch war der Frauenanteil am gesamten Personal der vier Direktionen?', tbl, opt,
+        'Frauen: ' + rows.map((z) => fmt((z.n * z.w) / 100, 1)).join(' + ') + ' = ' + fmt(women, 1) + '  von ' + fmt(tot, 0) + ' = ' + fmt(c, 2) + ' %. Einfacher Durchschnitt der Prozentsätze (' + fmt(naive, 2) + ' %) wäre falsch.');
+    }
+    if (t === 1) {
+      const leave = r.int(2, 8) * 5;
+      const men = x.n * (1 - x.w / 100);
+      if (men <= leave + 5) return tplStaff(r);
+      const women = (x.n * x.w) / 100;
+      const c = (women / (x.n - leave)) * 100;
+      const opt = numericOptions(r, round(c, 1), [x.w + (leave / x.n) * 100, (women / x.n) * 100 + 1.5, ((women + leave) / x.n) * 100, c * 1.08], 1, { suffix: ' %', minRel: 0.005, maxRel: 0.5 });
+      return q('numerical', 'Angenommen, ' + IN(x.d) + ' scheiden ' + leave + ' Männer aus und werden nicht ersetzt. Wie hoch wäre danach der Frauenanteil in dieser Direktion?', tbl, opt,
+        'Frauen: ' + fmt(x.n, 0) + ' × ' + x.w + ' % = ' + fmt(women, 1) + '. Neue Gesamtzahl: ' + fmt(x.n - leave, 0) + '. Anteil: ' + fmt(c, 2) + ' %.');
+    }
+    const other = rows[(k + r.int(1, 3)) % 4];
+    const a1 = (x.n * x.ad) / 100, a2 = (other.n * other.ad) / 100;
+    const c = a1 - a2;
+    if (Math.abs(c) < 2) return tplStaff(r);
+    const opt = numericOptions(r, round(Math.abs(c), 0), [Math.abs(x.n - other.n), Math.abs(x.ad - other.ad), Math.abs(((x.ad - other.ad) * (x.n + other.n)) / 200), Math.abs(c) + 6], 0, { positive: true, minRel: 0.04, maxRel: 4 });
+    return q('numerical', 'Wie viele Beschäftigte der Funktionsgruppe AD hatte ' + x.d + ' ' + (c > 0 ? 'mehr' : 'weniger') + ' als ' + other.d + '? (auf ganze Personen gerundet)', tbl, opt,
+      fmt(x.n, 0) + ' × ' + x.ad + ' % = ' + fmt(a1, 1) + '; ' + fmt(other.n, 0) + ' × ' + other.ad + ' % = ' + fmt(a2, 1) + '. Differenz ≈ ' + fmt(Math.abs(c), 0) + '.');
+  }
+
+  // ---------- Vorlage 7: Tourismus (zwei verknüpfte Größen) ----------
+  function tplTourism(r) {
+    const regs = r.sample(['Tirol', 'Algarve', 'Bayern', 'Balearen', 'Toskana', 'Kreta', 'Provence', 'Dalmatien', 'Andalusien', 'Südtirol'], 4);
+    const y1 = r.int(2019, 2024), y2 = y1 + 1;
+    const rows = regs.map((g) => {
+      const n1 = round(r.float(8, 60), 1);
+      const n2 = round(n1 * r.float(0.9, 1.14), 1);
+      const s1 = r.int(70, 160);
+      const s2 = Math.round(s1 * r.float(0.95, 1.1));
+      return { g, n1, n2, s1, s2 };
+    });
+    const tbl = table(
+      'Übernachtungen und durchschnittliche Ausgaben von Touristen',
+      ['Region', 'Übernachtungen ' + y1 + ' (Mio.)', 'Übernachtungen ' + y2 + ' (Mio.)', 'Ausgaben pro Nacht ' + y1 + ' (EUR)', 'Ausgaben pro Nacht ' + y2 + ' (EUR)'],
+      rows.map((x) => [x.g, fmt(x.n1, 1), fmt(x.n2, 1), fmt(x.s1, 0), fmt(x.s2, 0)])
+    );
+    const k = r.int(0, 3);
+    const x = rows[k];
+    const t = r.int(0, 1);
+    if (t === 0) {
+      const e1 = x.n1 * x.s1, e2 = x.n2 * x.s2;
+      const c = pct(e1, e2);
+      if (Math.abs(c) < 1) return tplTourism(r);
+      const opt = numericOptions(r, round(c, 1), [pct(x.n1, x.n2) + pct(x.s1, x.s2) + 1.3, pct(x.n1, x.n2), pct(x.s1, x.s2), ((e2 - e1) / e2) * 100], 1, { suffix: ' %', minRel: 0.02, maxRel: 4 });
+      return q('numerical', 'Um wie viel Prozent veränderten sich die gesamten Touristenausgaben ' + IN(x.g) + ' ' + VON(y1) + ' auf ' + y2 + '?', tbl, opt,
+        'Ausgaben ' + y1 + ': ' + fmt(x.n1, 1) + ' Mio. × ' + x.s1 + ' EUR = ' + fmt(e1, 1) + ' Mio. EUR. ' + y2 + ': ' + fmt(x.n2, 1) + ' × ' + x.s2 + ' = ' + fmt(e2, 1) + ' Mio. EUR. Veränderung: ' + fmt(c, 2) + ' %.');
+    }
+    const tot = rows.reduce((s, z) => s + z.n2 * z.s2, 0);
+    const c = tot / 1000;
+    const opt = numericOptions(r, round(c, 2), [rows.reduce((s, z) => s + z.n2, 0) * rows.reduce((s, z) => s + z.s2, 0) / 4 / 1000, rows.reduce((s, z) => s + z.n1 * z.s1, 0) / 1000, c * 1.1, c / 1.1], 2, { suffix: ' Mrd. EUR', minRel: 0.01, maxRel: 0.5 });
+    return q('numerical', 'Wie hoch waren ' + y2 + ' die gesamten Touristenausgaben in den vier Regionen zusammen?', tbl, opt,
+      rows.map((z) => fmt(z.n2, 1) + ' × ' + z.s2).join(' + ') + ' = ' + fmt(tot, 1) + ' Mio. EUR = ' + fmt(c, 2) + ' Mrd. EUR.');
+  }
+
+  // ---------- Vorlage 8: BIP pro Kopf (Kombination zweier Größen) ----------
+  function tplGdpPerCapita(r) {
+    const cs = r.sample(COUNTRIES.slice(0, 22), 5);
+    const year = r.int(2021, 2025);
+    const rows = cs.map((c) => ({ c: c.n, gdp: round(c.gdp * r.float(0.92, 1.08), 0), pop: round(c.pop * r.float(0.99, 1.01), 1), gr: round(r.float(-1.5, 4.5), 1) }));
+    const tbl = table(
+      'Wirtschaftsdaten ' + year,
+      ['Land', 'BIP (Mrd. EUR)', 'Bevölkerung (Mio.)', 'Reales BIP-Wachstum ggü. Vorjahr (%)'],
+      rows.map((x) => [x.c, fmt(x.gdp, 0), fmt(x.pop, 1), fmt(x.gr, 1)])
+    );
+    const t = r.int(0, 2);
+    const k = r.int(0, 4);
+    const x = rows[k];
+    if (t === 0) {
+      const c = (x.gdp / x.pop) * 1000;
+      const opt = numericOptions(r, round(c, -2), [(x.pop / x.gdp) * 1e6, c / 10, c * 1.15, c * 0.85], 0, { suffix: ' EUR', maxRel: 20 });
+      return q('numerical', 'Wie hoch war ' + year + ' das BIP pro Kopf ' + IN(x.c) + ' (auf 100 EUR gerundet)?', tbl, opt,
+        fmt(x.gdp, 0) + ' Mrd. EUR ÷ ' + fmt(x.pop, 1) + ' Mio. = ' + fmt(c, 0) + ' EUR ≈ ' + fmt(round(c, -2), 0) + ' EUR. Einheiten beachten: Mrd. ÷ Mio. = Tausend.');
+    }
+    if (t === 1) {
+      const c = x.gdp / (1 + x.gr / 100);
+      const opt = numericOptions(r, round(c, 1), [x.gdp * (1 - x.gr / 100), x.gdp, x.gdp * (1 + x.gr / 100), c - (x.gdp - c)], 1, { suffix: ' Mrd. EUR', minRel: 0.0005, maxRel: 0.2 });
+      if (Math.abs(x.gr) < 0.8) return tplGdpPerCapita(r);
+      return q('numerical', 'Wie hoch war das (reale) BIP ' + VON(x.c) + ' im Jahr ' + (year - 1) + ', ausgedrückt in Preisen ' + VON(year) + '?', tbl, opt,
+        fmt(x.gdp, 0) + ' ÷ ' + fmt(1 + x.gr / 100, 3) + ' = ' + fmt(c, 2) + ' Mrd. EUR. Beim Rückrechnen wird durch den Wachstumsfaktor geteilt, nicht der Prozentsatz abgezogen.');
+    }
+    const pc = rows.map((z) => z.gdp / z.pop);
+    const best = pc.indexOf(Math.max.apply(null, pc));
+    const sortedPc = pc.slice().sort((p1, p2) => p2 - p1);
+    if (sortedPc[0] / sortedPc[1] < 1.03) return tplGdpPerCapita(r);
+    return q('numerical', 'Welches Land hatte ' + year + ' das höchste BIP pro Kopf?', tbl, { options: rows.map((z) => z.c), correct: best },
+      'BIP pro Kopf (Tsd. EUR): ' + rows.map((z, i2) => z.c + ' ' + fmt(pc[i2], 1)).join('; ') + '.');
+  }
+
+  const TEMPLATES = [tplPopulation, tplTrade, tplEnergy, tplBudget, tplCurrency, tplStaff, tplTourism, tplGdpPerCapita];
+
+  function valid(q) {
+    return q && q.options.length === 5 && q.correct >= 0 && new Set(q.options).size === 5;
+  }
+
+  function generate(seed) {
+    let out = null;
+    for (let k = 0; k < 10 && !valid(out); k++) {
+      const r = U.rng(seed + k * 1000003);
+      const tpl = TEMPLATES[r.int(0, TEMPLATES.length - 1)];
+      out = tpl(r);
+    }
+    out.id = 'num-' + seed;
+    out.seed = seed;
+    out.source = 'generiert';
+    return out;
+  }
+
+  const API = { generate, count: TEMPLATES.length };
+  root.EPSO_NUMERICAL = API;
+  if (typeof module !== 'undefined') module.exports = API;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* gen-abstract.js */
+/* Generator für Aufgaben zum abstrakten Denken im EPSO-Stil:
+   Fünf Figuren folgen einer oder mehreren Regeln. Gesucht ist die sechste Figur.
+   Die richtige Antwort ergibt sich zwingend aus den Regeln; Distraktoren verletzen genau eine Regel. */
+(function (root) {
+  'use strict';
+  const U = root.EPSO_UTIL || (typeof require !== 'undefined' ? require('./util.js') : null);
+
+  const FILL = { k: '#1a1a1a', w: '#ffffff', g: '#9c9c9c' };
+  const FILL_NAME = { k: 'schwarz', w: 'weiß', g: 'grau' };
+  const SHAPES = ['circle', 'square', 'triangle', 'diamond', 'pentagon', 'hexagon', 'star', 'cross'];
+  const SHAPE_NAME = { circle: 'Kreis', square: 'Quadrat', triangle: 'Dreieck', diamond: 'Raute', pentagon: 'Fünfeck', hexagon: 'Sechseck', star: 'Stern', cross: 'Kreuz' };
+  const mod = (a, m) => ((a % m) + m) % m;
+
+  // ---------- Zeichnen ----------
+  function poly(n, cx, cy, r, rotDeg) {
+    const pts = [];
+    for (let i = 0; i < n; i++) {
+      const a = ((rotDeg - 90 + (360 / n) * i) * Math.PI) / 180;
+      pts.push((cx + r * Math.cos(a)).toFixed(2) + ',' + (cy + r * Math.sin(a)).toFixed(2));
+    }
+    return pts.join(' ');
+  }
+
+  function shapeSvg(name, cx, cy, r, fill, rot) {
+    const st = ' fill="' + FILL[fill] + '" stroke="#1a1a1a" stroke-width="1.6"';
+    rot = rot || 0;
+    switch (name) {
+      case 'circle':
+        return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r * 0.9 + '"' + st + '/>';
+      case 'square':
+        return '<polygon points="' + poly(4, cx, cy, r * 1.05, 45 + rot) + '"' + st + '/>';
+      case 'diamond':
+        return '<polygon points="' + poly(4, cx, cy, r * 1.05, rot) + '"' + st + '/>';
+      case 'triangle':
+        return '<polygon points="' + poly(3, cx, cy + r * 0.12, r * 1.1, rot) + '"' + st + '/>';
+      case 'pentagon':
+        return '<polygon points="' + poly(5, cx, cy, r, rot) + '"' + st + '/>';
+      case 'hexagon':
+        return '<polygon points="' + poly(6, cx, cy, r, rot) + '"' + st + '/>';
+      case 'star': {
+        const pts = [];
+        for (let i = 0; i < 10; i++) {
+          const rr = i % 2 ? r * 0.45 : r * 1.05;
+          const a = ((rot - 90 + 36 * i) * Math.PI) / 180;
+          pts.push((cx + rr * Math.cos(a)).toFixed(2) + ',' + (cy + rr * Math.sin(a)).toFixed(2));
+        }
+        return '<polygon points="' + pts.join(' ') + '"' + st + '/>';
+      }
+      case 'cross': {
+        const w = r * 0.36;
+        const d = 'M' + (cx - w) + ',' + (cy - r) + 'h' + 2 * w + 'v' + (r - w) + 'h' + (r - w) + 'v' + 2 * w + 'h' + -(r - w) + 'v' + (r - w) + 'h' + -2 * w + 'v' + -(r - w) + 'h' + -(r - w) + 'v' + -2 * w + 'h' + (r - w) + 'z';
+        return '<path d="' + d + '"' + st + ' transform="rotate(' + rot + ' ' + cx + ' ' + cy + ')"/>';
+      }
+      default: {
+        // n-Eck mit n Seiten (sides:N)
+        const n = parseInt(String(name).split(':')[1], 10);
+        return '<polygon points="' + poly(n, cx, cy, r, rot) + '"' + st + '/>';
+      }
+    }
+  }
+
+  const ORBIT = [];
+  for (let i = 0; i < 8; i++) {
+    const a = ((-90 + 45 * i) * Math.PI) / 180;
+    ORBIT.push([50 + 37 * Math.cos(a), 50 + 37 * Math.sin(a)]);
+  }
+
+  function renderLayer(L, s) {
+    switch (L.type) {
+      case 'arrow': {
+        const a = s.angle * 45;
+        return '<g transform="rotate(' + a + ' 50 50)"><line x1="50" y1="64" x2="50" y2="26" stroke="#1a1a1a" stroke-width="3.2"/>' +
+          '<polygon points="50,17 42,29 58,29" fill="' + FILL[s.fill || 'k'] + '" stroke="#1a1a1a" stroke-width="1.6"/>' +
+          '<circle cx="50" cy="68" r="4" fill="#1a1a1a"/></g>';
+      }
+      case 'center':
+        return shapeSvg(s.shape, 50, 50, 19, s.fill, s.rot ? s.rot * 45 : 0);
+      case 'sides':
+        return shapeSvg('sides:' + s.sides, 50, 50, 20, s.fill, 0);
+      case 'orbit': {
+        const p = ORBIT[s.pos];
+        return shapeSvg(s.shape, p[0], p[1], 7.5, s.fill, 0);
+      }
+      case 'corner': {
+        const c = [[4, 4, 1, 1], [96, 4, -1, 1], [96, 96, -1, -1], [4, 96, 1, -1]][s.pos];
+        const d = 22;
+        return '<polygon points="' + c[0] + ',' + c[1] + ' ' + (c[0] + c[2] * d) + ',' + c[1] + ' ' + c[0] + ',' + (c[1] + c[3] * d) + '" fill="' + FILL[s.fill] + '" stroke="#1a1a1a" stroke-width="1.4"/>';
+      }
+      case 'count': {
+        let out = '';
+        const n = s.n;
+        const sp = 8.5;
+        const x0 = 50 - ((n - 1) * sp) / 2;
+        for (let i = 0; i < n; i++) out += shapeSvg(s.shape || 'circle', x0 + i * sp, 89, 3.4, s.fill || 'k', 0);
+        return out;
+      }
+    }
+    return '';
+  }
+
+  function renderFigure(layers, states, label) {
+    let s = '<svg class="fig" viewBox="0 0 100 100" aria-hidden="true"><rect x="1" y="1" width="98" height="98" fill="#ffffff" stroke="#8a8f99" stroke-width="1"/>';
+    layers.forEach((L, i) => (s += renderLayer(L, states[i])));
+    s += '</svg>';
+    return '<figure class="fig-cell">' + s + (label ? '<figcaption>' + label + '</figcaption>' : '') + '</figure>';
+  }
+
+  // ---------- Regeln ----------
+  // Jede Regel: value(t) für t = 0..5, wrong(): plausible falsche Werte für t = 5, text: Beschreibung.
+  function ruleLinear(r, m, stepChoices, v0, what, unitText) {
+    const s = r.pick(stepChoices);
+    return {
+      value: (t) => mod(v0 + s * t, m),
+      wrong: () => [mod(v0 + s * 4, m), mod(v0 + s * 6, m), mod(v0 + s * 5 + 1, m), mod(v0 + s * 5 - 1, m), mod(v0 - s * 5, m)],
+      text: what + ' ' + unitText(s),
+    };
+  }
+
+  function ruleAlternating(r, m, v0, what, unitText) {
+    const a = r.pick([1, 2]), b = r.pick([a === 1 ? 2 : 1, 3]);
+    const val = (t) => mod(v0 + Math.ceil(t / 2) * a + Math.floor(t / 2) * b, m);
+    return {
+      value: val,
+      wrong: () => [val(4), val(6), mod(val(4) + b, m), mod(val(5) + 1, m), mod(val(5) - 1, m)],
+      text: what + ' ' + unitText(a) + ' und ' + unitText(b) + ' im Wechsel',
+    };
+  }
+
+  function ruleCycle(r, list, i0, what, names) {
+    const k = list.length;
+    return {
+      value: (t) => list[mod(i0 + t, k)],
+      wrong: () => list.concat(),
+      text: what + ' wechselt zyklisch: ' + list.map((x) => names[x] || x).join(' → '),
+    };
+  }
+
+  function ruleConst(v) {
+    return { value: () => v, wrong: () => [], text: null, constant: true };
+  }
+
+  const dirText = (s) => {
+    const deg = Math.abs(s) * 45;
+    return 'um ' + deg + '° ' + (s > 0 ? 'im Uhrzeigersinn' : 'gegen den Uhrzeigersinn');
+  };
+  const posText = (s) => 'um ' + Math.abs(s) + ' Position' + (Math.abs(s) > 1 ? 'en' : '') + ' ' + (s > 0 ? 'im Uhrzeigersinn' : 'gegen den Uhrzeigersinn');
+
+  // ---------- Ebenen (Layer) mit Attributen ----------
+  function makeArrow(r, vary) {
+    const v0 = r.int(0, 7);
+    const angle = r.chance(0.7)
+      ? ruleLinear(r, 8, [1, -1, 2, 3, -3], v0, 'Der Pfeil dreht sich pro Schritt', dirText)
+      : ruleAlternating(r, 8, v0, 'Der Pfeil dreht sich abwechselnd', (s) => 'um ' + s * 45 + '°');
+    const fillList = r.shuffle(['k', 'w', 'g']).slice(0, r.pick([2, 3]));
+    const fill = vary > 1 ? ruleCycle(r, fillList, 0, 'Die Farbe der Pfeilspitze', FILL_NAME) : ruleConst('k');
+    return { type: 'arrow', attrs: { angle, fill } };
+  }
+
+  function makeCenter(r, vary) {
+    const shapes = r.sample(SHAPES, r.pick([3, 4]));
+    const fills = r.shuffle(['k', 'w', 'g']).slice(0, r.pick([2, 3]));
+    const options = ['shape', 'fill', 'rot'];
+    const chosen = r.sample(options, vary);
+    const attrs = {};
+    attrs.shape = chosen.includes('shape') ? ruleCycle(r, shapes, 0, 'Die zentrale Form', SHAPE_NAME) : ruleConst(chosen.includes('rot') ? r.pick(['triangle', 'pentagon', 'star']) : r.pick(SHAPES));
+    attrs.fill = chosen.includes('fill') ? ruleCycle(r, fills, 0, 'Die Füllung der zentralen Form', FILL_NAME) : ruleConst(r.pick(['w', 'g']));
+    if (chosen.includes('rot')) {
+      if (!chosen.includes('shape')) attrs.shape = ruleConst(r.pick(['triangle', 'pentagon']));
+      attrs.rot = ruleLinear(r, 8, [1, -1, 3], 0, 'Die zentrale Form dreht sich pro Schritt', dirText);
+      if (chosen.includes('shape')) attrs.shape = ruleCycle(r, r.sample(['triangle', 'pentagon', 'star'], 2), 0, 'Die zentrale Form', SHAPE_NAME);
+    } else attrs.rot = ruleConst(0);
+    return { type: 'center', attrs };
+  }
+
+  function makeSides(r, vary) {
+    const start = r.int(3, 4);
+    const d = r.pick([1, 1, 2]);
+    const maxT5 = start + 5 * d;
+    const sides = {
+      value: (t) => start + d * t,
+      wrong: () => [start + d * 4, start + d * 6, start + d * 5 + 1, start + d * 5 - 1],
+      text: 'Die Anzahl der Seiten der zentralen Figur nimmt pro Schritt um ' + d + ' zu (' + start + ' → ' + maxT5 + ')',
+    };
+    const fills = r.shuffle(['k', 'w', 'g']).slice(0, 2);
+    const fill = vary > 1 ? ruleCycle(r, fills, 0, 'Die Füllung', FILL_NAME) : ruleConst('w');
+    return { type: 'sides', attrs: { sides, fill } };
+  }
+
+  function makeOrbit(r, vary) {
+    const v0 = r.int(0, 7);
+    const pos = r.chance(0.75)
+      ? ruleLinear(r, 8, [1, -1, 2, 3, -2], v0, 'Das kleine Element wandert pro Schritt', posText)
+      : ruleAlternating(r, 8, v0, 'Das kleine Element wandert abwechselnd', (s) => 'um ' + s + ' Position' + (s > 1 ? 'en' : ''));
+    const shapes = r.sample(['circle', 'square', 'triangle', 'star'], 2);
+    const fills = r.shuffle(['k', 'w', 'g']).slice(0, 2);
+    const second = vary > 1 ? r.pick(['shape', 'fill']) : null;
+    return {
+      type: 'orbit',
+      attrs: {
+        pos,
+        shape: second === 'shape' ? ruleCycle(r, shapes, 0, 'Das kleine Element', SHAPE_NAME) : ruleConst(shapes[0]),
+        fill: second === 'fill' ? ruleCycle(r, fills, 0, 'Die Farbe des kleinen Elements', FILL_NAME) : ruleConst('k'),
+      },
+    };
+  }
+
+  function makeCorner(r, vary) {
+    const v0 = r.int(0, 3);
+    const s = r.pick([1, -1, 2]);
+    const pos = {
+      value: (t) => mod(v0 + s * t, 4),
+      wrong: () => [mod(v0 + s * 4, 4), mod(v0 + s * 6, 4), mod(v0 + s * 5 + 1, 4), mod(v0 + s * 5 + 2, 4)],
+      text: 'Das Eckdreieck springt pro Schritt ' + (Math.abs(s) === 2 ? 'in die gegenüberliegende Ecke' : 'eine Ecke weiter ' + (s > 0 ? 'im Uhrzeigersinn' : 'gegen den Uhrzeigersinn')),
+    };
+    const fills = r.shuffle(['k', 'g', 'w']).slice(0, 2);
+    const fill = vary > 1 ? ruleCycle(r, fills, 0, 'Die Farbe des Eckdreiecks', FILL_NAME) : ruleConst('k');
+    return { type: 'corner', attrs: { pos, fill } };
+  }
+
+  function makeCount(r, vary) {
+    const kind = r.pick(['lin', 'lin', 'down', 'alt']);
+    let value, wrong, text;
+    if (kind === 'lin') {
+      const s0 = r.int(0, 1);
+      value = (t) => s0 + 1 + t;
+      wrong = () => [s0 + 5, s0 + 7, s0 + 4, s0 + 8];
+      text = 'Die Anzahl der Punkte unten nimmt pro Schritt um 1 zu';
+    } else if (kind === 'down') {
+      const s0 = r.int(6, 7);
+      value = (t) => s0 - t;
+      wrong = () => [s0 - 4, s0 - 6, s0 - 3, s0 - 5 + 2].filter((x) => x > 0);
+      text = 'Die Anzahl der Punkte unten nimmt pro Schritt um 1 ab';
+    } else {
+      const a = r.int(1, 2), b = a === 1 ? r.int(3, 4) : r.pick([4, 5]);
+      value = (t) => (t % 2 === 0 ? a : b) + (t >= 4 ? 0 : 0);
+      wrong = () => [b, a + 1, b - 1, b + 1];
+      text = 'Die Anzahl der Punkte unten wechselt zwischen ' + a + ' und ' + b;
+    }
+    const n = { value, wrong, text };
+    const shapes = r.sample(['circle', 'square', 'triangle'], 2);
+    const shape = vary > 1 ? ruleCycle(r, shapes, 0, 'Die Form der Punkte unten', SHAPE_NAME) : ruleConst('circle');
+    return { type: 'count', attrs: { n, shape, fill: ruleConst('k') } };
+  }
+
+  const CENTER = [makeArrow, makeCenter, makeSides];
+  const RING = [makeOrbit, makeCorner];
+
+  function buildLayers(r, difficulty) {
+    if (difficulty === 1) {
+      const f = r.pick([makeArrow, makeCenter, makeSides, makeOrbit, makeCorner]);
+      return [f(r, r.chance(0.35) ? 2 : 1)];
+    }
+    if (difficulty === 2) {
+      const combo = r.pick(['cr', 'cs', 'rs', 'cr']);
+      if (combo === 'cr') return [r.pick(CENTER)(r, 1), r.pick(RING)(r, r.chance(0.4) ? 2 : 1)];
+      if (combo === 'cs') return [r.pick(CENTER)(r, r.chance(0.4) ? 2 : 1), makeCount(r, 1)];
+      return [makeCorner(r, 1), makeCount(r, r.chance(0.3) ? 2 : 1)];
+    }
+    // schwer: drei Ebenen oder zwei Ebenen mit je zwei Regeln
+    if (r.chance(0.5)) return [r.pick(CENTER)(r, 2), makeCorner(r, 1), makeCount(r, 1)];
+    return [r.pick(CENTER)(r, 2), r.pick(RING)(r, 2)];
+  }
+
+  function stateAt(layers, t) {
+    return layers.map((L) => {
+      const s = {};
+      Object.keys(L.attrs).forEach((k) => (s[k] = L.attrs[k].value(t)));
+      return s;
+    });
+  }
+
+  function key(states) {
+    return JSON.stringify(states);
+  }
+
+  function validState(layers, st) {
+    return layers.every((L, i) => {
+      const s = st[i];
+      if (L.type === 'count') return s.n >= 1 && s.n <= 8;
+      if (L.type === 'sides') return s.sides >= 3 && s.sides <= 12;
+      return true;
+    });
+  }
+
+  function generate(seed, difficulty) {
+    let out = null;
+    for (let k = 0; k < 10; k++) {
+      out = generateOnce(seed, difficulty, k);
+      if (out.options.length === 5 && out.correct >= 0 && new Set(out.options).size === 5) break;
+    }
+    return out;
+  }
+
+  function generateOnce(seed, difficulty, k) {
+    const r = U.rng(seed + k * 1000003);
+    difficulty = difficulty || r.pick([1, 2, 2, 3, 3]);
+    let layers, seq, answer;
+    for (let tries = 0; tries < 20; tries++) {
+      layers = buildLayers(r, difficulty);
+      seq = [0, 1, 2, 3, 4].map((t) => stateAt(layers, t));
+      answer = stateAt(layers, 5);
+      // Die Folge muss sich sichtbar verändern und gültig sein.
+      const distinct = new Set(seq.map(key)).size;
+      if (distinct >= 2 && seq.concat([answer]).every((s) => validState(layers, s))) break;
+    }
+
+    // Distraktoren: je genau ein Attribut falsch
+    const wrongs = [];
+    const seen = new Set([key(answer)]);
+    const varying = [];
+    layers.forEach((L, li) => Object.keys(L.attrs).forEach((k) => { if (!L.attrs[k].constant) varying.push([li, k]); }));
+    const pool = [];
+    varying.forEach(([li, k]) => {
+      L_wrong(layers[li].attrs[k]).forEach((w) => pool.push([li, k, w]));
+    });
+    r.shuffle(pool).forEach(([li, k, w]) => {
+      if (wrongs.length >= 4) return;
+      const st = JSON.parse(JSON.stringify(answer));
+      st[li][k] = w;
+      const kk = key(st);
+      if (seen.has(kk) || !validState(layers, st)) return;
+      seen.add(kk);
+      wrongs.push(st);
+    });
+    // Falls zu wenige: zwei Attribute gleichzeitig verfälschen oder Konstante ändern
+    let guard = 0;
+    while (wrongs.length < 4 && guard++ < 100) {
+      const st = JSON.parse(JSON.stringify(answer));
+      const li = r.int(0, layers.length - 1);
+      const L = layers[li];
+      const ks = Object.keys(L.attrs).filter((a) => a !== 'rot' || !L.attrs[a].constant);
+      const k = r.pick(ks);
+      const cur = st[li][k];
+      if (k === 'fill') st[li][k] = r.pick(['k', 'w', 'g'].filter((f) => f !== cur));
+      else if (k === 'shape') st[li][k] = r.pick(SHAPES.filter((f) => f !== cur));
+      else if (typeof cur === 'number') st[li][k] = cur + r.pick([1, -1, 2]);
+      if (L.type === 'arrow' && k === 'angle') st[li][k] = mod(st[li][k], 8);
+      if ((L.type === 'orbit') && k === 'pos') st[li][k] = mod(st[li][k], 8);
+      if ((L.type === 'corner') && k === 'pos') st[li][k] = mod(st[li][k], 4);
+      if (L.type === 'center' && k === 'rot') st[li][k] = mod(st[li][k], 8);
+      const kk = key(st);
+      if (seen.has(kk) || !validState(layers, st)) continue;
+      seen.add(kk);
+      wrongs.push(st);
+    }
+
+    const all = r.shuffle(wrongs.concat([answer]));
+    const correct = all.findIndex((s) => key(s) === key(answer));
+    const letters = ['A', 'B', 'C', 'D', 'E'];
+
+    const seriesHtml = '<div class="fig-series">' + seq.map((s, i) => renderFigure(layers, s, String(i + 1))).join('') +
+      '<figure class="fig-cell fig-q"><svg class="fig" viewBox="0 0 100 100" aria-hidden="true"><rect x="1" y="1" width="98" height="98" fill="#ffffff" stroke="#8a8f99" stroke-dasharray="4 3"/><text x="50" y="62" text-anchor="middle" font-size="34" fill="#4a5261" font-family="Arial, sans-serif">?</text></svg><figcaption>6</figcaption></figure></div>';
+
+    const rules = [];
+    layers.forEach((L) => Object.keys(L.attrs).forEach((k) => { const a = L.attrs[k]; if (!a.constant && a.text) rules.push(a.text + '.'); }));
+
+    return {
+      id: 'abs-' + seed + '-' + difficulty,
+      seed,
+      difficulty,
+      section: 'abstract',
+      source: 'generiert',
+      stem: 'Welche Figur setzt die Reihe fort?',
+      data: seriesHtml,
+      options: all.map((s) => renderFigure(layers, s, '')),
+      optionsAreFigures: true,
+      correct,
+      explanation: 'Regeln: ' + rules.join(' ') + ' Die richtige Antwort ist ' + letters[correct] + '. Jede falsche Option verletzt mindestens eine dieser Regeln.',
+    };
+
+    function L_wrong(attr) {
+      const w = attr.wrong();
+      return Array.isArray(w) ? w : [];
+    }
+  }
+
+  const API = { generate };
+  root.EPSO_ABSTRACT = API;
+  if (typeof module !== 'undefined') module.exports = API;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* data/verbal-core.js */
+/* Fragenpool Sprachlogisches Denken – Registrierung und Block A (EU-Institutionen und Recht).
+   Format je Aufgabe: [Thema, Text, Fragetyp, [Optionen A–D], Index richtig, Erklärung]
+   Fragetypen: r = richtige Aussage, f = falsche Aussage, a = ableitbare Aussage, h = Kernaussage */
+(function (root) {
+  'use strict';
+  root.EPSO_VERBAL = root.EPSO_VERBAL || [];
+  root.EPSO_VERBAL_ADD = function (prefix, items) {
+    items.forEach(function (it, i) {
+      root.EPSO_VERBAL.push({
+        id: 'v-' + prefix + '-' + String(i + 1).padStart(3, '0'),
+        topic: it[0],
+        passage: it[1],
+        qtype: it[2],
+        options: it[3],
+        correct: it[4],
+        explanation: it[5],
+      });
+    });
+  };
+
+  root.EPSO_VERBAL_ADD('a', [
+    ['Europäische Bürgerinitiative',
+      'Mit der Europäischen Bürgerinitiative können Bürgerinnen und Bürger die Europäische Kommission auffordern, einen Rechtsakt vorzuschlagen. Dafür müssen innerhalb von zwölf Monaten mindestens eine Million Unterschriften gesammelt werden, und zwar aus mindestens sieben Mitgliedstaaten, in denen jeweils eine Mindestzahl erreicht werden muss. Die Initiative muss zudem ein Thema betreffen, für das die Kommission befugt ist, Rechtsakte vorzuschlagen.\n\nIst eine Initiative erfolgreich, ist die Kommission verpflichtet, sie zu prüfen und innerhalb von sechs Monaten in einer Mitteilung darzulegen, ob und welche Maßnahmen sie ergreifen will. Sie ist jedoch nicht verpflichtet, tatsächlich einen Gesetzesvorschlag vorzulegen. Kritiker bemängeln daher, dass das Instrument zwar Aufmerksamkeit erzeugt, seine rechtliche Wirkung aber begrenzt bleibt. Seit Einführung des Instruments hat nur ein kleiner Teil der registrierten Initiativen die erforderliche Zahl an Unterschriften erreicht.',
+      'r',
+      ['Eine erfolgreiche Bürgerinitiative verpflichtet die Kommission, innerhalb von sechs Monaten einen Gesetzesvorschlag vorzulegen.',
+        'Eine Initiative mit einer Million Unterschriften aus nur fünf Mitgliedstaaten erfüllt die Voraussetzungen nicht.',
+        'Die meisten registrierten Initiativen erreichen die erforderliche Zahl an Unterschriften.',
+        'Bürgerinitiativen können jedes beliebige Thema betreffen, sofern genügend Unterschriften vorliegen.'],
+      1,
+      'B ist richtig: Der Text verlangt Unterschriften aus mindestens sieben Mitgliedstaaten. A ist falsch, die Kommission muss nur eine Mitteilung vorlegen. C widerspricht der Aussage, dass nur ein kleiner Teil erfolgreich war. D ist falsch, weil das Thema in die Zuständigkeit der Kommission fallen muss.'],
+
+    ['Vorabentscheidungsverfahren',
+      'Das Vorabentscheidungsverfahren ermöglicht es nationalen Gerichten, dem Gerichtshof der Europäischen Union Fragen zur Auslegung des Unionsrechts oder zur Gültigkeit von Handlungen der Unionsorgane vorzulegen. Der Gerichtshof entscheidet dabei nicht über den konkreten Rechtsstreit; dieser bleibt beim nationalen Gericht, das die Antwort des Gerichtshofs anschließend auf den Fall anwenden muss.\n\nGrundsätzlich sind nationale Gerichte zur Vorlage berechtigt, aber nicht verpflichtet. Eine Pflicht zur Vorlage besteht für Gerichte, deren Entscheidungen nicht mehr mit Rechtsmitteln angefochten werden können. Von dieser Pflicht gibt es Ausnahmen, etwa wenn die richtige Auslegung so offenkundig ist, dass kein vernünftiger Zweifel bleibt. Das Verfahren gilt als wesentlicher Grund dafür, dass das Unionsrecht in allen Mitgliedstaaten einheitlich ausgelegt wird.',
+      'r',
+      ['Im Vorabentscheidungsverfahren entscheidet der Gerichtshof den Rechtsstreit zwischen den Parteien abschließend.',
+        'Alle nationalen Gerichte müssen dem Gerichtshof Auslegungsfragen zum Unionsrecht vorlegen.',
+        'Ein letztinstanzliches Gericht muss unter Umständen keine Vorlage machen, obwohl es Unionsrecht anwendet.',
+        'Das Vorabentscheidungsverfahren betrifft ausschließlich die Gültigkeit von Handlungen der Unionsorgane.'],
+      2,
+      'C ist richtig: Die Vorlagepflicht letztinstanzlicher Gerichte kennt Ausnahmen, etwa bei offenkundiger Auslegung. A ist falsch, der Fall bleibt beim nationalen Gericht. B ist falsch, untere Gerichte sind nur berechtigt. D ist falsch, das Verfahren betrifft auch die Auslegung.'],
+
+    ['Ordentliches Gesetzgebungsverfahren',
+      'Im ordentlichen Gesetzgebungsverfahren entscheiden das Europäische Parlament und der Rat gleichberechtigt über Vorschläge der Kommission. Das Verfahren kann bis zu drei Lesungen umfassen. In der Praxis werden jedoch die meisten Rechtsakte bereits in erster Lesung angenommen, weil sich Vertreter von Parlament, Rat und Kommission in informellen Verhandlungen, den sogenannten Trilogen, frühzeitig auf einen Kompromiss verständigen.\n\nBefürworter sehen in den Trilogen ein effizientes Mittel, um Blockaden zu vermeiden. Kritiker bemängeln, dass die Verhandlungen hinter verschlossenen Türen stattfinden und die Öffentlichkeit erst vom Ergebnis erfährt. Der Europäische Bürgerbeauftragte hat deshalb empfohlen, mehr Dokumente aus den Trilogen zugänglich zu machen.',
+      'a',
+      ['Trilogverhandlungen tragen dazu bei, dass viele Rechtsakte ohne zweite oder dritte Lesung verabschiedet werden.',
+        'Der Rat hat im ordentlichen Gesetzgebungsverfahren das letzte Wort, wenn sich die Organe nicht einigen.',
+        'Der Europäische Bürgerbeauftragte hat die Abschaffung der Triloge gefordert.',
+        'Die Mehrzahl der Rechtsakte wird erst in dritter Lesung angenommen.'],
+      0,
+      'A ergibt sich aus dem Text: Die frühe Einigung in Trilogen führt dazu, dass die meisten Akte schon in erster Lesung angenommen werden. B widerspricht der Gleichberechtigung. C verfälscht die Empfehlung, die nur mehr Transparenz verlangt. D widerspricht dem Text.'],
+
+    ['Subsidiaritätsprinzip',
+      'Nach dem Subsidiaritätsprinzip wird die Europäische Union in Bereichen, die nicht in ihre ausschließliche Zuständigkeit fallen, nur tätig, sofern und soweit die Ziele einer Maßnahme von den Mitgliedstaaten nicht ausreichend verwirklicht werden können und daher wegen ihres Umfangs oder ihrer Wirkungen auf Unionsebene besser zu verwirklichen sind.\n\nDie nationalen Parlamente wachen über die Einhaltung dieses Prinzips. Sie können innerhalb von acht Wochen nach Übermittlung eines Gesetzesentwurfs eine begründete Stellungnahme abgeben, wenn sie der Ansicht sind, dass der Entwurf gegen das Subsidiaritätsprinzip verstößt. Erreichen die Stellungnahmen eine bestimmte Schwelle, muss der Entwurf überprüft werden; man spricht dann von einer „gelben Karte“. Die Kommission kann an ihrem Entwurf festhalten, muss dies aber begründen. Bislang wurde die gelbe Karte nur selten gezogen.',
+      'r',
+      ['Das Subsidiaritätsprinzip gilt auch in Bereichen der ausschließlichen Zuständigkeit der Union.',
+        'Nach einer „gelben Karte“ muss die Kommission ihren Entwurf zurückziehen.',
+        'Nationale Parlamente können jederzeit während des Gesetzgebungsverfahrens eine begründete Stellungnahme abgeben.',
+        'Die Kommission darf nach einer „gelben Karte“ an ihrem Entwurf festhalten, wenn sie dies begründet.'],
+      3,
+      'D steht so im Text. A ist falsch, das Prinzip gilt nur außerhalb der ausschließlichen Zuständigkeit. B ist falsch, der Entwurf muss nur überprüft werden. C ist falsch, es gilt eine Frist von acht Wochen.'],
+
+    ['Europäischer Rechnungshof',
+      'Der Europäische Rechnungshof prüft, ob die Einnahmen und Ausgaben der Union rechtmäßig und ordnungsgemäß erfolgt sind und ob die Haushaltsführung wirtschaftlich war. Er veröffentlicht jährlich einen Bericht über die Ausführung des Haushaltsplans sowie zahlreiche Sonderberichte zu einzelnen Politikbereichen.\n\nDer Rechnungshof hat keine eigenen rechtlichen Befugnisse, um Sanktionen zu verhängen. Stellt er Unregelmäßigkeiten fest, die auf Betrug hindeuten, leitet er die Informationen an das Europäische Amt für Betrugsbekämpfung (OLAF) weiter. Seine Berichte dienen dem Europäischen Parlament als wichtige Grundlage für die Entscheidung über die Entlastung der Kommission für die Ausführung des Haushalts. Der Rechnungshof besteht aus einem Mitglied je Mitgliedstaat, die ihre Aufgaben in voller Unabhängigkeit wahrnehmen.',
+      'f',
+      ['Der Rechnungshof kann bei festgestellten Unregelmäßigkeiten selbst Geldbußen verhängen.',
+        'Der Rechnungshof prüft auch, ob Haushaltsmittel wirtschaftlich eingesetzt wurden.',
+        'Die Berichte des Rechnungshofs fließen in die Entlastungsentscheidung des Parlaments ein.',
+        'Jeder Mitgliedstaat stellt ein Mitglied des Rechnungshofs.'],
+      0,
+      'Gesucht ist die falsche Aussage. A widerspricht dem Text: Der Rechnungshof hat keine Sanktionsbefugnisse und leitet Verdachtsfälle an OLAF weiter. B, C und D stehen so im Text.'],
+
+    ['Mehrsprachigkeit der Union',
+      'Die Europäische Union hat 24 Amtssprachen. Verordnungen und andere Rechtsakte mit allgemeiner Geltung werden in allen Amtssprachen veröffentlicht, und alle Sprachfassungen sind gleichermaßen verbindlich. Bürgerinnen und Bürger haben das Recht, sich in jeder Amtssprache an die Organe zu wenden und eine Antwort in derselben Sprache zu erhalten.\n\nIntern arbeiten die Organe aus praktischen Gründen häufig mit wenigen Verfahrenssprachen, vor allem Englisch und Französisch. Weichen Sprachfassungen eines Rechtsakts voneinander ab, darf nach der Rechtsprechung des Gerichtshofs keine Fassung isoliert betrachtet werden; vielmehr ist die Vorschrift nach dem Zusammenhang und dem Zweck der Regelung auszulegen. Die Kosten der Mehrsprachigkeit machen nach Angaben der Organe weniger als ein Prozent des Unionshaushalts aus.',
+      'r',
+      ['Bei Abweichungen zwischen Sprachfassungen ist grundsätzlich die englische Fassung maßgeblich.',
+        'Die Organe verwenden intern alle 24 Amtssprachen gleichberechtigt.',
+        'Wer sich auf Maltesisch an ein Organ wendet, hat Anspruch auf eine Antwort auf Maltesisch, sofern Maltesisch Amtssprache ist.',
+        'Die Mehrsprachigkeit verursacht mehr als ein Prozent der Haushaltsausgaben.'],
+      2,
+      'C folgt aus dem Recht, in jeder Amtssprache eine Antwort in derselben Sprache zu erhalten. A widerspricht der Auslegung nach Zusammenhang und Zweck. B widerspricht der Praxis weniger Verfahrenssprachen. D widerspricht der Angabe „weniger als ein Prozent“.'],
+
+    ['Vertragsverletzungsverfahren',
+      'Die Europäische Kommission kann ein Vertragsverletzungsverfahren gegen einen Mitgliedstaat einleiten, der seinen Verpflichtungen aus dem Unionsrecht nicht nachkommt, etwa weil er eine Richtlinie nicht fristgerecht umgesetzt hat. Das Verfahren beginnt mit einem Aufforderungsschreiben, auf das eine mit Gründen versehene Stellungnahme folgen kann. Erst wenn der Mitgliedstaat auch danach nicht reagiert, kann die Kommission den Gerichtshof anrufen.\n\nStellt der Gerichtshof einen Verstoß fest, muss der Mitgliedstaat die erforderlichen Maßnahmen ergreifen. Kommt er dem Urteil nicht nach, kann die Kommission den Gerichtshof erneut anrufen und die Verhängung eines Pauschalbetrags oder eines Zwangsgelds beantragen. Die weitaus meisten Verfahren werden jedoch beigelegt, bevor es überhaupt zu einer Klage kommt.',
+      'a',
+      ['Finanzielle Sanktionen können bereits im ersten Urteil des Gerichtshofs verhängt werden.',
+        'Ein Mitgliedstaat kann eine Klage vor dem Gerichtshof vermeiden, indem er nach dem Aufforderungsschreiben den Verstoß beseitigt.',
+        'Die meisten Vertragsverletzungsverfahren enden mit einem Urteil des Gerichtshofs.',
+        'Vertragsverletzungsverfahren betreffen ausschließlich die verspätete Umsetzung von Richtlinien.'],
+      1,
+      'B lässt sich ableiten: Die Klage ist erst möglich, wenn der Staat nicht reagiert, und die meisten Verfahren werden vorher beigelegt. A widerspricht dem Text, der Sanktionen erst nach einer erneuten Anrufung vorsieht. C widerspricht dem letzten Satz. D ist zu eng, die Richtlinienumsetzung ist nur ein Beispiel („etwa“).'],
+
+    ['Europäischer Datenschutzbeauftragter',
+      'Der Europäische Datenschutzbeauftragte (EDSB) ist eine unabhängige Aufsichtsbehörde, die darüber wacht, dass die Organe, Einrichtungen und sonstigen Stellen der Union bei der Verarbeitung personenbezogener Daten die Datenschutzvorschriften einhalten. Für die Aufsicht über Unternehmen und nationale Behörden sind hingegen die Datenschutzbehörden der Mitgliedstaaten zuständig.\n\nDer EDSB berät die Kommission, das Parlament und den Rat außerdem zu Gesetzesvorschlägen, die Auswirkungen auf den Datenschutz haben. Seine Stellungnahmen sind nicht bindend, werden aber im Gesetzgebungsverfahren häufig zitiert. Darüber hinaus ist der EDSB Mitglied des Europäischen Datenschutzausschusses, in dem die nationalen Aufsichtsbehörden zusammenarbeiten, um eine einheitliche Anwendung der Datenschutz-Grundverordnung sicherzustellen.',
+      'r',
+      ['Der EDSB kann Bußgelder gegen private Unternehmen verhängen, die gegen die Datenschutz-Grundverordnung verstoßen.',
+        'Die Stellungnahmen des EDSB zu Gesetzesvorschlägen sind für den Gesetzgeber verbindlich.',
+        'Der EDSB leitet den Europäischen Datenschutzausschuss.',
+        'Eine Beschwerde über die Datenverarbeitung durch eine Agentur der Union fällt in die Zuständigkeit des EDSB.'],
+      3,
+      'D ist richtig: Der EDSB überwacht Organe, Einrichtungen und sonstige Stellen der Union, also auch Agenturen. A ist falsch, für Unternehmen sind nationale Behörden zuständig. B ist falsch, die Stellungnahmen sind nicht bindend. C geht über den Text hinaus, dort ist nur von Mitgliedschaft die Rede.'],
+
+    ['Die Rolle des Europäischen Rates',
+      'Der Europäische Rat, dem die Staats- und Regierungschefs der Mitgliedstaaten, sein Präsident und die Präsidentin der Kommission angehören, gibt der Union die für ihre Entwicklung erforderlichen Impulse und legt die allgemeinen politischen Zielvorstellungen und Prioritäten fest. Er wird ausdrücklich nicht gesetzgeberisch tätig.\n\nDer Europäische Rat ist nicht mit dem Rat der Europäischen Union zu verwechseln, in dem die Fachministerinnen und -minister der Mitgliedstaaten zusammenkommen und gemeinsam mit dem Parlament Gesetze beschließen. Ebenfalls zu unterscheiden ist der Europarat, eine eigenständige internationale Organisation mit Sitz in Straßburg, die nicht zur Europäischen Union gehört. Die Ähnlichkeit der Bezeichnungen führt in der öffentlichen Debatte regelmäßig zu Verwechslungen.',
+      'f',
+      ['Der Europäische Rat beschließt gemeinsam mit dem Europäischen Parlament Richtlinien und Verordnungen.',
+        'Dem Europäischen Rat gehört auch die Präsidentin der Kommission an.',
+        'Der Europarat ist kein Organ der Europäischen Union.',
+        'Im Rat der Europäischen Union kommen Fachministerinnen und -minister zusammen.'],
+      0,
+      'Gesucht ist die falsche Aussage. A ist falsch: Der Europäische Rat wird ausdrücklich nicht gesetzgeberisch tätig, Gesetze beschließt der Rat der EU mit dem Parlament. B, C und D stehen so im Text.'],
+
+    ['Europäische Staatsanwaltschaft',
+      'Die Europäische Staatsanwaltschaft (EUStA) hat im Jahr 2021 ihre Arbeit aufgenommen. Sie ist für die Ermittlung und Verfolgung von Straftaten zum Nachteil der finanziellen Interessen der Union zuständig, etwa Betrug mit EU-Fördermitteln oder grenzüberschreitenden Mehrwertsteuerbetrug ab einem Schaden von zehn Millionen Euro.\n\nNicht alle Mitgliedstaaten beteiligen sich an der EUStA; sie wurde im Wege der sogenannten Verstärkten Zusammenarbeit errichtet. In den nicht teilnehmenden Staaten bleiben die nationalen Behörden zuständig, und die Zusammenarbeit mit der EUStA erfolgt auf der Grundlage besonderer Vereinbarungen. Anders als das Amt für Betrugsbekämpfung OLAF, das nur verwaltungsrechtliche Untersuchungen führt, kann die EUStA Anklage vor den nationalen Gerichten erheben.',
+      'r',
+      ['Die EUStA ist für sämtliche Fälle von Mehrwertsteuerbetrug in der Union zuständig.',
+        'OLAF und die EUStA verfügen über dieselben Befugnisse zur Anklageerhebung.',
+        'Die EUStA kann in einem teilnehmenden Mitgliedstaat Anklage vor einem nationalen Gericht erheben.',
+        'Alle Mitgliedstaaten sind verpflichtet, sich an der EUStA zu beteiligen.'],
+      2,
+      'C ist richtig, der Text nennt ausdrücklich die Anklage vor nationalen Gerichten. A übersieht die Einschränkung auf grenzüberschreitende Fälle ab 10 Mio. Euro. B widerspricht dem Vergleich mit OLAF. D widerspricht der Verstärkten Zusammenarbeit.'],
+
+    ['Grundrechtecharta',
+      'Die Charta der Grundrechte der Europäischen Union ist seit dem Inkrafttreten des Vertrags von Lissabon im Jahr 2009 rechtsverbindlich und hat denselben Rang wie die Verträge. Sie gilt für die Organe und Einrichtungen der Union sowie für die Mitgliedstaaten, allerdings ausschließlich bei der Durchführung des Unionsrechts.\n\nDaraus folgt, dass sich Bürgerinnen und Bürger nicht in jedem Rechtsstreit mit nationalen Behörden auf die Charta berufen können. Handelt ein Mitgliedstaat in einem Bereich, der rein national geregelt ist, sind vielmehr die nationalen Grundrechte und die Europäische Menschenrechtskonvention maßgeblich. Wann genau ein Mitgliedstaat Unionsrecht „durchführt“, ist in der Rechtsprechung allerdings immer wieder umstritten gewesen.',
+      'a',
+      ['Die Charta hat einen niedrigeren Rang als die Verträge.',
+        'In einem rein national geregelten Bereich kann sich eine Person gegenüber ihrer Behörde nicht auf die Charta berufen.',
+        'Die Europäische Menschenrechtskonvention ist Teil der Charta.',
+        'Die Frage, wann Unionsrecht durchgeführt wird, ist durch die Rechtsprechung abschließend geklärt.'],
+      1,
+      'B folgt daraus, dass die Charta für die Mitgliedstaaten nur bei der Durchführung des Unionsrechts gilt. A widerspricht dem gleichen Rang. C wird im Text nicht behauptet. D widerspricht dem letzten Satz.'],
+
+    ['Europäische Bürgerbeauftragte',
+      'Die Europäische Bürgerbeauftragte untersucht Beschwerden über Missstände in der Verwaltungstätigkeit der Organe, Einrichtungen und sonstigen Stellen der Union. Beschwerden können von allen Unionsbürgern sowie von Personen mit Wohnsitz in einem Mitgliedstaat eingereicht werden. Ausgenommen ist der Gerichtshof in seiner Rechtsprechungstätigkeit.\n\nDie Bürgerbeauftragte kann Empfehlungen aussprechen, aber keine verbindlichen Entscheidungen treffen. Folgt ein Organ einer Empfehlung nicht, kann sie dem Europäischen Parlament einen Sonderbericht vorlegen. Nach ihren eigenen Angaben werden Empfehlungen in der großen Mehrheit der Fälle ganz oder teilweise umgesetzt. Die Bürgerbeauftragte kann Untersuchungen außerdem aus eigener Initiative einleiten, ohne dass eine Beschwerde vorliegt.',
+      'r',
+      ['Eine Person ohne Unionsbürgerschaft kann keine Beschwerde bei der Bürgerbeauftragten einreichen.',
+        'Die Bürgerbeauftragte kann ein Organ verpflichten, eine Verwaltungsentscheidung aufzuheben.',
+        'Die Bürgerbeauftragte kann die Urteile des Gerichtshofs überprüfen.',
+        'Die Bürgerbeauftragte kann eine Untersuchung auch ohne vorliegende Beschwerde beginnen.'],
+      3,
+      'D steht ausdrücklich im letzten Satz. A ist falsch, auch Personen mit Wohnsitz in einem Mitgliedstaat sind beschwerdeberechtigt. B ist falsch, sie gibt nur Empfehlungen ab. C ist falsch, die Rechtsprechungstätigkeit ist ausgenommen.'],
+
+    ['Qualifizierte Mehrheit im Rat',
+      'Die meisten Beschlüsse des Rates der Europäischen Union werden mit qualifizierter Mehrheit gefasst. Diese gilt als erreicht, wenn mindestens 55 % der Mitgliedstaaten zustimmen und diese zusammen mindestens 65 % der Bevölkerung der Union repräsentieren. Eine Sperrminorität muss mindestens vier Mitgliedstaaten umfassen; andernfalls gilt die qualifizierte Mehrheit als erreicht, selbst wenn die Bevölkerungsschwelle verfehlt wird.\n\nIn einigen sensiblen Bereichen, etwa der Gemeinsamen Außen- und Sicherheitspolitik oder der Steuerpolitik, ist weiterhin Einstimmigkeit erforderlich. Eine Enthaltung verhindert einen einstimmigen Beschluss nicht. Befürworter einer Ausweitung der Mehrheitsentscheidungen argumentieren, dass die Einstimmigkeit einzelnen Staaten ein Vetorecht verschafft; Gegner sehen darin einen notwendigen Schutz nationaler Souveränität.',
+      'r',
+      ['Drei große Mitgliedstaaten können einen Beschluss mit qualifizierter Mehrheit allein blockieren, wenn sie mehr als 35 % der Bevölkerung repräsentieren.',
+        'Bei Beschlüssen, die Einstimmigkeit erfordern, verhindert die Enthaltung eines Mitgliedstaats die Annahme.',
+        'In der Steuerpolitik kann ein einzelner Mitgliedstaat einen Beschluss durch Gegenstimme verhindern.',
+        'Die qualifizierte Mehrheit setzt die Zustimmung von 65 % der Mitgliedstaaten voraus.'],
+      2,
+      'C folgt aus dem Einstimmigkeitserfordernis in der Steuerpolitik. A ist falsch, eine Sperrminorität braucht mindestens vier Staaten. B widerspricht dem Satz über die Enthaltung. D verwechselt die Schwellen: 55 % der Staaten, 65 % der Bevölkerung.'],
+
+    ['Transparenzregister',
+      'Das Transparenzregister der Europäischen Union erfasst Organisationen und Einzelpersonen, die Einfluss auf die Politikgestaltung und Entscheidungsprozesse der Organe nehmen wollen. Seit einer interinstitutionellen Vereinbarung von 2021 beteiligen sich Parlament, Rat und Kommission gemeinsam an dem Register.\n\nFür bestimmte Tätigkeiten ist die Eintragung faktisch Voraussetzung: So treffen sich Kommissionsmitglieder und hochrangige Beamte grundsätzlich nur mit eingetragenen Interessenvertretern, und für den Zugang zu den Gebäuden des Parlaments mit einem langfristigen Ausweis ist die Eintragung erforderlich. Eine gesetzliche Pflicht zur Registrierung für alle Lobbyisten besteht jedoch nicht. Kritiker halten die Angaben im Register zudem teilweise für unvollständig, da sie auf Selbstauskünften beruhen und nur stichprobenartig überprüft werden.',
+      'a',
+      ['Wer sich nicht einträgt, macht sich strafbar.',
+        'Ein nicht eingetragener Interessenvertreter wird in der Regel keinen Termin bei einem Kommissionsmitglied erhalten.',
+        'Alle Angaben im Register werden von den Organen vollständig überprüft.',
+        'Der Rat beteiligt sich nicht am Transparenzregister.'],
+      1,
+      'B folgt aus dem Grundsatz, dass Kommissionsmitglieder sich nur mit eingetragenen Interessenvertretern treffen. A widerspricht dem Fehlen einer gesetzlichen Pflicht. C widerspricht den Stichprobenkontrollen. D widerspricht der Vereinbarung von 2021.'],
+
+    ['Agenturen der Union',
+      'Neben den Organen gibt es mehr als 40 dezentrale Agenturen der Europäischen Union, die über die Mitgliedstaaten verteilt sind. Sie erfüllen technische, wissenschaftliche oder verwaltungsbezogene Aufgaben, etwa die Bewertung von Arzneimitteln, die Überwachung der Flugsicherheit oder die Unterstützung bei der Kontrolle der Außengrenzen.\n\nDie Agenturen besitzen eigene Rechtspersönlichkeit und werden in der Regel von einem Verwaltungsrat geleitet, in dem die Mitgliedstaaten und die Kommission vertreten sind. Ihre Befugnisse sind in den jeweiligen Gründungsverordnungen festgelegt; manche Agenturen dürfen verbindliche Einzelentscheidungen treffen, die meisten hingegen bereiten lediglich Entscheidungen der Kommission vor. Die Standortwahl ist häufig Gegenstand politischer Verhandlungen zwischen den Mitgliedstaaten.',
+      'r',
+      ['Alle Agenturen der Union haben die Befugnis, verbindliche Entscheidungen zu treffen.',
+        'Die Agenturen haben ihren Sitz überwiegend in Brüssel.',
+        'Die Befugnisse einer Agentur ergeben sich aus ihrer Gründungsverordnung.',
+        'In den Verwaltungsräten der Agenturen ist ausschließlich die Kommission vertreten.'],
+      2,
+      'C steht im Text. A ist falsch, nur manche Agenturen dürfen verbindlich entscheiden. B widerspricht der Verteilung über die Mitgliedstaaten. D ist falsch, auch die Mitgliedstaaten sind vertreten.'],
+
+    ['Haushaltsverfahren',
+      'Der Jahreshaushalt der Europäischen Union wird von Parlament und Rat gemeinsam auf Vorschlag der Kommission festgelegt. Er muss sich innerhalb der Obergrenzen des Mehrjährigen Finanzrahmens bewegen, der in der Regel für sieben Jahre vom Rat einstimmig nach Zustimmung des Parlaments beschlossen wird.\n\nAnders als nationale Haushalte darf der Unionshaushalt kein Defizit aufweisen: Die Einnahmen müssen die Ausgaben vollständig decken. Die Einnahmen stammen überwiegend aus Beiträgen der Mitgliedstaaten, die sich nach ihrem Bruttonationaleinkommen richten, sowie aus Zöllen und einem Anteil an der Mehrwertsteuer. Für den Wiederaufbaufonds nach der Pandemie hat die Kommission ausnahmsweise in großem Umfang Anleihen an den Kapitalmärkten aufgenommen.',
+      'f',
+      ['Der Jahreshaushalt darf die Obergrenzen des Mehrjährigen Finanzrahmens nicht überschreiten.',
+        'Der Mehrjährige Finanzrahmen wird mit qualifizierter Mehrheit im Rat beschlossen.',
+        'Die Beiträge der Mitgliedstaaten richten sich nach ihrem Bruttonationaleinkommen.',
+        'Zölle sind eine Einnahmequelle des Unionshaushalts.'],
+      1,
+      'Gesucht ist die falsche Aussage. B widerspricht dem Text, der eine einstimmige Beschlussfassung nennt. A, C und D sind im Text belegt.'],
+
+    ['Schengen-Raum',
+      'Im Schengen-Raum finden an den Binnengrenzen grundsätzlich keine Personenkontrollen statt. Zum Schengen-Raum gehören die meisten, aber nicht alle Mitgliedstaaten der Union; umgekehrt nehmen auch einige Nicht-EU-Staaten wie Norwegen und die Schweiz teil.\n\nDie Mitgliedstaaten dürfen in Ausnahmefällen vorübergehend wieder Kontrollen an den Binnengrenzen einführen, etwa bei einer ernsthaften Bedrohung der öffentlichen Ordnung oder der inneren Sicherheit. Solche Kontrollen müssen verhältnismäßig und zeitlich befristet sein und sind der Kommission und den anderen Mitgliedstaaten mitzuteilen. In den vergangenen Jahren haben mehrere Staaten solche Kontrollen wiederholt verlängert, was Kritik hervorgerufen hat, dass der Ausnahmefall zur Regel werde.',
+      'r',
+      ['Die Mitgliedschaft im Schengen-Raum setzt die Mitgliedschaft in der Europäischen Union voraus.',
+        'Wiedereingeführte Binnengrenzkontrollen müssen von der Kommission genehmigt werden.',
+        'Alle EU-Mitgliedstaaten gehören dem Schengen-Raum an.',
+        'Ein Schengen-Staat darf bei einer ernsthaften Bedrohung der inneren Sicherheit vorübergehend wieder Grenzkontrollen einführen.'],
+      3,
+      'D steht so im Text. A ist falsch, Norwegen und die Schweiz nehmen teil. B geht über den Text hinaus, dort ist nur von einer Mitteilungspflicht die Rede. C ist falsch, es sind „nicht alle“ Mitgliedstaaten.'],
+
+    ['Europäischer Auswärtiger Dienst',
+      'Der Europäische Auswärtige Dienst (EAD) unterstützt den Hohen Vertreter der Union für Außen- und Sicherheitspolitik bei der Durchführung der Gemeinsamen Außen- und Sicherheitspolitik. Er wurde 2010 geschaffen und setzt sich aus Beamten des Generalsekretariats des Rates, der Kommission sowie abgeordneten Diplomaten der Mitgliedstaaten zusammen.\n\nDer EAD unterhält weltweit über 140 Delegationen, die die Union in Drittstaaten und bei internationalen Organisationen vertreten. Die Delegationen ersetzen jedoch nicht die Botschaften der Mitgliedstaaten, die weiterhin die nationale Außenpolitik vertreten und etwa konsularische Aufgaben für ihre eigenen Staatsangehörigen wahrnehmen. In Krisensituationen kann die Zusammenarbeit zwischen Delegationen und nationalen Botschaften allerdings eng sein.',
+      'a',
+      ['Mit der Gründung des EAD haben die Mitgliedstaaten ihre Botschaften in Drittstaaten geschlossen.',
+        'Ein Teil des Personals des EAD stammt aus den diplomatischen Diensten der Mitgliedstaaten.',
+        'Der EAD ist allein für die konsularische Betreuung von Unionsbürgern im Ausland zuständig.',
+        'Der Hohe Vertreter ist dem EAD unterstellt.'],
+      1,
+      'B folgt aus der Zusammensetzung mit abgeordneten Diplomaten der Mitgliedstaaten. A widerspricht dem Fortbestehen der Botschaften. C widerspricht den konsularischen Aufgaben der Botschaften. D kehrt das Verhältnis um, der EAD unterstützt den Hohen Vertreter.'],
+
+    ['Zugang zu Dokumenten',
+      'Jede Unionsbürgerin und jeder Unionsbürger sowie jede Person mit Wohnsitz in einem Mitgliedstaat hat das Recht auf Zugang zu Dokumenten des Parlaments, des Rates und der Kommission. Der Zugang kann verweigert werden, wenn die Verbreitung bestimmte öffentliche oder private Interessen beeinträchtigen würde, etwa die öffentliche Sicherheit, die internationalen Beziehungen oder den Schutz der Privatsphäre.\n\nFür einige Ausnahmen, beispielsweise den Schutz von Gerichtsverfahren oder laufenden Entscheidungsprozessen, gilt die Verweigerung nur dann, wenn kein überwiegendes öffentliches Interesse an der Verbreitung besteht. Die Organe müssen einen Antrag innerhalb von 15 Arbeitstagen beantworten; die Frist kann in Ausnahmefällen verlängert werden. Wird der Zugang verweigert, kann der Antragsteller einen Zweitantrag stellen und anschließend Klage erheben oder sich an die Bürgerbeauftragte wenden.',
+      'r',
+      ['Der Schutz der Privatsphäre kann in keinem Fall die Verweigerung des Zugangs rechtfertigen.',
+        'Die Antwortfrist von 15 Arbeitstagen kann unter keinen Umständen verlängert werden.',
+        'Auch bei laufenden Entscheidungsprozessen kann ein überwiegendes öffentliches Interesse die Freigabe eines Dokuments rechtfertigen.',
+        'Gegen die Verweigerung des Zugangs ist ausschließlich die Beschwerde bei der Bürgerbeauftragten möglich.'],
+      2,
+      'C ergibt sich aus der Abwägung mit dem überwiegenden öffentlichen Interesse. A widerspricht der ausdrücklichen Ausnahme für die Privatsphäre. B widerspricht der möglichen Fristverlängerung. D übersieht die Klagemöglichkeit.'],
+
+    ['Unionsbürgerschaft',
+      'Unionsbürgerin oder Unionsbürger ist, wer die Staatsangehörigkeit eines Mitgliedstaats besitzt. Die Unionsbürgerschaft tritt zur nationalen Staatsbürgerschaft hinzu, ersetzt sie aber nicht. Die Mitgliedstaaten entscheiden daher weiterhin selbst, unter welchen Voraussetzungen sie ihre Staatsangehörigkeit verleihen.\n\nZu den mit der Unionsbürgerschaft verbundenen Rechten gehören das Recht auf Freizügigkeit, das aktive und passive Wahlrecht bei Kommunalwahlen und bei den Wahlen zum Europäischen Parlament im Wohnsitzmitgliedstaat sowie der konsularische Schutz durch andere Mitgliedstaaten in Drittstaaten, in denen der eigene Staat nicht vertreten ist. Das Wahlrecht bei nationalen Parlamentswahlen ist hingegen nicht Teil der Unionsbürgerschaft.',
+      'f',
+      ['Eine Italienerin mit Wohnsitz in Deutschland kann in Deutschland bei Kommunalwahlen kandidieren.',
+        'Die Unionsbürgerschaft kann unabhängig von der Staatsangehörigkeit eines Mitgliedstaats erworben werden.',
+        'Ein Österreicher in einem Drittstaat ohne österreichische Vertretung kann den Schutz der deutschen Botschaft in Anspruch nehmen.',
+        'Unionsbürger haben aufgrund der Unionsbürgerschaft kein Wahlrecht bei den nationalen Parlamentswahlen ihres Wohnsitzstaats.'],
+      1,
+      'Gesucht ist die falsche Aussage. B widerspricht dem Text: Unionsbürger ist nur, wer die Staatsangehörigkeit eines Mitgliedstaats besitzt. A, C und D ergeben sich aus den genannten Rechten.'],
+
+    ['Wettbewerbsrecht',
+      'Das Wettbewerbsrecht der Union verbietet Vereinbarungen zwischen Unternehmen, die den Wettbewerb im Binnenmarkt beschränken, etwa Preisabsprachen oder die Aufteilung von Märkten. Ebenso verboten ist die missbräuchliche Ausnutzung einer marktbeherrschenden Stellung. Eine beherrschende Stellung als solche ist dagegen nicht verboten.\n\nDie Kommission kann bei Verstößen Geldbußen von bis zu zehn Prozent des weltweiten Jahresumsatzes eines Unternehmens verhängen. Unternehmen, die an einem Kartell beteiligt waren und dieses als Erste offenlegen, kann im Rahmen der Kronzeugenregelung die Geldbuße ganz oder teilweise erlassen werden. Diese Regelung hat sich als eines der wirksamsten Instrumente zur Aufdeckung von Kartellen erwiesen.',
+      'r',
+      ['Ein Unternehmen mit marktbeherrschender Stellung verstößt allein dadurch gegen das Wettbewerbsrecht.',
+        'Die Geldbuße ist auf zehn Prozent des in der Union erzielten Umsatzes begrenzt.',
+        'Ein Kartellmitglied, das das Kartell als Erstes offenlegt, kann straffrei bleiben.',
+        'Die Kronzeugenregelung hat sich in der Praxis als wenig wirksam erwiesen.'],
+      2,
+      'C folgt daraus, dass die Geldbuße ganz erlassen werden kann. A widerspricht dem Satz, dass die beherrschende Stellung als solche nicht verboten ist. B verwechselt den weltweiten mit dem EU-Umsatz. D widerspricht der Bewertung im Text.'],
+
+    ['Petitionsrecht',
+      'Jede Unionsbürgerin und jeder Unionsbürger sowie jede natürliche oder juristische Person mit Wohnsitz oder satzungsmäßigem Sitz in einem Mitgliedstaat kann beim Europäischen Parlament eine Petition einreichen. Die Petition muss ein Anliegen betreffen, das in die Tätigkeitsbereiche der Union fällt und den Petenten unmittelbar betrifft.\n\nDer Petitionsausschuss prüft zunächst die Zulässigkeit. Zulässige Petitionen können dazu führen, dass die Kommission um Auskunft ersucht wird, dass der Ausschuss einen Bericht erstellt oder dass ein Informationsbesuch in dem betroffenen Mitgliedstaat stattfindet. Das Parlament kann jedoch keine Entscheidungen nationaler Behörden aufheben. Im Unterschied zur Europäischen Bürgerinitiative ist für eine Petition keine Mindestzahl an Unterstützern erforderlich.',
+      'a',
+      ['Eine Petition kann auch von einem einzelnen Bürger eingereicht werden.',
+        'Das Parlament kann auf eine Petition hin eine rechtswidrige Entscheidung einer nationalen Behörde aufheben.',
+        'Unternehmen dürfen keine Petitionen beim Parlament einreichen.',
+        'Jede eingereichte Petition wird vom Petitionsausschuss inhaltlich behandelt.'],
+      0,
+      'A folgt daraus, dass keine Mindestzahl an Unterstützern nötig ist. B widerspricht dem Text. C ist falsch, auch juristische Personen sind berechtigt. D übersieht die vorgeschaltete Zulässigkeitsprüfung.'],
+
+    ['Rechtsstaatlichkeitsmechanismus',
+      'Seit 2021 gilt eine Verordnung, die es der Union ermöglicht, Zahlungen aus dem Unionshaushalt an einen Mitgliedstaat auszusetzen oder zu kürzen, wenn Verstöße gegen die Grundsätze der Rechtsstaatlichkeit die wirtschaftliche Führung des Haushalts beeinträchtigen oder ernsthaft zu beeinträchtigen drohen. Es genügt also nicht, dass ein Verstoß gegen die Rechtsstaatlichkeit vorliegt; es muss ein hinreichend unmittelbarer Zusammenhang mit dem Haushalt bestehen.\n\nDie Kommission schlägt die Maßnahmen vor, der Rat beschließt sie mit qualifizierter Mehrheit. Zwei Mitgliedstaaten hatten gegen die Verordnung geklagt; der Gerichtshof wies die Klagen ab. Kritiker innerhalb des Parlaments haben der Kommission wiederholt vorgeworfen, den Mechanismus zu zögerlich anzuwenden.',
+      'r',
+      ['Jeder Verstoß gegen die Rechtsstaatlichkeit führt automatisch zur Kürzung von EU-Mitteln.',
+        'Über Maßnahmen nach der Verordnung entscheidet die Kommission allein.',
+        'Der Gerichtshof hat die Verordnung für nichtig erklärt.',
+        'Für eine Kürzung muss ein Zusammenhang zwischen dem Rechtsstaatsverstoß und dem Unionshaushalt bestehen.'],
+      3,
+      'D steht so im Text. A widerspricht dem Erfordernis des Haushaltsbezugs. B ist falsch, der Rat beschließt auf Vorschlag der Kommission. C widerspricht der Abweisung der Klagen.'],
+
+    ['Beamtenstatut und Auswahlverfahren',
+      'Die Einstellung von Beamtinnen und Beamten der EU-Organe erfolgt in der Regel über allgemeine Auswahlverfahren, die vom Europäischen Amt für Personalauswahl (EPSO) organisiert werden. Wer ein Auswahlverfahren erfolgreich abschließt, wird in eine Reserveliste aufgenommen. Die Aufnahme in die Reserveliste begründet jedoch keinen Anspruch auf eine Einstellung.\n\nDie Organe wählen aus den Reservelisten Bewerberinnen und Bewerber aus, deren Profil zu den offenen Stellen passt. Es ist daher möglich, dass erfolgreiche Kandidaten längere Zeit oder sogar überhaupt nicht eingestellt werden. Die Gültigkeitsdauer der Reservelisten ist begrenzt, kann aber verlängert werden. Bewerberinnen und Bewerbern wird deshalb empfohlen, sich aktiv bei den Organen um Stellen zu bemühen.',
+      'r',
+      ['Wer in die Reserveliste aufgenommen wird, hat Anspruch auf eine Stelle bei einem EU-Organ.',
+        'Die Reservelisten sind unbegrenzt gültig.',
+        'EPSO entscheidet, welches Organ welche Kandidatin einstellt.',
+        'Ein erfolgreicher Abschluss des Auswahlverfahrens garantiert keine Einstellung.'],
+      3,
+      'D entspricht dem Text. A widerspricht dem fehlenden Anspruch. B widerspricht der begrenzten Gültigkeit. C geht über den Text hinaus, die Organe wählen selbst aus.'],
+
+    ['Assoziierungsabkommen',
+      'Assoziierungsabkommen schafft die Europäische Union mit Drittstaaten, um besonders enge Beziehungen zu begründen, die über reine Handelsabkommen hinausgehen. Sie können Bestimmungen über politischen Dialog, Zusammenarbeit in zahlreichen Politikbereichen und eine schrittweise Annäherung an das Unionsrecht enthalten.\n\nEin Assoziierungsabkommen ist nicht gleichbedeutend mit einer Beitrittsperspektive. Zwar haben einige Staaten, mit denen solche Abkommen bestanden, später einen Beitrittsantrag gestellt und sind der Union beigetreten; andere Abkommen, etwa mit Staaten des Mittelmeerraums, sehen einen Beitritt ausdrücklich nicht vor. Die Abkommen bedürfen in der Regel der Zustimmung des Europäischen Parlaments und werden häufig auch von den nationalen Parlamenten ratifiziert.',
+      'a',
+      ['Wer ein Assoziierungsabkommen mit der Union schließt, erhält damit das Recht, der Union beizutreten.',
+        'Assoziierungsabkommen beschränken sich auf den Abbau von Zöllen.',
+        'Aus dem Bestehen eines Assoziierungsabkommens lässt sich nicht schließen, dass der Partnerstaat der Union beitreten wird.',
+        'Assoziierungsabkommen werden ohne Beteiligung des Europäischen Parlaments geschlossen.'],
+      2,
+      'C folgt daraus, dass ein solches Abkommen nicht gleichbedeutend mit einer Beitrittsperspektive ist. A widerspricht dem Text. B widerspricht der Aussage, dass die Abkommen über Handel hinausgehen. D widerspricht dem Zustimmungserfordernis.'],
+  ]);
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* app.js */
+/* EPSO-Logiktrainer: Ablaufsteuerung, Darstellung, Speicherung. */
+(function () {
+  'use strict';
+  const U = window.EPSO_UTIL;
+  const esc = U.esc;
+  const LETTERS = ['A', 'B', 'C', 'D', 'E'];
+
+  // Testformat AD/427/26 (Quelle: EPSO-Unterlagen zur ersten Testphase, siehe README)
+  const SECTIONS = {
+    verbal: { title: 'Sprachlogisches Denken', short: 'Sprachlogik', n: 20, minutes: 35 },
+    numerical: { title: 'Zahlenlogisches Denken', short: 'Zahlenlogik', n: 10, minutes: 20 },
+    abstract: { title: 'Abstraktes Denken', short: 'Abstrakte Logik', n: 10, minutes: 10 },
+  };
+  const PASS = { verbal: 10, numAbs: 10 };
+  const COMPETITION = 'EPSO/AD/427/26';
+
+  const QTYPE = {
+    r: 'Welche der folgenden Aussagen ist richtig?',
+    f: 'Welche der folgenden Aussagen ist falsch?',
+    a: 'Welche der folgenden Aussagen lässt sich aus dem Text ableiten?',
+    h: 'Welche Aussage gibt die Kernaussage des Textes am besten wieder?',
+  };
+
+  // ---------- Speicher ----------
+  const KEY = 'epso-logiktrainer-v1';
+  function blankStore() {
+    return { history: [], wrong: {}, seen: {}, imported: [], settings: { scale: 1 } };
+  }
+  function loadStore() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return blankStore();
+      return Object.assign(blankStore(), JSON.parse(raw));
+    } catch (e) {
+      return blankStore();
+    }
+  }
+  function saveStore() {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(S.store));
+    } catch (e) { /* Speicher nicht verfügbar: Sitzung läuft trotzdem */ }
+  }
+
+  const S = { store: loadStore(), session: null, view: 'home', timer: null, calcOpen: false, confirmEnd: false, homeTab: null };
+
+  // ---------- Fragenquellen ----------
+  function verbalPool() {
+    return (window.EPSO_VERBAL || []).map((v) => ({
+      id: v.id,
+      section: 'verbal',
+      source: 'pool',
+      topic: v.topic,
+      passage: v.passage,
+      stem: QTYPE[v.qtype] || v.qtype,
+      options: v.options,
+      correct: v.correct,
+      explanation: v.explanation,
+    }));
+  }
+
+  function importedPool(section) {
+    return (S.store.imported || []).filter((q) => q.section === section);
+  }
+
+  function questionById(id) {
+    if (id.startsWith('num-')) return window.EPSO_NUMERICAL.generate(parseInt(id.slice(4), 10));
+    if (id.startsWith('abs-')) {
+      const p = id.split('-');
+      return window.EPSO_ABSTRACT.generate(parseInt(p[1], 10), parseInt(p[2], 10));
+    }
+    if (id.startsWith('imp-')) return (S.store.imported || []).find((q) => q.id === id) || null;
+    return verbalPool().find((q) => q.id === id) || null;
+  }
+
+  function pickQuestions(section, n, opts) {
+    opts = opts || {};
+    const src = opts.sources || { pool: true, generated: true, imported: true };
+    let list = [];
+    const imp = src.imported ? importedPool(section) : [];
+    if (section === 'verbal') {
+      const pool = src.pool || src.generated ? verbalPool() : [];
+      const cand = pool.concat(imp);
+      // Selten gesehene Fragen zuerst, innerhalb gleicher Häufigkeit zufällig
+      const seen = S.store.seen || {};
+      const shuffled = cand.map((q) => ({ q, k: (seen[q.id] || 0) + Math.random() * 0.9 }));
+      shuffled.sort((a, b) => a.k - b.k);
+      list = shuffled.slice(0, n).map((x) => x.q);
+    } else {
+      const impShare = src.generated ? Math.min(imp.length, Math.round(n * 0.3)) : Math.min(imp.length, n);
+      const seen = S.store.seen || {};
+      const impSorted = imp.slice().sort((a, b) => (seen[a.id] || 0) - (seen[b.id] || 0) + Math.random() - 0.5);
+      list = impSorted.slice(0, impShare);
+      if (src.generated) {
+        while (list.length < n) {
+          const seed = U.newSeed();
+          const q = section === 'numerical'
+            ? window.EPSO_NUMERICAL.generate(seed)
+            : window.EPSO_ABSTRACT.generate(seed, opts.difficulty || difficultyMix(list.length, n));
+          list.push(q);
+        }
+      }
+      list = shuffleArr(list);
+    }
+    return list;
+  }
+
+  function difficultyMix(i, n) {
+    // Prüfungsähnliche Mischung: etwa 30 % leicht, 40 % mittel, 30 % schwer
+    const f = i / n;
+    return f < 0.3 ? 1 : f < 0.7 ? 2 : 3;
+  }
+
+  function shuffleArr(a) {
+    const b = a.slice();
+    for (let i = b.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [b[i], b[j]] = [b[j], b[i]];
+    }
+    return b;
+  }
+
+  // ---------- Sitzungen ----------
+  function makePart(section, questions, timed, feedback, minutesOverride) {
+    const cfg = SECTIONS[section];
+    return {
+      section,
+      title: cfg.title,
+      questions,
+      answers: questions.map(() => null),
+      flags: questions.map(() => false),
+      elim: questions.map(() => []),
+      checked: questions.map(() => false),
+      times: questions.map(() => 0),
+      current: 0,
+      timeLimit: timed ? (minutesOverride || cfg.minutes) * 60 : null,
+      elapsed: 0,
+      feedback,
+      submitted: false,
+      started: false,
+    };
+  }
+
+  function startExam() {
+    S.session = {
+      mode: 'exam',
+      label: 'Prüfungssimulation',
+      parts: ['verbal', 'numerical', 'abstract'].map((s) => makePart(s, pickQuestions(s, SECTIONS[s].n), true, false)),
+      pi: 0,
+    };
+    go('intro');
+  }
+
+  function startSingle(section, opts) {
+    const n = opts.n || SECTIONS[section].n;
+    const qs = pickQuestions(section, n, opts);
+    if (!qs.length) {
+      flash('Für diese Auswahl gibt es keine Fragen. Aktiviere eine weitere Quelle.');
+      return;
+    }
+    const timed = opts.mode === 'test';
+    const minutes = timed ? Math.max(1, Math.round((SECTIONS[section].minutes * qs.length) / SECTIONS[section].n)) : null;
+    S.session = {
+      mode: opts.mode,
+      label: opts.mode === 'test' ? 'Einzeltest' : 'Übungsmodus',
+      parts: [makePart(section, qs, timed, opts.mode === 'practice', minutes)],
+      pi: 0,
+    };
+    go(timed ? 'intro' : 'test');
+    if (!timed) beginPart();
+  }
+
+  function startWrongReview() {
+    const ids = Object.keys(S.store.wrong || {});
+    if (!ids.length) {
+      flash('Noch keine falsch beantworteten Fragen gespeichert.');
+      return;
+    }
+    const bySec = { verbal: [], numerical: [], abstract: [] };
+    shuffleArr(ids).forEach((id) => {
+      const q = questionById(id);
+      if (q && bySec[q.section]) bySec[q.section].push(q);
+    });
+    const parts = Object.keys(bySec)
+      .filter((s) => bySec[s].length)
+      .map((s) => makePart(s, bySec[s].slice(0, 20), false, true));
+    S.session = { mode: 'wrong', label: 'Fehler wiederholen', parts, pi: 0 };
+    go('test');
+    beginPart();
+  }
+
+  function part() {
+    return S.session.parts[S.session.pi];
+  }
+
+  let lastTick = 0;
+  function beginPart() {
+    const p = part();
+    p.started = true;
+    lastTick = Date.now();
+    clearInterval(S.timer);
+    S.timer = setInterval(tick, 500);
+    render();
+  }
+
+  function tick() {
+    if (!S.session || S.view !== 'test') return;
+    const p = part();
+    const now = Date.now();
+    const dt = (now - lastTick) / 1000;
+    lastTick = now;
+    p.elapsed += dt;
+    p.times[p.current] += dt;
+    if (p.timeLimit && p.elapsed >= p.timeLimit) {
+      p.elapsed = p.timeLimit;
+      submitPart(true);
+      return;
+    }
+    const el = document.getElementById('timer-val');
+    if (el) {
+      el.textContent = timerText(p);
+      const box = document.getElementById('timer');
+      if (box && p.timeLimit) box.classList.toggle('low', p.timeLimit - p.elapsed <= 120);
+    }
+  }
+
+  function timerText(p) {
+    const secs = p.timeLimit ? Math.max(0, Math.ceil(p.timeLimit - p.elapsed)) : Math.floor(p.elapsed);
+    const m = Math.floor(secs / 60), s = secs % 60;
+    return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+  }
+
+  function submitPart(auto) {
+    const p = part();
+    p.submitted = true;
+    p.autoSubmitted = !!auto;
+    clearInterval(S.timer);
+    S.confirmEnd = false;
+    recordPart(p);
+    if (S.session.pi < S.session.parts.length - 1) {
+      S.session.pi++;
+      if (S.session.mode === 'exam') go('intro');
+      else {
+        go('test');
+        beginPart();
+      }
+    } else {
+      go('results');
+    }
+  }
+
+  function recordPart(p) {
+    const store = S.store;
+    let correct = 0;
+    p.questions.forEach((q, i) => {
+      store.seen[q.id] = (store.seen[q.id] || 0) + 1;
+      const ok = p.answers[i] === q.correct;
+      if (ok) correct++;
+      if (!ok && p.answers[i] !== null) store.wrong[q.id] = { section: q.section, n: ((store.wrong[q.id] || {}).n || 0) + 1 };
+      if (!ok && p.answers[i] === null && S.session.mode !== 'practice') store.wrong[q.id] = { section: q.section, n: ((store.wrong[q.id] || {}).n || 0) + 1 };
+      if (ok && store.wrong[q.id]) delete store.wrong[q.id];
+    });
+    store.history.push({
+      date: new Date().toISOString(),
+      mode: S.session.mode,
+      section: p.section,
+      total: p.questions.length,
+      correct,
+      answered: p.answers.filter((a) => a !== null).length,
+      seconds: Math.round(p.elapsed),
+      timed: !!p.timeLimit,
+    });
+    if (store.history.length > 500) store.history = store.history.slice(-500);
+    // Generierte Aufgaben nicht dauerhaft als "gesehen" sammeln – Pool bleibt klein
+    Object.keys(store.seen).forEach((k) => { if (k.startsWith('num-') || k.startsWith('abs-')) delete store.seen[k]; });
+    saveStore();
+  }
+
+  // ---------- Navigation ----------
+  function go(view) {
+    S.view = view;
+    render();
+    window.scrollTo(0, 0);
+  }
+
+  function flash(msg) {
+    const el = document.getElementById('flash');
+    if (!el) return;
+    el.textContent = msg;
+    el.hidden = false;
+    clearTimeout(flash.t);
+    flash.t = setTimeout(() => (el.hidden = true), 4200);
+  }
+
+  // ---------- Darstellung ----------
+  const ICON = {
+    flag: '<svg viewBox="0 0 16 16" aria-hidden="true"><path class="flagicon" d="M3 1h10v14l-5-3.6L3 15z"/></svg>',
+    calc: '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2.5" y="1.5" width="11" height="13" rx="1.5"/><rect x="4.5" y="3.5" width="7" height="3"/><path d="M5 9h1M8 9h1M11 9h.5M5 12h1M8 12h1M11 12h.5"/></svg>',
+    elim: '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6"/><path d="M3.8 12.2 12.2 3.8"/></svg>',
+    zoomIn: '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5M5 7h4M7 5v4"/></svg>',
+    zoomOut: '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5M5 7h4"/></svg>',
+    list: '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 4h9M5 8h9M5 12h9M2 4h.5M2 8h.5M2 12h.5"/></svg>',
+    stars: '<svg class="stars" width="30" height="30" viewBox="0 0 30 30" aria-hidden="true">' +
+      Array.from({ length: 12 }, (_, i) => {
+        const a = (i * 30 * Math.PI) / 180;
+        return '<circle cx="' + (15 + 11 * Math.sin(a)).toFixed(1) + '" cy="' + (15 - 11 * Math.cos(a)).toFixed(1) + '" r="1.6" fill="#ffcc00"/>';
+      }).join('') + '</svg>',
+  };
+
+  function topbar(title, sub, right) {
+    return '<header class="topbar"><div class="brand">' + ICON.stars + '<div style="min-width:0"><div class="title">' + esc(title) + '</div>' +
+      (sub ? '<div class="sub">' + esc(sub) + '</div>' : '') + '</div></div><div class="spacer"></div>' + (right || '') + '</header>';
+  }
+
+  function render() {
+    const app = document.getElementById('app');
+    document.documentElement.style.setProperty('--text-scale', S.store.settings.scale || 1);
+    let html = '';
+    if (S.view === 'home') html = viewHome();
+    else if (S.view === 'intro') html = viewIntro();
+    else if (S.view === 'test') html = viewTest();
+    else if (S.view === 'review') html = viewReview();
+    else if (S.view === 'results') html = viewResults();
+    app.innerHTML = html + '<div id="flash" class="notice" hidden style="position:fixed;left:16px;right:16px;bottom:80px;z-index:40;max-width:520px;margin:0 auto"></div>';
+    if (S.view === 'test' && S.calcOpen && part().section === 'numerical') mountCalc();
+  }
+
+  // ----- Startseite -----
+  function viewHome() {
+    const st = sectionStats();
+    const wrongN = Object.keys(S.store.wrong || {}).length;
+    const pool = verbalPool().length;
+    const imp = (S.store.imported || []).length;
+    const tab = S.homeTab || 'start';
+    let h = topbar('EPSO Logiktrainer', COMPETITION + ' · Erste Testphase', '<button class="tb-btn" data-act="theme">Hell/Dunkel</button>');
+    h += '<main class="page">';
+    h += '<section class="hero"><div class="eyebrow">Concours 2026 · Logiktests im November</div><h1>Training für die drei Logiktests im TAO-Format</h1>' +
+      '<p>Sprachlogik zählt allein 35 % der Gesamtpunkte. Übe unter echten Zeitbedingungen oder in Ruhe mit Lösungsweg. Alle Tests laufen auf Deutsch.</p></section>';
+    h += '<section class="facts">' + ['verbal', 'numerical', 'abstract'].map((s) => {
+      const c = SECTIONS[s];
+      const x = st[s];
+      const acc = x.total ? Math.round((x.correct / x.total) * 100) : null;
+      return '<div class="fact"><h3>' + c.title + '</h3><div class="small">' + c.n + ' Fragen · ' + c.minutes + ' Minuten · ' +
+        (s === 'verbal' ? 'bestanden ab 10/20' : 'mit ' + (s === 'numerical' ? 'Abstraktem Denken' : 'Zahlenlogik') + ' zusammen ab 10/20') + '</div>' +
+        '<div class="big">' + (acc === null ? '–' : acc + ' %') + '</div><div class="small">' + (x.total ? x.correct + ' von ' + x.total + ' richtig in ' + x.sessions + ' Durchgängen' : 'Noch keine Durchgänge') + '</div></div>';
+    }).join('') + '</section>';
+
+    h += '<nav class="btnrow" aria-label="Bereiche">' + [['start', 'Training starten'], ['stats', 'Statistik'], ['import', 'Fragen importieren'], ['info', 'Testformat & Hinweise']]
+      .map(([k, l]) => '<button class="btn' + (tab === k ? ' primary' : '') + '" data-act="tab" data-tab="' + k + '">' + l + '</button>').join('') + '</nav>';
+
+    if (tab === 'start') {
+      h += '<section class="panel"><h2>Prüfung simulieren</h2><p class="lead">Alle drei Tests nacheinander mit Originalzeiten: 20 Fragen Sprachlogik in 35 Minuten, 10 Fragen Zahlenlogik in 20 Minuten und 10 Fragen Abstraktes Denken in 10 Minuten. Die Lösungen siehst du erst nach dem Ende.</p>' +
+        '<div class="btnrow"><button class="btn primary" data-act="exam">Prüfungssimulation starten (65 Minuten)</button>' +
+        (wrongN ? '<button class="btn" data-act="wrong">Fehler wiederholen (' + wrongN + ')</button>' : '') + '</div></section>';
+
+      h += '<section class="panel"><h2>Einzeln üben</h2><p class="lead">Im Übungsmodus prüfst du jede Antwort sofort und siehst den Lösungsweg. Im Einzeltest läuft die Zeit wie in der Prüfung.</p>' +
+        '<div class="form">' +
+        field('f-section', 'Test', '<select id="f-section"><option value="verbal">Sprachlogisches Denken</option><option value="numerical">Zahlenlogisches Denken</option><option value="abstract">Abstraktes Denken</option></select>') +
+        field('f-mode', 'Modus', '<select id="f-mode"><option value="practice">Übungsmodus (mit Lösungen)</option><option value="test">Einzeltest (mit Zeitlimit)</option></select>') +
+        field('f-n', 'Anzahl Fragen', '<select id="f-n"><option value="5">5</option><option value="10" selected>10</option><option value="20">20</option><option value="30">30</option></select>') +
+        field('f-diff', 'Schwierigkeit (Abstrakt)', '<select id="f-diff"><option value="0">Gemischt wie in der Prüfung</option><option value="1">Leicht (eine Regel)</option><option value="2">Mittel (zwei Regeln)</option><option value="3">Schwer (drei Regeln)</option></select>') +
+        '</div><fieldset style="border:none;padding:0;margin:0;display:grid;gap:6px"><legend class="small" style="font-weight:600;padding:0;margin-bottom:4px">Fragenquellen</legend><div class="checks">' +
+        '<label><input type="checkbox" id="src-pool" checked> Fragenpool Sprachlogik (' + pool + ' Texte)</label>' +
+        '<label><input type="checkbox" id="src-gen" checked> Generierte Aufgaben (Zahlen/Abstrakt, unbegrenzt)</label>' +
+        '<label><input type="checkbox" id="src-imp"' + (imp ? ' checked' : '') + '> Importierte Fragen (' + imp + ')</label></div></fieldset>' +
+        '<div class="btnrow"><button class="btn primary" data-act="single">Starten</button></div></section>';
+    }
+    if (tab === 'stats') h += viewStats();
+    if (tab === 'import') h += viewImport();
+    if (tab === 'info') h += viewInfo();
+    h += '</main>';
+    return h;
+  }
+
+  function field(id, label, control) {
+    return '<div class="field"><label for="' + id + '">' + label + '</label>' + control + '</div>';
+  }
+
+  function sectionStats() {
+    const out = {};
+    ['verbal', 'numerical', 'abstract'].forEach((s) => (out[s] = { total: 0, correct: 0, sessions: 0, seconds: 0, answered: 0 }));
+    (S.store.history || []).forEach((h) => {
+      const o = out[h.section];
+      if (!o) return;
+      o.total += h.total;
+      o.correct += h.correct;
+      o.sessions++;
+      o.seconds += h.seconds;
+      o.answered += h.answered;
+    });
+    return out;
+  }
+
+  function viewStats() {
+    const st = sectionStats();
+    let h = '<section class="panel"><h2>Statistik</h2><p class="lead">Die orangefarbene Markierung zeigt die Bestehensgrenze von 50 %. Das Tempo vergleicht deine Zeit pro Frage mit der Zeit, die in der Prüfung pro Frage zur Verfügung steht.</p>';
+    h += '<div class="data-wrap"><table class="stats-table"><thead><tr><th>Test</th><th class="num">Durchgänge</th><th class="num">Fragen</th><th class="num">Richtig</th><th>Trefferquote</th><th class="num">Ø Zeit/Frage</th><th class="num">Vorgabe</th></tr></thead><tbody>';
+    ['verbal', 'numerical', 'abstract'].forEach((s) => {
+      const x = st[s];
+      const acc = x.total ? (x.correct / x.total) * 100 : 0;
+      const per = x.total ? x.seconds / x.total : 0;
+      const target = (SECTIONS[s].minutes * 60) / SECTIONS[s].n;
+      h += '<tr><td>' + SECTIONS[s].title + '</td><td class="num">' + x.sessions + '</td><td class="num">' + x.total + '</td><td class="num">' + x.correct + '</td>' +
+        '<td><div style="display:flex;align-items:center;gap:8px"><div class="bar" style="flex:1"><i style="width:' + acc.toFixed(1) + '%"></i><b style="left:50%"></b></div><span class="tabular">' + (x.total ? Math.round(acc) + ' %' : '–') + '</span></div></td>' +
+        '<td class="num">' + (x.total ? fmtSec(per) : '–') + '</td><td class="num">' + fmtSec(target) + '</td></tr>';
+    });
+    h += '</tbody></table></div>';
+    const recent = (S.store.history || []).slice(-15).reverse();
+    if (recent.length) {
+      h += '<h3 style="font-size:1rem">Letzte Durchgänge</h3><div class="data-wrap"><table class="stats-table"><thead><tr><th>Datum</th><th>Test</th><th>Modus</th><th class="num">Ergebnis</th><th class="num">Zeit</th></tr></thead><tbody>' +
+        recent.map((r) => '<tr><td>' + new Date(r.date).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' }) + '</td><td>' + SECTIONS[r.section].short + '</td><td>' + modeName(r.mode) + '</td><td class="num">' + r.correct + '/' + r.total + '</td><td class="num">' + fmtSec(r.seconds) + '</td></tr>').join('') +
+        '</tbody></table></div>';
+    }
+    h += '<h3 style="font-size:1rem">Fortschritt sichern</h3><p class="lead">Dein Fortschritt liegt nur in diesem Browser. Kopiere den Text, um ihn auf einem anderen Gerät unter „Fragen importieren“ einzufügen.</p>' +
+      '<div class="btnrow"><button class="btn" data-act="export">Fortschritt als Text anzeigen</button><button class="btn danger" data-act="reset">Statistik zurücksetzen</button></div>' +
+      '<div id="export-box"></div></section>';
+    return h;
+  }
+
+  function modeName(m) {
+    return { exam: 'Simulation', test: 'Einzeltest', practice: 'Übung', wrong: 'Fehler' }[m] || m;
+  }
+
+  function fmtSec(s) {
+    s = Math.round(s);
+    return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0') + ' min';
+  }
+
+  function viewImport() {
+    return '<section class="panel"><h2>Fragen importieren</h2>' +
+      '<p class="lead">Füge hier eigene oder offizielle Beispielfragen als JSON ein, etwa aus dem EPSO-Beispieltest, den euphorum-Unterlagen oder Webinaren. Importierte Fragen erscheinen mit dem Etikett „Importiert“ und lassen sich als Quelle getrennt auswählen. Hier kannst du auch einen gesicherten Fortschritt wiederherstellen.</p>' +
+      '<details><summary class="small" style="cursor:pointer;font-weight:600">Format anzeigen</summary><pre class="small" style="white-space:pre-wrap;background:var(--surface-2);padding:10px;border-radius:6px">[\n  {\n    "section": "verbal",\n    "source": "EPSO-Beispieltest",\n    "passage": "Text …",\n    "stem": "Welche der folgenden Aussagen ist richtig?",\n    "options": ["…", "…", "…", "…"],\n    "correct": 2,\n    "explanation": "…"\n  },\n  {\n    "section": "numerical",\n    "data": "&lt;table&gt;…&lt;/table&gt; (HTML, optional)",\n    "stem": "…", "options": ["…"], "correct": 0\n  }\n]\n\ncorrect = Index der richtigen Antwort, beginnend bei 0.</pre></details>' +
+      '<label for="imp-text" class="small" style="font-weight:600">JSON einfügen</label><textarea id="imp-text" placeholder="[ { &quot;section&quot;: &quot;verbal&quot;, … } ]"></textarea>' +
+      '<div class="btnrow"><label class="btn" for="imp-file" style="display:inline-block">Datei wählen</label><input type="file" id="imp-file" accept=".json,application/json,text/plain" hidden>' +
+      '<button class="btn primary" data-act="import">Importieren</button>' +
+      ((S.store.imported || []).length ? '<button class="btn danger" data-act="clear-imp">Importierte Fragen löschen (' + S.store.imported.length + ')</button>' : '') + '</div></section>';
+  }
+
+  function viewInfo() {
+    return '<section class="panel"><h2>Testformat ' + COMPETITION + '</h2>' +
+      '<div class="data-wrap"><table class="stats-table"><thead><tr><th>Test</th><th class="num">Fragen</th><th class="num">Zeit</th><th>Mindestpunktzahl</th><th>Gewichtung</th></tr></thead><tbody>' +
+      '<tr><td>Sprachlogisches Denken</td><td class="num">20</td><td class="num">35 min</td><td>10/20</td><td>35 % der Gesamtpunkte</td></tr>' +
+      '<tr><td>Zahlenlogisches Denken</td><td class="num">10</td><td class="num">20 min</td><td rowspan="2">zusammen 10/20</td><td rowspan="2">nur bestanden/nicht bestanden</td></tr>' +
+      '<tr><td>Abstraktes Denken</td><td class="num">10</td><td class="num">10 min</td></tr></tbody></table></div>' +
+      '<div class="notice">Die Zahlen stammen aus Vorbereitungsunterlagen zu AD/427/26. Maßgeblich ist die Bekanntmachung des Auswahlverfahrens (ABl. C/2026/00711). Prüfe sie dort und in deiner Einladung im Candidate Portal.</div>' +
+      '<h3 style="font-size:1rem">So funktioniert die Oberfläche (wie in TAO)</h3><ul class="small" style="margin:0;padding-left:1.2em;display:grid;gap:4px">' +
+      '<li>Jeder Test hat einen eigenen Countdown. Wenn die Zeit abläuft, wird der Test automatisch abgegeben.</li>' +
+      '<li>Über die Navigationsleiste springst du direkt zu jeder Frage. Ausgefüllte Kreise sind beantwortet, das orange Fähnchen markiert Fragen zur Überprüfung.</li>' +
+      '<li>Mit dem Durchstreich-Symbol neben einer Antwort schließt du Optionen aus.</li>' +
+      '<li>In der Zahlenlogik gibt es einen einfachen Taschenrechner auf dem Bildschirm, keinen wissenschaftlichen.</li>' +
+      '<li>Vor der Abgabe siehst du eine Übersicht mit unbeantworteten und markierten Fragen. Abgegebene Tests lassen sich nicht mehr öffnen.</li>' +
+      '<li>Falsche Antworten geben keinen Punktabzug. Beantworte deshalb immer alle Fragen.</li></ul>' +
+      '<h3 style="font-size:1rem">Tastatur</h3><p class="small muted" style="margin:0">A–E oder 1–5 wählen eine Antwort · ← → blättern · M markiert die Frage · R öffnet den Taschenrechner</p>' +
+      '<h3 style="font-size:1rem">Offizielle Übungsquellen</h3><ul class="small" style="margin:0;padding-left:1.2em;display:grid;gap:4px">' +
+      '<li><a href="https://eu-careers.europa.eu/de/sample-tests/reasoning-tests-ad" target="_blank" rel="noopener">EPSO-Beispieltest in TAO (20 Fragen)</a></li>' +
+      '<li><a href="https://www.euphorum.org/" target="_blank" rel="noopener">European Career Portal 2.0 (euphorum), Demobereich</a></li>' +
+      '<li><a href="https://eu-karriere.org/veranstaltungen/logiktest" target="_blank" rel="noopener">Webinare des Seminarbüros</a></li></ul></section>';
+  }
+
+  // ----- Einleitung vor jedem Test -----
+  function viewIntro() {
+    const p = part();
+    const cfg = SECTIONS[p.section];
+    const idx = S.session.pi + 1, tot = S.session.parts.length;
+    let h = topbar(COMPETITION + ' – ' + cfg.title, S.session.label + (tot > 1 ? ' · Test ' + idx + ' von ' + tot : ''));
+    h += '<main class="page"><section class="panel"><div class="eyebrow">' + (tot > 1 ? 'Test ' + idx + ' von ' + tot : 'Einzeltest') + '</div><h2 style="font-size:1.6rem">' + cfg.title + '</h2>';
+    h += '<p>Dieser Test umfasst <strong>' + p.questions.length + ' Fragen</strong>. Du hast <strong>' + Math.round(p.timeLimit / 60) + ' Minuten</strong> Zeit.</p>';
+    const hint = {
+      verbal: 'Lies jeden Text und wähle die Aussage, die sich allein aus dem Text ergibt. Verwende kein Vorwissen. Achte auf Einschränkungen wie „einige“, „meist“ oder „bisher“.',
+      numerical: 'Beantworte die Fragen anhand der Tabellen und Diagramme. Der Taschenrechner öffnet sich über das Symbol in der Werkzeugleiste oder mit der Taste R.',
+      abstract: 'Jede Reihe folgt einer oder mehreren Regeln. Wähle die Figur, die die Reihe fortsetzt.',
+    }[p.section];
+    h += '<p class="muted">' + hint + '</p>';
+    h += '<p class="small muted">Die Zeit läuft ab dem Klick auf „Test beginnen“. Wenn sie abläuft, wird der Test automatisch abgegeben. Für falsche Antworten gibt es keinen Punktabzug.</p>';
+    h += '<div class="btnrow"><button class="btn primary" data-act="begin">Test beginnen</button>' + (S.session.pi === 0 ? '<button class="btn" data-act="home">Abbrechen</button>' : '') + '</div></section></main>';
+    return h;
+  }
+
+  // ----- Testansicht -----
+  function viewTest() {
+    const p = part();
+    const q = p.questions[p.current];
+    const cfg = SECTIONS[p.section];
+    const practice = p.feedback;
+    const timerHtml = '<div class="timer' + (p.timeLimit && p.timeLimit - p.elapsed <= 120 ? ' low' : '') + '" id="timer" title="' + (p.timeLimit ? 'Verbleibende Zeit' : 'Verstrichene Zeit') + '">' +
+      '<span class="small" style="font-weight:400">' + (p.timeLimit ? 'Verbleibend' : 'Zeit') + '</span><span id="timer-val">' + timerText(p) + '</span></div>';
+    const endBtn = '<button class="tb-btn" data-act="to-review">' + (practice ? 'Beenden' : 'Test beenden') + '</button>';
+    let h = topbar(COMPETITION + ' – ' + cfg.title, S.session.label + (S.session.parts.length > 1 ? ' · Test ' + (S.session.pi + 1) + ' von ' + S.session.parts.length : ''), timerHtml + endBtn);
+
+    h += '<div class="navbar"><div class="qnav" role="navigation" aria-label="Fragen">' + p.questions.map((qq, i) => {
+      let cls = 'qdot';
+      if (practice && p.checked[i]) cls += p.answers[i] === qq.correct ? ' right' : ' wrong';
+      else if (p.answers[i] !== null) cls += ' answered';
+      if (p.flags[i]) cls += ' flagged';
+      if (i === p.current) cls += ' current';
+      return '<button class="' + cls + '" data-act="goto" data-i="' + i + '" aria-label="Frage ' + (i + 1) + (p.answers[i] !== null ? ', beantwortet' : '') + (p.flags[i] ? ', markiert' : '') + '"' + (i === p.current ? ' aria-current="true"' : '') + '>' + (i + 1) + '</button>';
+    }).join('') + '</div><div class="legend"><span><i></i>offen</span><span><i class="fill"></i>beantwortet</span><span><i class="flag"></i>markiert</span></div></div>';
+
+    h += '<div class="toolbar">' +
+      '<button class="tool" data-act="flag" aria-pressed="' + p.flags[p.current] + '">' + ICON.flag + (p.flags[p.current] ? 'Markierung entfernen' : 'Zur Überprüfung markieren') + '</button>' +
+      (p.section === 'numerical' ? '<button class="tool" data-act="calc" aria-pressed="' + S.calcOpen + '">' + ICON.calc + 'Taschenrechner</button>' : '') +
+      '<button class="tool" data-act="zoom-out" aria-label="Schrift kleiner">' + ICON.zoomOut + '</button><button class="tool" data-act="zoom-in" aria-label="Schrift größer">' + ICON.zoomIn + '</button>' +
+      (!practice ? '<button class="tool" data-act="to-review">' + ICON.list + 'Übersicht</button>' : '') +
+      (q.source && q.source !== 'generiert' && q.source !== 'pool' ? '<span class="pill src">' + esc(q.sourceLabel || q.source) + '</span>' : '') +
+      '<span class="qcounter">Frage ' + (p.current + 1) + ' von ' + p.questions.length + '</span></div>';
+
+    h += '<main class="stage">' + questionHtml(q, p, p.current, practice) + '</main>';
+
+    const isLast = p.current === p.questions.length - 1;
+    let right = '';
+    if (practice && !p.checked[p.current]) right = '<button class="btn primary" data-act="check"' + (p.answers[p.current] === null ? ' disabled' : '') + '>Antwort prüfen</button>';
+    else if (isLast) right = '<button class="btn primary" data-act="to-review">' + (practice ? 'Auswertung' : 'Zur Übersicht') + '</button>';
+    else right = '<button class="btn primary" data-act="next">Weiter</button>';
+    h += '<footer class="footer"><button class="btn" data-act="prev"' + (p.current === 0 ? ' disabled' : '') + '>Zurück</button>' + right + '</footer>';
+    return h;
+  }
+
+  function passageHtml(text) {
+    return String(text).split(/\n\s*\n/).map((para) => '<p>' + esc(para.trim()) + '</p>').join('');
+  }
+
+  function questionHtml(q, p, i, practice) {
+    const ans = p ? p.answers[i] : null;
+    const checked = p ? p.checked[i] : true;
+    const elim = p ? p.elim[i] : [];
+    const showSol = practice && checked;
+    const figs = !!q.optionsAreFigures;
+    const opts = '<ol class="options' + (figs ? ' figs' : '') + '" role="radiogroup" aria-label="Antwortmöglichkeiten">' + q.options.map((o, k) => {
+      let cls = 'opt';
+      if (ans === k) cls += ' selected';
+      if (elim.includes(k)) cls += ' eliminated';
+      if (showSol && k === q.correct) cls += ' correct';
+      if (showSol && ans === k && k !== q.correct) cls += ' incorrect';
+      const content = figs || q.htmlOptions ? o : esc(o);
+      const elimBtn = p && !showSol ? '<button class="elim" data-act="elim" data-k="' + k + '" title="Antwort ausschließen" aria-label="Antwort ' + LETTERS[k] + ' ausschließen">' + ICON.elim + '</button>' : '<span></span>';
+      if (figs) {
+        return '<li class="' + cls + '" data-act="answer" data-k="' + k + '" role="radio" aria-checked="' + (ans === k) + '" tabindex="0"><span class="otext">' + content + '</span><span class="optfoot"><span class="letter">' + LETTERS[k] + '</span>' + elimBtn + '</span></li>';
+      }
+      return '<li class="' + cls + '" data-act="answer" data-k="' + k + '" role="radio" aria-checked="' + (ans === k) + '" tabindex="0"><span class="letter">' + LETTERS[k] + '</span><span class="otext">' + content + '</span>' + elimBtn + '</li>';
+    }).join('') + '</ol>';
+
+    let fb = '';
+    if (showSol) {
+      const ok = ans === q.correct;
+      fb = '<div class="feedback ' + (ok ? 'good' : 'badf') + '" role="status"><h3>' + (ok ? 'Richtig' : ans === null ? 'Nicht beantwortet' : 'Falsch') + ' – richtig ist ' + LETTERS[q.correct] + '</h3><p>' + esc(q.explanation || 'Keine Erklärung hinterlegt.') + '</p></div>';
+    }
+
+    const stem = '<p class="stem">' + esc(q.stem) + '</p>';
+    if (q.section === 'verbal') {
+      return '<div class="split"><article class="pane material"><div class="passage">' + passageHtml(q.passage) + '</div></article><section class="pane">' + stem + opts + fb + '</section></div>';
+    }
+    if (q.section === 'numerical') {
+      return '<div class="split"><article class="pane material">' + (q.data || '') + (q.passage ? '<div class="passage">' + passageHtml(q.passage) + '</div>' : '') + '</article><section class="pane">' + stem + opts + fb + '</section></div>';
+    }
+    return '<div class="split single"><section class="pane" style="display:grid;gap:16px">' + (q.data || '') + stem + opts + fb + '</section></div>';
+  }
+
+  // ----- Übersicht vor Abgabe -----
+  function viewReview() {
+    const p = part();
+    const cfg = SECTIONS[p.section];
+    const unanswered = p.answers.filter((a) => a === null).length;
+    const flagged = p.flags.filter(Boolean).length;
+    const timerHtml = '<div class="timer' + (p.timeLimit && p.timeLimit - p.elapsed <= 120 ? ' low' : '') + '" id="timer"><span class="small" style="font-weight:400">' + (p.timeLimit ? 'Verbleibend' : 'Zeit') + '</span><span id="timer-val">' + timerText(p) + '</span></div>';
+    let h = topbar(COMPETITION + ' – ' + cfg.title, 'Übersicht vor der Abgabe', timerHtml);
+    h += '<main class="page"><section class="panel"><h2>Übersicht</h2><p class="lead">' + (p.questions.length - unanswered) + ' von ' + p.questions.length + ' Fragen beantwortet · ' + flagged + ' markiert. Klicke auf eine Frage, um zu ihr zurückzukehren.</p>';
+    h += '<div class="review-grid">' + p.questions.map((q, i) => '<button class="review-cell' + (p.answers[i] === null ? ' unanswered' : '') + '" data-act="goto" data-i="' + i + '"><span>Frage ' + (i + 1) + (p.flags[i] ? ' <span style="color:var(--flag)">⚑</span>' : '') + '</span><span class="st">' + (p.answers[i] === null ? 'offen' : 'Antwort ' + LETTERS[p.answers[i]]) + '</span></button>').join('') + '</div>';
+    if (S.confirmEnd) {
+      h += '<div class="confirm" role="alert"><strong>Test wirklich abgeben?</strong><span class="small">' + (unanswered ? unanswered + ' Frage(n) sind noch unbeantwortet. ' : '') + 'Danach kannst du nichts mehr ändern.</span><div class="btnrow"><button class="btn primary" data-act="submit">Ja, abgeben</button><button class="btn" data-act="cancel-submit">Weiter bearbeiten</button></div></div>';
+    }
+    h += '<div class="btnrow"><button class="btn" data-act="back-to-test">Zurück zum Test</button><button class="btn primary" data-act="ask-submit">Test abgeben</button>' +
+      (S.session.mode !== 'exam' ? '' : '') + '</div></section></main>';
+    return h;
+  }
+
+  // ----- Ergebnisse -----
+  function viewResults() {
+    const sess = S.session;
+    let h = topbar('Ergebnis – ' + sess.label, COMPETITION, '<button class="tb-btn" data-act="home">Zur Startseite</button>');
+    h += '<main class="page">';
+    const score = {};
+    sess.parts.forEach((p) => (score[p.section] = { c: p.answers.filter((a, i) => a === p.questions[i].correct).length, n: p.questions.length }));
+    if (sess.mode === 'exam') {
+      const v = score.verbal.c, na = score.numerical.c + score.abstract.c;
+      const pv = v >= PASS.verbal, pn = na >= PASS.numAbs;
+      h += '<section class="panel"><div class="eyebrow">Prüfungssimulation</div><h2 style="font-size:1.6rem">' + (pv && pn ? 'Mindestpunktzahlen erreicht' : 'Mindestpunktzahl nicht erreicht') + '</h2>' +
+        '<div class="facts">' +
+        '<div class="fact"><h3>Sprachlogisches Denken</h3><div class="big">' + v + '/20</div><div><span class="pill ' + (pv ? 'pass' : 'fail') + '">' + (pv ? 'bestanden' : 'nicht bestanden') + '</span> <span class="small muted">Grenze 10/20</span></div></div>' +
+        '<div class="fact"><h3>Zahlen- + Abstraktes Denken</h3><div class="big">' + na + '/20</div><div><span class="pill ' + (pn ? 'pass' : 'fail') + '">' + (pn ? 'bestanden' : 'nicht bestanden') + '</span> <span class="small muted">Grenze 10/20 zusammen</span></div></div>' +
+        '<div class="fact"><h3>Einzelwerte</h3><div class="small">Zahlenlogik ' + score.numerical.c + '/10 · Abstrakt ' + score.abstract.c + '/10</div><div class="small muted">In der Rangliste zählt nur die Sprachlogik (35 % der Gesamtpunkte).</div></div>' +
+        '</div></section>';
+    } else {
+      sess.parts.forEach((p) => {
+        const s = score[p.section];
+        h += '<section class="panel"><div class="eyebrow">' + esc(sess.label) + '</div><h2 style="font-size:1.4rem">' + p.title + ': ' + s.c + ' von ' + s.n + ' richtig</h2>' +
+          '<p class="lead">Trefferquote ' + Math.round((s.c / s.n) * 100) + ' % · Zeit ' + fmtSec(p.elapsed) + ' · im Schnitt ' + fmtSec(p.elapsed / s.n) + ' pro Frage (Vorgabe ' + fmtSec((SECTIONS[p.section].minutes * 60) / SECTIONS[p.section].n) + ')</p></section>';
+      });
+    }
+    sess.parts.forEach((p) => {
+      h += '<section class="panel"><h2>' + p.title + ' – Lösungen</h2>' + (p.autoSubmitted ? '<div class="notice">Die Zeit war abgelaufen. Der Test wurde automatisch abgegeben.</div>' : '') + '<div class="reslist">';
+      p.questions.forEach((q, i) => {
+        const a = p.answers[i];
+        const ok = a === q.correct;
+        const mk = a === null ? 'n' : ok ? 'r' : 'w';
+        const label = q.section === 'verbal' ? (q.topic || 'Text') : (q.stem.length > 90 ? q.stem.slice(0, 88) + '…' : q.stem);
+        h += '<details class="resitem"><summary><span class="mark ' + mk + '">' + (mk === 'r' ? '✓' : mk === 'w' ? '✗' : '–') + '</span><strong>Frage ' + (i + 1) + '</strong><span class="muted small" style="min-width:0;flex:1">' + esc(label) + '</span><span class="small tabular">' + (a === null ? 'keine Antwort' : 'deine: ' + LETTERS[a]) + ' · richtig: ' + LETTERS[q.correct] + ' · ' + fmtSec(p.times[i]) + '</span></summary>' +
+          '<div class="body">' + questionHtml(q, { answers: p.answers, checked: p.questions.map(() => true), elim: p.questions.map(() => []) }, i, true).replace('pane material', 'pane') + '</div></details>';
+      });
+      h += '</div></section>';
+    });
+    h += '<div class="btnrow"><button class="btn primary" data-act="home">Zur Startseite</button>' + (Object.keys(S.store.wrong).length ? '<button class="btn" data-act="wrong">Fehler wiederholen (' + Object.keys(S.store.wrong).length + ')</button>' : '') + '</div></main>';
+    return h;
+  }
+
+  // ---------- Taschenrechner ----------
+  const calc = { expr: '', val: '0', fresh: true, acc: null, op: null, x: null, y: null };
+  function mountCalc() {
+    let el = document.getElementById('calc');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'calc';
+      el.className = 'calc';
+      el.setAttribute('role', 'dialog');
+      el.setAttribute('aria-label', 'Taschenrechner');
+      document.getElementById('app').appendChild(el);
+    }
+    const keys = [['C', 'clear'], ['←', 'back'], ['%', 'pct'], ['÷', '/'], ['7'], ['8'], ['9'], ['×', '*'], ['4'], ['5'], ['6'], ['−', '-'], ['1'], ['2'], ['3'], ['+', '+'], ['±', 'neg'], ['0'], [',', '.'], ['=', '=']];
+    el.innerHTML = '<header data-drag="1"><span>Taschenrechner</span><button data-act="calc" aria-label="Taschenrechner schließen">×</button></header>' +
+      '<div class="disp"><div class="expr" id="calc-expr">' + esc(calc.expr) + '</div><div class="val" id="calc-val">' + esc(calc.val.replace('.', ',')) + '</div></div>' +
+      '<div class="keys">' + keys.map(([l, k]) => '<button data-calc="' + (k || l) + '" class="' + (['/', '*', '-', '+', 'pct'].includes(k) ? 'op' : k === '=' ? 'eq' : '') + '">' + l + '</button>').join('') + '</div>';
+    if (calc.x !== null) { el.style.left = calc.x + 'px'; el.style.top = calc.y + 'px'; el.style.right = 'auto'; el.style.bottom = 'auto'; }
+  }
+
+  function calcPress(k) {
+    const num = () => parseFloat(calc.val);
+    const apply = (a, b, op) => (op === '+' ? a + b : op === '-' ? a - b : op === '*' ? a * b : op === '/' ? (b === 0 ? NaN : a / b) : b);
+    const sym = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+    if (/^[0-9]$/.test(k)) {
+      if (calc.fresh) { calc.val = k; calc.fresh = false; } else if (calc.val.length < 16) calc.val = calc.val === '0' ? k : calc.val + k;
+    } else if (k === '.') {
+      if (calc.fresh) { calc.val = '0.'; calc.fresh = false; } else if (!calc.val.includes('.')) calc.val += '.';
+    } else if (k === 'clear') {
+      Object.assign(calc, { expr: '', val: '0', fresh: true, acc: null, op: null });
+    } else if (k === 'back') {
+      if (!calc.fresh) calc.val = calc.val.length > 1 ? calc.val.slice(0, -1) : '0';
+    } else if (k === 'neg') {
+      calc.val = String(-num());
+    } else if (k === 'pct') {
+      // wie ein Tischrechner: 200 + 5 % = 210; allein: Wert / 100
+      calc.val = String(calc.acc !== null && (calc.op === '+' || calc.op === '-') ? (calc.acc * num()) / 100 : num() / 100);
+      calc.fresh = true;
+    } else if (['+', '-', '*', '/'].includes(k)) {
+      if (calc.acc !== null && calc.op && !calc.fresh) calc.acc = apply(calc.acc, num(), calc.op);
+      else if (calc.acc === null || !calc.op) calc.acc = num();
+      calc.op = k;
+      calc.expr = fmtCalc(calc.acc) + ' ' + sym[k];
+      calc.val = String(calc.acc);
+      calc.fresh = true;
+    } else if (k === '=') {
+      if (calc.op && calc.acc !== null) {
+        const b = num();
+        const r = apply(calc.acc, b, calc.op);
+        calc.expr = fmtCalc(calc.acc) + ' ' + sym[calc.op] + ' ' + fmtCalc(b) + ' =';
+        calc.val = String(r);
+        calc.acc = null;
+        calc.op = null;
+        calc.fresh = true;
+      }
+    }
+    const v = parseFloat(calc.val);
+    const shown = isNaN(v) ? 'Fehler' : calc.fresh ? fmtCalc(v) : calc.val.replace('.', ',');
+    const ev = document.getElementById('calc-val'), ee = document.getElementById('calc-expr');
+    if (ev) ev.textContent = shown;
+    if (ee) ee.textContent = calc.expr;
+  }
+  function fmtCalc(v) {
+    if (!isFinite(v)) return 'Fehler';
+    const r = Math.round(v * 1e10) / 1e10;
+    return String(r).replace('.', ',');
+  }
+
+  // ---------- Ereignisse ----------
+  document.addEventListener('click', (e) => {
+    const c = e.target.closest('[data-calc]');
+    if (c) { calcPress(c.dataset.calc); return; }
+    const t = e.target.closest('[data-act]');
+    if (!t) return;
+    const act = t.dataset.act;
+    const p = S.session ? part() : null;
+    switch (act) {
+      case 'theme': {
+        const cur = document.documentElement.getAttribute('data-theme');
+        const dark = cur ? cur === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+        break;
+      }
+      case 'tab': S.homeTab = t.dataset.tab; render(); break;
+      case 'exam': startExam(); break;
+      case 'wrong': startWrongReview(); break;
+      case 'single': {
+        const section = val('f-section');
+        const mode = val('f-mode');
+        startSingle(section, {
+          mode,
+          n: parseInt(val('f-n'), 10),
+          difficulty: parseInt(val('f-diff'), 10) || 0,
+          sources: { pool: chk('src-pool'), generated: chk('src-gen'), imported: chk('src-imp') },
+        });
+        break;
+      }
+      case 'begin': go('test'); beginPart(); break;
+      case 'home': clearInterval(S.timer); S.session = null; S.calcOpen = false; go('home'); break;
+      case 'answer': {
+        if (!p || p.submitted) return;
+        if (e.target.closest('.elim')) return;
+        if (p.feedback && p.checked[p.current]) return;
+        const k = parseInt(t.dataset.k, 10);
+        p.answers[p.current] = k;
+        p.elim[p.current] = p.elim[p.current].filter((x) => x !== k);
+        render();
+        break;
+      }
+      case 'elim': {
+        e.stopPropagation();
+        const k = parseInt(t.dataset.k, 10);
+        const list = p.elim[p.current];
+        p.elim[p.current] = list.includes(k) ? list.filter((x) => x !== k) : list.concat([k]);
+        if (p.answers[p.current] === k) p.answers[p.current] = null;
+        render();
+        break;
+      }
+      case 'flag': p.flags[p.current] = !p.flags[p.current]; render(); break;
+      case 'calc': S.calcOpen = !S.calcOpen; if (!S.calcOpen) { const el = document.getElementById('calc'); if (el) el.remove(); } render(); break;
+      case 'zoom-in': S.store.settings.scale = Math.min(1.4, (S.store.settings.scale || 1) + 0.1); saveStore(); render(); break;
+      case 'zoom-out': S.store.settings.scale = Math.max(0.8, (S.store.settings.scale || 1) - 0.1); saveStore(); render(); break;
+      case 'prev': if (p.current > 0) { p.current--; render(); window.scrollTo(0, 0); } break;
+      case 'next': if (p.current < p.questions.length - 1) { p.current++; render(); window.scrollTo(0, 0); } break;
+      case 'goto': p.current = parseInt(t.dataset.i, 10); if (S.view !== 'test') S.view = 'test'; render(); window.scrollTo(0, 0); break;
+      case 'check': p.checked[p.current] = true; render(); break;
+      case 'to-review':
+        if (p.feedback) { submitPart(false); break; }
+        S.confirmEnd = false; go('review'); break;
+      case 'back-to-test': go('test'); break;
+      case 'ask-submit': S.confirmEnd = true; render(); break;
+      case 'cancel-submit': S.confirmEnd = false; render(); break;
+      case 'submit': submitPart(false); break;
+      case 'import': doImport(); break;
+      case 'clear-imp': S.store.imported = []; saveStore(); flash('Importierte Fragen gelöscht.'); render(); break;
+      case 'export': {
+        const box = document.getElementById('export-box');
+        box.innerHTML = '<textarea id="export-text" readonly>' + esc(JSON.stringify({ epsoTrainerBackup: 1, store: S.store })) + '</textarea><div class="btnrow"><button class="btn" data-act="copy-export">Kopieren</button></div>';
+        break;
+      }
+      case 'copy-export': {
+        const ta = document.getElementById('export-text');
+        navigator.clipboard && navigator.clipboard.writeText(ta.value).then(() => flash('Kopiert.'), () => { ta.select(); flash('Text markiert – bitte mit Strg+C kopieren.'); });
+        if (!navigator.clipboard) { ta.select(); flash('Text markiert – bitte mit Strg+C kopieren.'); }
+        break;
+      }
+      case 'reset': {
+        if (t.dataset.sure) { S.store.history = []; S.store.wrong = {}; S.store.seen = {}; saveStore(); flash('Statistik zurückgesetzt.'); render(); }
+        else { t.dataset.sure = '1'; t.textContent = 'Wirklich zurücksetzen? Nochmals klicken'; }
+        break;
+      }
+    }
+  });
+
+  document.addEventListener('change', (e) => {
+    if (e.target.id === 'imp-file' && e.target.files[0]) {
+      const fr = new FileReader();
+      fr.onload = () => { document.getElementById('imp-text').value = fr.result; flash('Datei geladen – jetzt auf „Importieren“ klicken.'); };
+      fr.readAsText(e.target.files[0]);
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (S.view !== 'test' || !S.session) {
+      if (e.key === 'Enter' && e.target.matches && e.target.matches('[data-act]')) e.target.click();
+      return;
+    }
+    if (e.target.matches && e.target.matches('input, textarea, select')) return;
+    const p = part();
+    const k = e.key.toLowerCase();
+    if (S.calcOpen && p.section === 'numerical' && e.target.closest && e.target.closest('#calc')) {
+      return;
+    }
+    const idx = 'abcde'.indexOf(k) >= 0 ? 'abcde'.indexOf(k) : '12345'.indexOf(k);
+    if (idx >= 0 && idx < p.questions[p.current].options.length && !(p.feedback && p.checked[p.current])) {
+      p.answers[p.current] = idx;
+      render();
+    } else if (e.key === 'ArrowRight' && p.current < p.questions.length - 1) { p.current++; render(); }
+    else if (e.key === 'ArrowLeft' && p.current > 0) { p.current--; render(); }
+    else if (k === 'm') { p.flags[p.current] = !p.flags[p.current]; render(); }
+    else if (k === 'r' && p.section === 'numerical') { S.calcOpen = !S.calcOpen; if (!S.calcOpen) { const el = document.getElementById('calc'); if (el) el.remove(); } render(); }
+    else if (e.key === 'Enter' && e.target.matches && e.target.matches('[data-act]')) e.target.click();
+  });
+
+  // Taschenrechner verschieben
+  let drag = null;
+  document.addEventListener('pointerdown', (e) => {
+    const hd = e.target.closest('[data-drag]');
+    if (!hd || e.target.closest('button')) return;
+    const el = document.getElementById('calc');
+    const r = el.getBoundingClientRect();
+    drag = { dx: e.clientX - r.left, dy: e.clientY - r.top };
+    hd.setPointerCapture(e.pointerId);
+  });
+  document.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    const el = document.getElementById('calc');
+    calc.x = Math.max(0, Math.min(window.innerWidth - 60, e.clientX - drag.dx));
+    calc.y = Math.max(0, Math.min(window.innerHeight - 60, e.clientY - drag.dy));
+    Object.assign(el.style, { left: calc.x + 'px', top: calc.y + 'px', right: 'auto', bottom: 'auto' });
+  });
+  document.addEventListener('pointerup', () => (drag = null));
+
+  function val(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+  function chk(id) { const el = document.getElementById(id); return !!(el && el.checked); }
+
+  function doImport() {
+    const text = val('imp-text').trim();
+    if (!text) { flash('Füge zuerst JSON-Text ein oder wähle eine Datei.'); return; }
+    let data;
+    try { data = JSON.parse(text); } catch (err) { flash('Das ist kein gültiges JSON: ' + err.message); return; }
+    if (data && data.epsoTrainerBackup && data.store) {
+      S.store = Object.assign(blankStore(), data.store);
+      saveStore();
+      flash('Fortschritt wiederhergestellt.');
+      render();
+      return;
+    }
+    if (!Array.isArray(data)) data = [data];
+    let ok = 0, bad = 0;
+    data.forEach((q, i) => {
+      if (!q || !SECTIONS[q.section] || !Array.isArray(q.options) || q.options.length < 2 || typeof q.correct !== 'number' || q.correct < 0 || q.correct >= q.options.length) { bad++; return; }
+      const id = 'imp-' + Date.now().toString(36) + '-' + i;
+      S.store.imported.push({
+        id,
+        section: q.section,
+        source: 'import',
+        sourceLabel: q.source || 'Importiert',
+        topic: q.topic || q.source || 'Importiert',
+        passage: q.passage || '',
+        data: q.data || '',
+        stem: q.stem || (q.section === 'abstract' ? 'Welche Figur setzt die Reihe fort?' : QTYPE.r),
+        options: q.options,
+        htmlOptions: !!q.htmlOptions,
+        optionsAreFigures: !!q.optionsAreFigures,
+        correct: q.correct,
+        explanation: q.explanation || '',
+      });
+      ok++;
+    });
+    saveStore();
+    flash(ok + ' Fragen importiert' + (bad ? ', ' + bad + ' übersprungen (Pflichtfelder fehlen)' : '') + '.');
+    render();
+  }
+
+  render();
+})();
+
+</script>
+</body>
+</html>
