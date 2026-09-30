@@ -44,6 +44,25 @@
   const S = { store: loadStore(), session: null, view: 'home', timer: null, calcOpen: false, confirmEnd: false, homeTab: null };
 
   // ---------- Fragenquellen ----------
+  // Antwortreihenfolge mischen; Buchstabenverweise in der Erklärung werden mit umgestellt.
+  function shuffleOptions(q) {
+    if (q.optionsAreFigures || q.fixedOrder) return q;
+    const n = q.options.length;
+    const perm = shuffleArr(Array.from({ length: n }, (_, i) => i));
+    const newPos = perm.map((_, oldIdx) => perm.indexOf(oldIdx));
+    const out = Object.assign({}, q, {
+      options: perm.map((i) => q.options[i]),
+      correct: newPos[q.correct],
+    });
+    if (q.explanation) {
+      out.explanation = q.explanation.replace(/\b([A-E])\b/g, (m, L) => {
+        const old = LETTERS.indexOf(L);
+        return old < n ? LETTERS[newPos[old]] : m;
+      });
+    }
+    return out;
+  }
+
   function verbalPool() {
     return (window.EPSO_VERBAL || []).map((v) => ({
       id: v.id,
@@ -69,7 +88,8 @@
       return window.EPSO_ABSTRACT.generate(parseInt(p[1], 10), parseInt(p[2], 10));
     }
     if (id.startsWith('imp-')) return (S.store.imported || []).find((q) => q.id === id) || null;
-    return verbalPool().find((q) => q.id === id) || null;
+    const v = verbalPool().find((q) => q.id === id);
+    return v ? shuffleOptions(v) : null;
   }
 
   function pickQuestions(section, n, opts) {
@@ -84,7 +104,7 @@
       const seen = S.store.seen || {};
       const shuffled = cand.map((q) => ({ q, k: (seen[q.id] || 0) + Math.random() * 0.9 }));
       shuffled.sort((a, b) => a.k - b.k);
-      list = shuffled.slice(0, n).map((x) => x.q);
+      list = shuffled.slice(0, n).map((x) => shuffleOptions(x.q));
     } else {
       const impShare = src.generated ? Math.min(imp.length, Math.round(n * 0.3)) : Math.min(imp.length, n);
       const seen = S.store.seen || {};
