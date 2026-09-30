@@ -410,6 +410,214 @@ textarea { width: 100%; min-height: 140px; font-family: ui-monospace, Menlo, Con
   .btn { padding: 9px 12px; }
 }
 
+/* =====================================================================
+   TAO-Testoberfläche (nachgebildet nach dem offiziellen EPSO-Beispieltest)
+   ===================================================================== */
+:root { --tao-blue: #1f5fcf; --tao-ink: #111111; --headh: 60px; }
+:root[data-theme="dark"] { --tao-blue: #6f9cf0; --tao-ink: #e6eaf2; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --tao-blue: #6f9cf0; --tao-ink: #e6eaf2; } }
+body.in-test { background: var(--surface); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.flash { position: fixed; left: 16px; right: 16px; bottom: 96px; z-index: 60; max-width: 520px; margin: 0 auto; }
+
+.tao-head {
+  position: sticky; top: 0; z-index: 25; height: var(--headh);
+  display: flex; align-items: center; gap: 14px; padding: 0 16px;
+  background: var(--surface); border-bottom: 1px solid var(--line);
+}
+.tao-logo { flex: none; background: var(--brand); border-radius: 8px; width: 40px; height: 40px; display: grid; place-items: center; }
+.tao-crumbs { display: flex; align-items: flex-start; gap: 8px; min-width: 0; font-size: 0.98rem; line-height: 1.25; }
+.tao-crumbs .crumb { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.tao-crumbs .crumb.stack { display: flex; flex-direction: column; flex: none; }
+.tao-crumbs .sep { color: var(--muted); }
+.tao-timer { color: var(--tao-blue); font-weight: 700; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.tao-timer.low { color: var(--bad); }
+.tao-tools { margin-left: auto; display: flex; gap: 4px; flex: none; }
+.tao-tool {
+  width: 44px; height: 44px; display: grid; place-items: center; cursor: pointer;
+  background: transparent; border: 1px solid transparent; border-radius: 4px; color: var(--tao-ink);
+}
+.tao-tool svg { width: 26px; height: 26px; }
+.tao-tool:hover { background: var(--surface-2); }
+.tao-tool[aria-pressed="true"] { border-color: var(--tao-ink); background: var(--surface-2); }
+.tao-hint { background: #fff6cc; color: #3a3000; font-size: 0.85rem; padding: 6px 16px; text-align: center; }
+
+.tao-stage { padding: 24px 16px 170px; }
+.tao-q { max-width: 980px; margin: 0 auto; display: grid; gap: 20px; }
+.srcline { text-align: right; }
+.hl-zone { width: 100%; max-width: 790px; margin: 0 auto; display: grid; gap: 18px; }
+.hl-on .hl-zone { cursor: text; }
+.passage { font-family: var(--font-ui); font-size: 1.02rem; line-height: 1.55; max-width: none; text-align: justify; hyphens: auto; }
+.passage p { margin: 0; }
+.tao-q .stem { font-weight: 400; margin: 0; font-size: 1.02rem; }
+mark.hl { background: #ffe066; color: #111; border-radius: 2px; }
+
+.tao-options { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.tao-opt {
+  display: flex; align-items: center; gap: 12px; min-height: 46px;
+  border: 2px solid var(--tao-ink); border-radius: 8px; background: var(--surface);
+  padding: 9px 14px; cursor: pointer;
+}
+.tao-opt:hover { box-shadow: 0 0 0 1px var(--tao-ink); }
+.tao-opt .radio { flex: none; width: 17px; height: 17px; border-radius: 50%; border: 2px solid currentColor; display: grid; place-items: center; }
+.tao-opt .letter { flex: none; font-weight: 700; min-width: 1.6em; }
+.tao-opt .otext { min-width: 0; flex: 1; }
+.tao-opt.selected { background: var(--tao-blue); border-color: var(--tao-blue); color: #fff; }
+.tao-opt.selected .radio::after { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.tao-opt.eliminated .otext, .tao-opt.eliminated .letter { text-decoration: line-through; opacity: 0.55; }
+.tao-opt.correct { border-color: var(--ok); background: var(--ok-bg); color: var(--fg); }
+.tao-opt.correct .radio::after { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--ok); }
+.tao-opt.incorrect { border-color: var(--bad); background: var(--bad-bg); color: var(--fg); }
+.tao-opt .elim { margin-left: auto; color: inherit; }
+.tao-opt .elim[aria-pressed="true"] { color: var(--bad); }
+.check-row { justify-content: center; }
+
+/* Material immer schwarz auf weiß wie im Test */
+.tao-data, .tao-figs { background: #fff; color: #111; border-radius: 4px; padding: 10px; display: grid; justify-items: center; gap: 18px; }
+.tao-data .data-wrap { max-width: 100%; }
+table.data.official { width: auto; font-size: 0.9rem; color: #111; }
+table.data.official caption { text-align: center; background: #cdf2c0; border: 1px solid #333; border-bottom: none; padding: 5px 8px; font-weight: 700; }
+table.data.official th, table.data.official td { border: 1px solid #333; padding: 3px 9px; }
+table.data.official thead th { background: #fff; color: #111; font-weight: 700; }
+table.data.official tbody tr:nth-child(odd) td, table.data.official tbody tr:nth-child(odd) th { background: #dcf8fb; }
+table.data.official tbody th { font-weight: 700; }
+.tao-data table.data { color: #111; }
+.tao-data table.data th, .tao-data table.data td { border-color: #9aa2ad; }
+.tao-data table.data thead th { background: #eef2f7; color: #111; }
+.tao-data svg.chart { background: #fff; }
+.tao-data .ch-title, .tao-data .ch-val { fill: #111; }
+.tao-data .ch-axis { fill: #444; }
+.tao-data .ch-grid { stroke: #d5d9e0; }
+.tao-data .ch-s2 { fill: #0b2a66 !important; }
+.tao-data .data-note { color: #444; }
+
+.tao-figs .fig-series { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: clamp(8px, 2.5vw, 22px); width: 100%; max-width: 600px; }
+.tao-figs .fig-cell { margin: 0; }
+.tao-figs .fig { max-width: 100px; }
+.fig-options { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: clamp(8px, 2.5vw, 22px); width: 100%; max-width: 600px; margin-top: 18px; }
+.fig-opt { margin: 0; display: grid; justify-items: center; gap: 4px; cursor: pointer; border-radius: 4px; padding: 3px; }
+.fig-opt figcaption { font-weight: 800; font-size: 1.15rem; }
+.fig-opt.selected { outline: 3px solid var(--tao-blue); }
+.fig-opt.correct { outline: 3px solid #1f7a3a; }
+.fig-opt .fig-cell { margin: 0; }
+
+.tao-bookmark {
+  position: fixed; right: 16px; bottom: 88px; z-index: 22; width: 48px; height: 48px; border-radius: 50%;
+  border: 2px solid var(--tao-ink); background: var(--surface); color: var(--tao-ink); cursor: pointer; display: grid; place-items: center;
+}
+.tao-bookmark svg { width: 22px; height: 22px; }
+.tao-bookmark[aria-pressed="true"] { color: var(--flag); border-color: var(--flag); }
+
+.tao-nav {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 22; background: var(--surface); border-top: 1px solid var(--line);
+  display: flex; align-items: center; gap: 12px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+}
+.tao-round {
+  flex: none; width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--tao-ink); background: var(--surface);
+  color: var(--tao-ink); display: grid; place-items: center; cursor: pointer;
+}
+.tao-round svg { width: 22px; height: 22px; }
+.tao-round.primary { background: var(--tao-blue); border-color: var(--tao-blue); color: #fff; }
+.tao-round-ph { flex: none; width: 46px; }
+.tao-track { position: relative; flex: 1; min-width: 0; display: flex; align-items: center; overflow-x: auto; padding: 8px 6px 10px; scrollbar-width: thin; justify-content: safe center; }
+.tdot {
+  position: relative; flex: none; width: 36px; height: 36px; border-radius: 50%;
+  border: 1.5px solid var(--tao-ink); background: var(--surface); color: var(--tao-ink);
+  font-weight: 700; font-size: 0.82rem; font-variant-numeric: tabular-nums; cursor: pointer; display: grid; place-items: center;
+}
+.tao-track .tdot:not(:first-child) { margin-left: 11px; }
+.tao-track .tdot:not(:first-child)::before { content: ''; position: absolute; right: 100%; top: 50%; width: 11px; height: 1.5px; background: var(--tao-ink); }
+.tdot.seen { border-width: 2px; }
+.tdot.answered { background: var(--tao-ink); color: var(--surface); }
+.tdot.current { outline: 3px solid var(--tao-blue); outline-offset: 2px; }
+.tdot.flagged::after {
+  content: ''; position: absolute; top: -6px; right: -5px; width: 10px; height: 13px; background: var(--flag);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 72%, 0 100%);
+}
+.tdot.right { background: var(--ok); border-color: var(--ok); color: #fff; }
+.tdot.wrong { background: var(--bad); border-color: var(--bad); color: #fff; }
+.tao-ovbtn {
+  flex: none; display: inline-flex; align-items: center; gap: 6px; border: 2px solid var(--tao-ink); border-radius: 999px;
+  background: var(--surface); color: var(--tao-ink); padding: 7px 14px; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; cursor: pointer;
+}
+.tao-ovbtn svg { width: 18px; height: 18px; }
+
+.tao-overlay { position: fixed; top: var(--headh); left: 0; right: 0; bottom: 0; z-index: 30; background: var(--surface); display: flex; flex-direction: column; }
+.tao-bar { position: relative; background: #111; color: #fff; min-height: 60px; display: grid; place-items: center; padding: 0 60px; }
+.tao-bar h2 { font-size: 1rem; text-transform: uppercase; letter-spacing: 0.02em; text-align: center; }
+.tao-x { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; background: transparent; border: none; color: #fff; cursor: pointer; display: grid; place-items: center; }
+.tao-x svg { width: 26px; height: 26px; }
+.tao-ovbody { flex: 1; overflow: auto; padding: 24px 16px; width: 100%; max-width: 1120px; margin: 0 auto; }
+.tao-ovbody.narrow { max-width: 760px; }
+.tao-tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--tao-ink); flex-wrap: wrap; }
+.tao-tab { background: transparent; border: none; border-bottom: 3px solid transparent; padding: 8px 12px; font-weight: 700; font-size: 0.9rem; cursor: pointer; color: var(--fg); }
+.tao-tab[aria-selected="true"] { border-bottom-color: var(--tao-ink); }
+.tao-group { font-weight: 400; font-size: 1.05rem; border-bottom: 1px solid var(--tao-ink); padding-bottom: 8px; margin: 26px 0 14px; }
+.tao-ovdots { display: flex; flex-wrap: wrap; gap: 16px; }
+.tao-ovdots .tdot { width: 40px; height: 40px; }
+.tao-ovfoot { display: flex; justify-content: flex-end; align-items: center; gap: 12px 20px; padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px)); flex-wrap: wrap; border-top: 1px solid var(--line); }
+.tao-link { display: inline-flex; align-items: center; gap: 8px; background: transparent; border: none; font-weight: 700; text-transform: uppercase; font-size: 0.9rem; cursor: pointer; color: var(--fg); padding: 8px 4px; }
+.tao-link svg, .tao-pill svg { width: 20px; height: 20px; }
+.tao-pill {
+  display: inline-flex; align-items: center; gap: 10px; border: 2px solid var(--tao-ink); border-radius: 999px;
+  background: var(--surface); color: var(--fg); padding: 9px 18px; font-weight: 700; text-transform: uppercase; font-size: 0.9rem; cursor: pointer;
+}
+.tao-modal-bg { position: fixed; inset: 0; z-index: 50; background: rgba(255, 255, 255, 0.6); display: grid; place-items: center; padding: 16px; }
+.tao-modal { background: #111; color: #fff; max-width: 580px; width: 100%; padding: 22px 24px; border-radius: 4px; display: grid; gap: 10px; }
+.tao-modal p { margin: 0; }
+.tao-modal-btns { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-top: 12px; }
+.tao-pill.inv { background: transparent; border-color: #fff; color: #fff; }
+.tao-pill.fill { background: var(--tao-blue); border-color: #fff; color: #fff; }
+
+.set-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.set-row p { margin: 2px 0 0; }
+.switch { display: inline-flex; align-items: center; gap: 10px; background: transparent; border: none; cursor: pointer; color: var(--fg); padding: 4px; }
+.switch .knob { position: relative; width: 46px; height: 26px; border-radius: 13px; border: 2px solid var(--tao-ink); background: var(--surface); }
+.switch .knob::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--tao-ink); transition: left 0.15s; }
+.switch[aria-checked="true"] .knob { background: var(--tao-blue); border-color: var(--tao-blue); }
+.switch[aria-checked="true"] .knob::after { left: 23px; background: #fff; }
+
+.tao-float { position: fixed; z-index: 40; background: var(--surface); border: 1px solid #111; box-shadow: 0 12px 34px rgba(0, 0, 0, 0.25); }
+.tao-float-head { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; background: #111; color: #fff; height: 48px; font-weight: 700; text-transform: uppercase; text-align: center; cursor: move; user-select: none; touch-action: none; }
+.tao-float-head button { background: transparent; border: none; color: #fff; cursor: pointer; height: 44px; display: grid; place-items: center; }
+.tao-float-head button svg { width: 20px; height: 20px; }
+.tao-float.calc { right: 24px; top: calc(var(--headh) + 20px); width: min(300px, calc(100vw - 24px)); padding: 0; border-radius: 0; bottom: auto; }
+.tao-float.calc .disp { background: #262626; color: #fff; border: none; border-radius: 0; min-height: 92px; padding: 12px 14px; text-align: right; display: grid; align-content: end; }
+.tao-float.calc .disp .expr { color: #b9c0cc; font-size: 0.8rem; min-height: 1.2em; word-break: break-all; }
+.tao-float.calc .disp .val { font-size: 1.7rem; font-weight: 600; word-break: break-all; font-variant-numeric: tabular-nums; }
+.tao-float.calc .keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: #c9d3e0; margin: 0; }
+.tao-float.calc .keys button { border: none; border-radius: 0; height: 64px; font-size: 1.1rem; font-weight: 700; cursor: pointer; background: #e7f0fb; color: #111; padding: 0; }
+.tao-float.calc .keys button.fn { background: #eef0f3; }
+.tao-float.calc .keys button.op, .tao-float.calc .keys button.eq { background: #2f6fd0; color: #fff; }
+.tao-float.calc .keys button.eq { grid-column: span 2; }
+.tao-float.calc .keys button:hover { filter: brightness(0.95); }
+.tao-float.notes { left: 24px; top: calc(var(--headh) + 20px); width: min(380px, calc(100vw - 24px)); }
+.tao-float.notes textarea { display: block; width: 100%; min-height: 260px; border: none; border-radius: 0; resize: vertical; font: 0.95rem/1.5 var(--font-ui); padding: 12px; background: var(--surface); color: var(--fg); }
+.tao-ruler { position: fixed; left: 0; right: 0; height: 3.4em; z-index: 35; pointer-events: none; border-top: 2px solid var(--tao-blue); border-bottom: 2px solid var(--tao-blue); box-shadow: 0 0 0 200vmax rgba(0, 0, 0, 0.38); }
+
+.official-panel { border-color: var(--brand-2); border-width: 2px; }
+.srcset { border: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.srcset legend { font-weight: 600; padding: 0; margin-bottom: 4px; }
+.resitem .tao-q { gap: 14px; }
+.resitem .tao-opt { cursor: default; }
+
+@media (max-width: 720px) {
+  .tao-crumbs .crumb:first-child, .tao-crumbs .crumb:first-child + .sep { display: none; }
+  .tao-tool { width: 36px; height: 36px; }
+  .tao-tool svg { width: 22px; height: 22px; }
+  .tao-head { gap: 8px; padding: 0 10px; }
+  .tao-logo { display: none; }
+  .tao-ovbtn span { display: none; }
+  .tao-ovbtn { padding: 8px; }
+  .tao-nav { gap: 8px; padding-inline: 10px; }
+  .tao-round, .tao-round-ph { width: 42px; height: 42px; }
+  .tdot { width: 32px; height: 32px; }
+  .tao-bookmark { bottom: 82px; right: 10px; width: 44px; height: 44px; }
+  .tao-stage { padding-inline: 12px; }
+  .tao-opt { padding: 8px 10px; gap: 9px; }
+  .passage { text-align: left; }
+}
+
 </style>
 </head>
 <body>
@@ -1065,7 +1273,32 @@ textarea { width: 100%; min-height: 140px; font-family: ui-monospace, Menlo, Con
     out.id = 'num-' + seed;
     out.seed = seed;
     out.source = 'generiert';
-    return out;
+    return withNone(out, seed);
+  }
+
+  // Im EPSO-Beispieltest ist Option E oft „Keine der oben genannten“. Bei gut der Hälfte der
+  // Zahlenaufgaben wird E dadurch ersetzt; in etwa jedem fünften dieser Fälle ist E die Lösung,
+  // weil der richtige Wert dann nicht unter A–D steht.
+  const NONE = 'Keine der oben genannten';
+  function withNone(q, seed) {
+    if (!q.options.every((o) => /\d/.test(o))) return q; // nur bei Zahlenantworten
+    const r = U.rng(seed * 7 + 13);
+    if (!r.chance(0.55)) return q;
+    const keep = q.options.map((o, i) => i);
+    let correct;
+    if (r.chance(0.2)) {
+      // Lösung entfernen: E ist richtig
+      keep.splice(q.correct, 1);
+      correct = 4;
+    } else {
+      const wrong = keep.filter((i) => i !== q.correct);
+      keep.splice(keep.indexOf(r.pick(wrong)), 1);
+      correct = keep.indexOf(q.correct);
+    }
+    const options = keep.map((i) => q.options[i]).concat([NONE]);
+    let explanation = q.explanation;
+    if (correct === 4) explanation += ' Dieser Wert steht nicht unter A–D, deshalb ist E („' + NONE + '“) richtig.';
+    return Object.assign({}, q, { options, correct, explanation, fixedOrder: true });
   }
 
   const API = { generate, count: TEMPLATES.length };
@@ -1175,7 +1408,7 @@ textarea { width: 100%; min-height: 140px; font-family: ui-monospace, Menlo, Con
   }
 
   function renderFigure(layers, states, label) {
-    let s = '<svg class="fig" viewBox="0 0 100 100" aria-hidden="true"><rect x="1" y="1" width="98" height="98" fill="#ffffff" stroke="#8a8f99" stroke-width="1"/>';
+    let s = '<svg class="fig" viewBox="0 0 100 100" aria-hidden="true"><rect x="1.5" y="1.5" width="97" height="97" fill="#ffffff" stroke="#111111" stroke-width="2"/>';
     layers.forEach((L, i) => (s += renderLayer(L, states[i])));
     s += '</svg>';
     return '<figure class="fig-cell">' + s + (label ? '<figcaption>' + label + '</figcaption>' : '') + '</figure>';
@@ -1424,8 +1657,8 @@ textarea { width: 100%; min-height: 140px; font-family: ui-monospace, Menlo, Con
     const correct = all.findIndex((s) => key(s) === key(answer));
     const letters = ['A', 'B', 'C', 'D', 'E'];
 
-    const seriesHtml = '<div class="fig-series">' + seq.map((s, i) => renderFigure(layers, s, String(i + 1))).join('') +
-      '<figure class="fig-cell fig-q"><svg class="fig" viewBox="0 0 100 100" aria-hidden="true"><rect x="1" y="1" width="98" height="98" fill="#ffffff" stroke="#8a8f99" stroke-dasharray="4 3"/><text x="50" y="62" text-anchor="middle" font-size="34" fill="#4a5261" font-family="Arial, sans-serif">?</text></svg><figcaption>6</figcaption></figure></div>';
+    // Wie im EPSO-Test: fünf Bilder der Reihe, kein Platzhalter für das sechste
+    const seriesHtml = '<div class="fig-series">' + seq.map((s) => renderFigure(layers, s, '')).join('') + '</div>';
 
     const rules = [];
     layers.forEach((L) => Object.keys(L.attrs).forEach((k) => { const a = L.attrs[k]; if (!a.constant && a.text) rules.push(a.text + '.'); }));
@@ -1436,7 +1669,7 @@ textarea { width: 100%; min-height: 140px; font-family: ui-monospace, Menlo, Con
       difficulty,
       section: 'abstract',
       source: 'generiert',
-      stem: 'Welche Figur setzt die Reihe fort?',
+      stem: '', // wie im EPSO-Test: keine Frage, nur Reihe und Optionen A–E
       data: seriesHtml,
       options: all.map((s) => renderFigure(layers, s, '')),
       optionsAreFigures: true,
@@ -4443,40 +4676,266 @@ EPSO_VERBAL_ADD('l', [
     'C gibt die Kernaussage wieder: Ein Störfaktor verhindert einen kausalen Schluss. A behauptet eine Kausalität, die der Text ausdrücklich nicht zieht. B geht ebenso zu weit in die Gegenrichtung. D kehrt den Befund um.'],
 ]);
 
+/* data/official-sample.js */
+/* Offizieller EPSO-Beispieltest „Reasoning tests AD“ (deutsche Fassung, TAO-Plattform) – 20 Aufgaben.
+   Quelle: https://eu-careers.europa.eu/en/graduates-administrators-ad5 → Sample test DE,
+   Lösungen aus der Auswertungsansicht des Beispieltests und den barrierefreien PDF-Fassungen
+   (AD_Verbal_10Q_DA2.pdf, AD_Numerical_5Q_DA2.pdf). Abgerufen am 30.09.2026.
+   Texte und Antwortoptionen sind wörtlich übernommen. Die Tabellen sind als HTML nachgesetzt,
+   die Figurenreihen des abstrakten Teils als SVG nachgezeichnet. Erklärungen sind eigene Ergänzungen. */
+(function (root) {
+  'use strict';
+  const SRC = 'EPSO-Beispieltest';
+  const STEM_V = 'Welche der folgenden Aussagen ist zutreffend?';
+
+  // ---------- Sprachlogisches Denken ----------
+  const V = [
+    ['Gentests',
+      'Gentests sind medizinische Verfahren, mit denen Veränderungen oder bestimmte Probleme an Genen und Chromosomen festgestellt werden können. Meistens dienen Gentests dazu, Erbkrankheiten wie die Bluterkrankheit zu erkennen. Durch Gentests kann bei Verdacht eine Krankheit nachgewiesen oder ausgeschlossen werden und kann die Wahrscheinlichkeit festgestellt werden, dass ein Mensch an einer Erbkrankheit erkrankt oder diese vererbt. Derzeit werden mehrere Hundert Gentests verwendet; weitere werden entwickelt. Da die Tests einerseits Vorteile bieten und andererseits problematisch sind, ist die Entscheidung, ob man sich testen lassen möchte, jedem selbst überlassen. Es gibt Berater, die über die Tests informieren und bei der Entscheidung helfen, aber viele Menschen bezweifeln noch immer die Nützlichkeit der Gentests. Sie glauben, dass mit Gentests nur die Vererbung tödlicher Krankheiten nachgewiesen wird, und ziehen es daher vor, nichts darüber zu erfahren.',
+      ['Im Allgemeinen werden gesunde Menschen Gentests unterzogen',
+        'Mit Gentests kann festgestellt werden, wie groß die Wahrscheinlichkeit ist, dass jemand an einer bestimmten Krankheit erkrankt',
+        'Gentests sind nicht sehr sinnvoll, weil sie freiwillig sind',
+        'Jährlich werden mehrere Hundert Gentests durchgeführt'],
+      1,
+      'B steht fast wörtlich im Text („kann die Wahrscheinlichkeit festgestellt werden, dass ein Mensch an einer Erbkrankheit erkrankt“). A: Der Text sagt nur, wofür Gentests meist dienen, nicht, wer sie im Allgemeinen macht. C verknüpft zwei Aussagen zu einer Begründung, die der Text nicht zieht; Zweifel äußern nur „viele Menschen“. D verwechselt „mehrere Hundert Gentests verwendet“ (Arten von Tests) mit der Zahl der jährlich durchgeführten Tests.'],
+    ['Antarktis',
+      'Die Antarktis ist bei weitem der kälteste Kontinent - dort werden weltweit die niedrigsten Temperaturen gemessen. Ihre gewaltige Eisdecke umfasst 90 % des gesamten Gletschereises der Welt. Aufgrund des rauen Klimas gibt es in der Antarktis nur sehr wenige Pflanzen, doch das Meer bietet ein reichhaltiges Nahrungsangebot für Pinguine und große Seevogelkolonien. Der Russe F.G. von Bellingshausen zählte zur Gruppe der Forscher, die nach eignen Aussagen 1820 als erste den Kontinent erblickten. Doch erst Anfang des 20. Jahrhunderts erforschten Expeditionen zahlreicher Länder das Innere der Antarktis. Dies hatte zur Folge, dass sieben Nationen auf diesem Kontinent Gebietsansprüche erhoben, obwohl sie diese Gebiete nie dauerhaft besiedelten. 1958 errichteten zwölf Nationen im Rahmen einer gemeinsamen Studie Forschungsstationen in der Antarktis.',
+      ['Der erste Mensch, der die Antarktis erblickte, war ein Russe',
+        'Anfang des 20. Jahrhunderts erhoben sieben Länder Gebietsansprüche in der Antarktis, 1958 stieg diese Zahl auf zwölf an',
+        'In der Antarktis befindet sich mehr Gletschereis als auf allen anderen Kontinenten zusammen',
+        'In der Antarktis gab es nie dauerhaft menschliche Bewohner'],
+      2,
+      'C folgt rechnerisch: 90 % des Gletschereises liegen in der Antarktis, für alle anderen Kontinente bleiben 10 %. A: Bellingshausen gehörte nur zu einer Gruppe, die „nach eigenen Aussagen“ als erste den Kontinent sah – das ist kein belegter Erstkontakt. B: 1958 errichteten zwölf Nationen Forschungsstationen, das sind keine Gebietsansprüche. D: Der Text sagt nur, dass die sieben Nationen ihre Gebiete nicht dauerhaft besiedelten, nicht dass es nie Bewohner gab.'],
+    ['Moldau',
+      'Moldau ist eine Region im Nordosten Rumäniens. Bis zu ihrer Vereinigung mit der Walachei im Jahr 1859 war Moldau ein unabhängiger Staat. Heute bildet sie einen großen Teil des modernen rumänischen Staates. In der Geschichte gehörten wiederholt die Regionen Bessarabien und Bukowina zu Moldau. Ein Großteil Bessarabiens bildet heute die Republik Moldau, während der Rest Bessarabiens und der Norden Bukowinas zur Ukraine gehören.',
+      ['Das Gebiet der historischen Moldau ist heute auf mindestens drei Staaten verteilt',
+        'Der Staat Moldau war bis 1859 Teil der Region Moldau',
+        'Die Region Moldau erstreckt sich auf dasselbe Gebiet wie der unabhängige Staat Moldau',
+        'Bessarabien und Bukowina bilden heute die Republik Moldau bzw. die Ukraine'],
+      0,
+      'A ist richtig: Teile der historischen Moldau liegen heute in Rumänien, in der Republik Moldau (Großteil Bessarabiens) und in der Ukraine (Rest Bessarabiens, Nord-Bukowina). B vermischt die Begriffe: Bis 1859 war Moldau selbst ein unabhängiger Staat. C: Die heutige Republik Moldau umfasst nur einen Großteil Bessarabiens. D ist zu pauschal: Nur ein Teil Bessarabiens ist heute Moldau, und nur der Norden der Bukowina gehört zur Ukraine.'],
+    ['Gambel-Eiche',
+      'Die Gambel-Eiche ist ein kleiner Laub abwerfender Baum, der gewöhnlich in einer Höhe zwischen 1700 und 2400 m über dem Meeresspiegel wächst. Er ist im Vorgebirge des mittleren Südwestens der Vereinigten Staaten sehr verbreitet und wächst vor allem dort, wo der Niederschlag 30 – 60 cm im Jahr beträgt. Gambel-Eichen gedeihen an Hängen mit dünnem, steinigem, alkalischem Erdboden, wo andere Pflanzen nur begrenzt wachsen. Sie können auch in fruchtbarerem Boden überleben, sind dort aber größerer Konkurrenz durch andere Pflanzen ausgesetzt. Gambel-Eichen haben sich auf nasse Frühlings- und heiße, trockene Sommerzeiten eingestellt – Bedingungen, die auch Brände begünstigen. Doch selbst wenn sie schwer verbrannt ist, kann sich die Gambel-Eiche schnell aus ihren unterirdischen Wurzeln regenerieren und Dürre widerstehen.',
+      ['Gambel-Eichen gedeihen an Hängen, an denen keine anderen Pflanzen überleben können',
+        'Gambel-Eichen sind in den ganzen Vereinigten Staaten verbreitet',
+        'Gambel-Eichen gedeihen besser in einer Umgebung, in der sie weniger Konkurrenz durch andere Pflanzen ausgesetzt sind',
+        'Die Gambel-Eiche kann nicht durch Feuer oder Dürre zerstört werden'],
+      2,
+      'C ergibt sich aus dem Gegensatz im Text: Sie „gedeihen“ dort, wo andere Pflanzen nur begrenzt wachsen, auf fruchtbarem Boden „überleben“ sie nur und haben mehr Konkurrenz. A übertreibt („keine anderen Pflanzen“ statt „nur begrenzt“). B: Verbreitet ist sie im mittleren Südwesten, nicht in den ganzen USA. D übertreibt: Sie regeneriert sich nach Bränden und widersteht Dürre, unzerstörbar ist sie deshalb nicht.'],
+    ['Haiku',
+      'Haiku sind eine Form der japanischen Dichtung, die keine Reime kennt. Haiku bestehen aus 17 Silben, die entweder eine einzige Zeile oder drei Zeilen mit jeweils fünf, sieben und fünf Silben füllen. Das Gedicht enthält stets einen Hinweis auf die Jahreszeit, die den Rahmen bildet. Haiku-Dichter drücken möglichst viel mit möglichst wenigen Worten aus. Diese Form der Dichtung wurde durch den Dichter Basho im 17. Jahrhundert bekannt gemacht, der sie kunstvoll verfeinerte. In Japan sind Haiku auch heute noch die beliebteste Form der Dichtung.',
+      ['Haiku nutzen subtile Reime, um die Bedeutung des Gedichts zum Ausdruck zu bringen',
+        'In längeren Haiku-Gedichten wird oft die Struktur von fünf, sieben und fünf Silben in sechs-, neun- oder zwölfzeiligen Versen wiederholt',
+        'Haiku enthalten in der Regel drei Wörter mit fünf, sieben bzw. fünf Silben',
+        'Haiku enthalten immer einen Hinweis auf die Jahreszeit, die den Rahmen bildet'],
+      3,
+      'D gibt „enthält stets einen Hinweis auf die Jahreszeit“ wieder. A widerspricht „keine Reime“. B: Laut Text bestehen Haiku immer aus 17 Silben, längere Haiku gibt es danach nicht. C verwechselt Zeilen mit Wörtern.'],
+    ['Posttraumatische Belastungsstörung',
+      'Ein gängiges Blutdruckmittel könnte Menschen, die ein traumatisches Erlebnis hatten, helfen, sich von ihren quälenden Erinnerungen zu befreien. Ein Drittel der Personen, die ein belastendes Erlebnis hatten, leiden unter posttraumatischen Belastungsstörungen. Schon ein Geräusch oder ein Geruch kann die Erinnerung an dieses Erlebnis wieder wachrufen. Patienten mit dieser Störung erhalten eine Beratung. Da diese jedoch nicht immer wirksam ist, suchen Forscher nach alternativen Therapien. Studien haben gezeigt, dass Ratten, die konditioniert waren, auf bestimmte Ereignisse im Labor mit Angst zu reagieren, nach Verabreichung des Medikaments ihre Angst verloren. Dies deutet darauf hin, dass das Medikament zur Behandlung posttraumatischer Belastungsstörungen beitragen könnte. Für einige Kritiker sind posttraumatische Belastungsstörungen jedoch eine natürliche Reaktion auf traumatische Erlebnisse und sollten daher nicht medikamentös behandelt werden.',
+      ['Posttraumatische Belastungsstörungen hängen mit zu hohem Blutdruck zusammen',
+        'Es ist unwahrscheinlich, dass Patienten, die unter posttraumatischen Belastungsstörungen leiden, sich von alleine erholen',
+        'Geräusche oder Gerüche können Erinnerungen an belastende Erlebnisse wachrufen',
+        'Bei der Behandlung posttraumatischer Belastungsstörungen ist die Beratung in der Regel unwirksam'],
+      2,
+      'C steht so im Text. A ist ein Fehlschluss: Dass ein Blutdruckmittel helfen könnte, heißt nicht, dass die Störung mit Blutdruck zusammenhängt. B: Über Spontanheilung sagt der Text nichts. D übertreibt: Die Beratung ist „nicht immer wirksam“, nicht „in der Regel unwirksam“.'],
+    ['Methode der kleinsten Quadrate',
+      'Die Methode der kleinsten Quadrate ist eine statistische Methode zur Berechnung einer Geraden oder einer Kurve, die das Verhältnis zwischen zwei Messgrößen am besten repräsentiert. Werden die Messungen als Punkte auf einen Graphen übertragen und liegen sie nahe an derselben Linie, so kann zur Bestimmung der Modellkurve die Methode der kleinsten Quadrate angewandt werden. Die Parameter dieser Kurve werden numerisch bestimmt, indem die Summe der quadratischen Abweichungen der Kurve von den beobachteten Punkten minimiert wird. Man spricht von Regression oder, wenn die Linie eine Gerade und keine Kurve ist, von linearer Regression.',
+      ['Die Methode der kleinsten Quadrate wird in der Praxis kaum angewandt',
+        'Die lineare Regression ist eine Methode, die den Abstand von Datenpunkten zu einer Horizontalen berechnet',
+        'Die Methode der kleinsten Quadrate ermöglicht das Anlegen einer Modellkurve, die die Datenpunkte für zwei Messgrößen am besten repräsentiert',
+        'Die Methode der kleinsten Quadrate funktioniert am besten bei Kurven'],
+      2,
+      'C fasst den ersten und zweiten Satz zusammen. A: Über die Verbreitung in der Praxis sagt der Text nichts. B: Gemessen werden die Abweichungen von der Modellgeraden, nicht von einer Horizontalen. D: Der Text vergleicht Geraden und Kurven nicht.'],
+    ['Europäische Weltwirtschaft im 19. Jahrhundert',
+      'Die Herausbildung der auf Europa ausgerichteten Weltwirtschaft im 19. Jahrhundert war geprägt durch ein System von Nationalstaaten, die zueinander in Wettbewerb standen. Ein wesentliches Merkmal dieser Epoche war, dass kein Staat allein stark genug war, um die anderen zu beherrschen. Aus dieser Lage heraus entstand die Weltwirtschaft. Im Gegensatz zu früheren Systemen wie beispielsweise dem Reich der Habsburger, in dem die Stabilität der Wirtschaft von der Stabilität des Reiches abhing, konnte in diesem neuen Weltsystem die Wirtschaft auch dann fortbestehen, wenn ein Staat oder eine Regierung zusammenbrach. Es spielte keine Rolle mehr, welche Staaten beteiligt waren; die Wirtschaftstätigkeit konnte wegen des Wettbewerbs zwischen den verschiedenen Ländern und politischen Gruppierungen fortgesetzt werden.',
+      ['Das Habsburgerreich brach aufgrund wirtschaftlicher Instabilität zusammen',
+        'Durch den Wettbewerb wurde die Wirtschaft des neuen Weltsystems stabiler',
+        'Die auf Europa ausgerichtete Weltwirtschaft war das Ergebnis des Handelns eines dominanten Staates',
+        'Der Zusammenbruch eines Nationalstaats hätte die auf Europa ausgerichtete Weltwirtschaft erheblich geschwächt'],
+      1,
+      'B ergibt sich aus dem letzten Satz: Wegen des Wettbewerbs lief die Wirtschaft auch weiter, wenn ein Staat zusammenbrach. A dreht die Abhängigkeit um: Die Wirtschaft hing von der Stabilität des Reiches ab, nicht umgekehrt; zum Zusammenbruch sagt der Text nichts. C widerspricht „kein Staat allein stark genug“. D widerspricht der Aussage, dass die Wirtschaft den Zusammenbruch eines Staates überstand.'],
+    ['Lemuren',
+      'Lemuren sind eine Familie aus der Ordnung der Primaten und werden der Unterordnung der Halbaffen (richtiger: Feuchtnasenaffen) zugerechnet. Man nimmt an, dass sie ursprünglich in Afrika verbreitet waren, heute sind sie jedoch nur noch auf der Insel Madagaskar und einigen kleineren umliegenden Inseln anzutreffen, einschließlich der Komoren (wohin sie wahrscheinlich von den Menschen gebracht wurden). Ihr Körpergewicht reicht je nach Art vom 30 g schweren Zwerg-Mausmaki bis zum 10 kg schweren Indri. Früher gab es auf Madagaskar sogar noch größere Arten, die aber seit der Ansiedlung der Menschen ausgestorben sind. Die kleineren Lemurenarten sind meist nachtaktiv und die größeren tagaktiv, es gibt aber auch Ausnahmen.',
+      ['Lemuren lebten schon auf Madagaskar, bevor die Insel von Menschen besiedelt wurde',
+        'Lemuren kommen von Natur aus auf den Komoren vor',
+        'Indris sind nur tagsüber aktiv',
+        'Das Aussterben der größten Lemurenarten ist eine unmittelbare Folge der Ansiedlung der Menschen auf Madagascar'],
+      0,
+      'A folgt aus dem Text: Größere Arten sind „seit der Ansiedlung der Menschen“ ausgestorben – sie müssen also vorher schon auf Madagaskar gelebt haben. B widerspricht der Klammer (wahrscheinlich von Menschen gebracht). C: Größere Arten sind meist tagaktiv, es gibt aber Ausnahmen; über Indris im Besonderen sagt der Text nichts Sicheres. D: „seit“ beschreibt nur die zeitliche Abfolge, keine Ursache.'],
+    ['Programm Marco Polo',
+      'Hauptziele des Programms Marco Polo sind die Verringerung der Überlastung der Straßen und die Verbesserung der Umweltfreundlichkeit des gesamten Verkehrssystems. Das Programm soll einen verkehrspolitischen Kurs unterstützen, der im Weißbuch der Kommission "Die europäische Verkehrspolitik bis 2010 - Weichenstellungen für die Zukunft" dargelegt wurde. Dort wird empfohlen, die Verkehrsträgeranteile im Güterverkehr bis 2010 wieder auf die Höhe von 1998 zurückzuführen. Um dies zu erreichen, werden mit dem Programm Aktionen in den Sektoren Güterverkehr und Logistik sowie anderen Bereichen unterstützt. Die Aktionen sollen beispielsweise dazu beitragen, den Straßengüterverkehr auf den Kurzstreckenseeverkehr, die Schiene und die Binnenschifffahrt zu verlagern und den Güterverkehr per Straße auf das Minimum zu reduzieren.',
+      ['Die Verlagerung des Straßengüterverkehrs auf den Kurzstreckenseeverkehr, die Schiene und die Binnenschifffahrt soll sich positiv auf die Umwelt auswirken',
+        'Das Programm wurde eingeführt, weil der internationale Straßengüterverkehr erheblich zugenommen hat',
+        'Im Weißbuch der Kommission stehen die Auswirkungen des Güterverkehrs auf die Umwelt im Vordergrund, nicht die Überlastung der Straßen',
+        'Der Gütertransport im Kurzstreckenseeverkehr, auf der Schiene und in der Binnenschifffahrt ist seit 1998 insgesamt zurückgegangen'],
+      0,
+      'A verbindet Ziel und Mittel des Programms: Die Verlagerung dient den Hauptzielen, zu denen die Umweltfreundlichkeit des Verkehrssystems gehört. B: Einen Anstieg des internationalen Straßengüterverkehrs erwähnt der Text nicht. C: Der Text gewichtet die Ziele im Weißbuch nicht. D: Der Text spricht von Verkehrsträgeranteilen, nicht vom absoluten Transportvolumen.'],
+  ];
+
+  // ---------- Zahlenverständnis ----------
+  const FUE = '<div class="data-wrap"><table class="data official"><caption>FuE-Ausgaben nach Ländern</caption><thead>' +
+    '<tr><th class="rowhead" rowspan="2">Land</th><th colspan="2">FuE-Ausgaben<br>(in % des BIP)</th><th colspan="2">Öffentliche FuE-Ausgaben<br>(in % der FuE-Ausgaben)</th><th>Zahl der Patent&shy;anmeldungen<br>(pro Mio. Einwohner)</th><th>FuE-Ausgaben<br>(in Mio. €)</th><th>BIP pro Kopf<br>(in €)</th></tr>' +
+    '<tr><th>2000</th><th>2003</th><th>2000</th><th>2003</th><th>2000</th><th>2000</th><th>2000</th></tr></thead><tbody>' +
+    [['Belgien', '1,97', '1,89', '22,9', '23,5', '145,6', '3 900', '19 330'],
+      ['Finnland', '3,34', '3,43', '26,2', '25,7', '350,8', '3 725', '21 582'],
+      ['Frankreich', '2,15', '2,17', '38,7', '39,0', '139,5', '24 075', '18 874'],
+      ['Deutschland', '2,45', '2,52', '31,4', '31,2', '307,0', '41 100', '20 261'],
+      ['Niederlande', '1,82', '1,76', '34,2', '36,2', '246,3', '6 075', '21 003']]
+      .map((r) => '<tr><th class="rowhead" scope="row">' + r[0] + '</th>' + r.slice(1).map((c) => '<td>' + c + '</td>').join('') + '</tr>').join('') +
+    '</tbody></table></div>';
+  const DEMO = '<div class="data-wrap"><table class="data official"><caption>Demografie der Weltbevölkerung</caption><thead>' +
+    '<tr><th class="rowhead">Kontinent</th><th>Fläche (km²)</th><th>Bevölkerung (Mio.)</th><th>Prozentsatz der in Städten lebenden Bevölkerung</th><th>Anzahl Länder</th></tr></thead><tbody>' +
+    [['Afrika', '30 065 000', '877,5', '36', '53'], ['Asien', '44 579 000', '3 879,0', '34', '44'], ['Europa', '9 938 000', '727,0', '74', '46'],
+      ['Nordamerika', '24 256 000', '501,5', '79', '23'], ['Südamerika', '17 819 000', '379,5', '82', '12']]
+      .map((r) => '<tr><th class="rowhead" scope="row">' + r[0] + '</th>' + r.slice(1).map((c) => '<td>' + c + '</td>').join('') + '</tr>').join('') +
+    '</tbody></table></div>';
+  const NONE = 'Keine der oben genannten';
+  const N = [
+    [FUE, 'Wie war im Jahr 2000 das Verhältnis des niederländischen BIP zum finnischen BIP?', ['1:3', '2:3', '3:2', '3:1', NONE], 3,
+      'BIP = FuE-Ausgaben ÷ FuE-Anteil am BIP. Niederlande: 6 075 ÷ 0,0182 ≈ 333 800 Mio. €. Finnland: 3 725 ÷ 0,0334 ≈ 111 500 Mio. €. Verhältnis ≈ 2,99 : 1, also 3:1 (D). Falle: Das BIP pro Kopf (21 003 zu 21 582) beantwortet die Frage nicht, weil die Einwohnerzahl fehlt.'],
+    [FUE, 'Wie war im Jahr 2000 in etwa das Verhältnis des deutschen BIP zum französischen BIP?', ['1:3', '2:3', '3:2', '3:1', NONE], 2,
+      'Deutschland: 41 100 ÷ 0,0245 ≈ 1 677 600 Mio. €. Frankreich: 24 075 ÷ 0,0215 ≈ 1 119 800 Mio. €. Verhältnis ≈ 1,50 : 1 = 3:2 (C).'],
+    [FUE, 'Um welchen Prozentsatz haben sich die öffentlichen FuE-Ausgaben in Deutschland zwischen 2000 und 2003 erhöht, wenn das deutsche BIP in diesem Zeitraum um 2 % gewachsen ist?', ['1,35 %', '2,20 %', '3,25 %', '4,25 %', NONE], 3,
+      'Öffentliche FuE-Ausgaben = BIP × FuE-Quote × öffentlicher Anteil. Faktor 2003 zu 2000: 1,02 × (2,52 ÷ 2,45) × (31,2 ÷ 31,4) = 1,02 × 1,0286 × 0,9936 ≈ 1,0425, also +4,25 % (D). Schneller Weg: nur die drei Wachstumsfaktoren multiplizieren, absolute Werte braucht man nicht.'],
+    [FUE, 'Um welchen Prozentsatz haben sich die öffentlichen FuE-Ausgaben in Belgien zwischen 2000 und 2003 erhöht, wenn das belgische BIP in diesem Zeitraum um 3 % gewachsen ist?', ['1,11 %', '1,21 %', '1,31 %', '1,41 %', NONE], 3,
+      'Faktor: 1,03 × (1,89 ÷ 1,97) × (23,5 ÷ 22,9) = 1,03 × 0,9594 × 1,0262 ≈ 1,0141, also +1,41 % (D). Die FuE-Quote sinkt, der öffentliche Anteil und das BIP steigen.'],
+    [DEMO, 'Wie groß (in km²) sind Nord- und Südamerika zusammen?', ['42 015 000', '42 075 000', '42 135 000', '42 195 000', '42 255 000'], 1,
+      '24 256 000 + 17 819 000 = 42 075 000 km² (B). Die Optionen liegen nur 60 000 auseinander – hier zählt sauberes Addieren der letzten Stellen (256 + 819 = 1 075).'],
+  ];
+
+  // ---------- Abstraktes Denken (SVG-Nachzeichnungen) ----------
+  function box(inner) {
+    return '<svg class="fig" viewBox="0 0 100 100" aria-hidden="true"><rect x="1.5" y="1.5" width="97" height="97" fill="#fff" stroke="#111" stroke-width="2"/>' + inner + '</svg>';
+  }
+  // offener Pfeil (Linie mit zwei Schenkeln), von (x1,y1) nach (x2,y2)
+  function arrowOpen(x1, y1, x2, y2) {
+    const a = Math.atan2(y2 - y1, x2 - x1), L = 9, w = 0.5;
+    const p1 = [x2 - L * Math.cos(a - w), y2 - L * Math.sin(a - w)], p2 = [x2 - L * Math.cos(a + w), y2 - L * Math.sin(a + w)];
+    return '<path d="M' + x1 + ' ' + y1 + 'L' + x2 + ' ' + y2 + 'M' + p1[0].toFixed(1) + ' ' + p1[1].toFixed(1) + 'L' + x2 + ' ' + y2 + 'L' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1) + '" stroke="#111" stroke-width="2.2" fill="none" stroke-linecap="round"/>';
+  }
+  // Pfeil mit gefüllter Spitze
+  function arrowSolid(x1, y1, x2, y2) {
+    const a = Math.atan2(y2 - y1, x2 - x1), L = 10, w = 0.42;
+    const bx = x2 - L * 0.8 * Math.cos(a), by = y2 - L * 0.8 * Math.sin(a);
+    const p1 = [x2 - L * Math.cos(a - w), y2 - L * Math.sin(a - w)], p2 = [x2 - L * Math.cos(a + w), y2 - L * Math.sin(a + w)];
+    return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + bx.toFixed(1) + '" y2="' + by.toFixed(1) + '" stroke="#111" stroke-width="2"/>' +
+      '<path d="M' + x2 + ' ' + y2 + 'L' + p1[0].toFixed(1) + ' ' + p1[1].toFixed(1) + 'L' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1) + 'Z" fill="#111"/>';
+  }
+  const ring = (x, y, r) => '<circle cx="' + x + '" cy="' + y + '" r="' + (r || 5.5) + '" fill="#fff" stroke="#111" stroke-width="2"/>';
+  const dot = (x, y, r) => '<circle cx="' + x + '" cy="' + y + '" r="' + (r || 5) + '" fill="#111"/>';
+  const cross = (x, y) => '<path d="M' + (x - 4) + ' ' + (y - 4) + 'L' + (x + 4) + ' ' + (y + 4) + 'M' + (x + 4) + ' ' + (y - 4) + 'L' + (x - 4) + ' ' + (y + 4) + '" stroke="#111" stroke-width="2"/>';
+  const tri = (x, y) => '<path d="M' + x + ' ' + (y - 9) + 'L' + (x + 9) + ' ' + (y + 7) + 'L' + (x - 9) + ' ' + (y + 7) + 'Z" fill="#fff" stroke="#111" stroke-width="2"/>';
+
+  // Aufgabe 16: Pfeil dreht sich um 90° gegen den Uhrzeigersinn und wandert nach unten
+  const F16 = [arrowOpen(72, 16, 27, 16), arrowOpen(73, 16, 73, 61), arrowOpen(51, 50, 96, 50), arrowOpen(72, 86, 72, 41), arrowOpen(72, 84, 27, 84)];
+  const O16 = [arrowOpen(73, 16, 73, 61), arrowOpen(72, 16, 27, 16), arrowOpen(27, 55, 27, 10), arrowOpen(27, 50, 27, 95), arrowOpen(5, 50, 50, 50)];
+
+  // Aufgabe 17: Streifen „\“, Kreuz und Kreis wandern auf der Diagonale von rechts oben nach links unten
+  const P = [[90, 10], [74, 26], [58, 42], [42, 58], [26, 74], [10, 90]];
+  const stripes = [-60, -20, 20, 60].map((c) => {
+    // Linie y = x + c innerhalb des Quadrats
+    const x1 = Math.max(0, -c), x2 = Math.min(100, 100 - c);
+    return '<line x1="' + (x1 + 1.5) + '" y1="' + (x1 + c + 1.5) + '" x2="' + (x2 - 1.5) + '" y2="' + (x2 + c - 1.5) + '" stroke="#111" stroke-width="1.8"/>';
+  }).join('');
+  const f17 = (xp, op) => stripes + cross(P[xp][0] + 3, P[xp][1] - 3) + ring(P[op][0] - 3, P[op][1] + 3, 5);
+  const F17 = [f17(0, 3), f17(1, 2), f17(1, 0), f17(2, 1), f17(2, 3)];
+  const O17 = [f17(2, 4), f17(2, 3), f17(3, 4), f17(3, 2), stripes + ring(P[3][0], P[3][1], 5) + cross(P[3][0], P[3][1])];
+
+  // Aufgabe 18: Punkt auf dem Rand, zwei verschränkte Reihen
+  const F18 = [dot(8, 50), dot(8, 8), dot(8, 92), dot(50, 8), dot(50, 92)];
+  const O18 = [dot(92, 50), dot(8, 92), dot(92, 92), dot(92, 8), dot(50, 8)];
+
+  // Aufgabe 19: 2×2-Raster, getauscht wird reihum oben – links – unten – rechts
+  const grid = '<path d="M50 1.5V98.5M1.5 50H98.5" stroke="#111" stroke-width="2"/>';
+  const cellXY = [[25, 25], [75, 25], [25, 75], [75, 75]];
+  const sym = { o: (x, y) => ring(x, y, 9), t: tri, d: (x, y) => dot(x, y, 5) };
+  const f19 = (cells) => grid + cells.split('').map((c, i) => (c === '_' ? '' : sym[c](cellXY[i][0], cellXY[i][1]))).join('');
+  const F19 = ['otd_', 'tod_', 'dot_', 'do_t', 'dt_o'].map(f19);
+  const O19 = ['odt_', 't_od', 'd_to', 'td_o', 'tod_'].map(f19);
+
+  // Aufgabe 20: Kreis wandert im Uhrzeigersinn durch die Ecken, Pfeilrichtung pendelt um „links“ mit wachsendem Ausschlag
+  const C = { tl: [14, 14], tr: [86, 14], br: [86, 86], bl: [14, 86] };
+  const dirArrow = (deg) => {
+    const a = (deg * Math.PI) / 180, r = 36;
+    const dx = Math.cos(a) * r, dy = -Math.sin(a) * r;
+    return arrowSolid(+(50 - dx).toFixed(1), +(50 - dy).toFixed(1), +(50 + dx).toFixed(1), +(50 + dy).toFixed(1));
+  };
+  const f20 = (deg, c) => dirArrow(deg) + ring(C[c][0], C[c][1], 6);
+  const F20 = [f20(180, 'tl'), f20(135, 'tr'), f20(225, 'br'), f20(90, 'bl'), f20(270, 'tl')];
+  const O20 = [f20(225, 'br'), f20(225, 'bl'), f20(45, 'tr'), f20(0, 'tr'), dirArrow(45) + ring(20, 80, 6)];
+
+  const ABS = [
+    [F16, O16, 3, 'Der Pfeil dreht sich von Bild zu Bild um 90° gegen den Uhrzeigersinn (links – unten – rechts – oben – links); als Nächstes zeigt er nach unten. Gleichzeitig wandert er Schritt für Schritt vom oberen zum unteren Rand. Nur D zeigt einen nach unten gerichteten Pfeil im unteren Bereich; A hat die richtige Richtung, steht aber oben.'],
+    [F17, O17, 2, 'Nummeriert man die Plätze auf der Diagonale von rechts oben (0) nach links unten, steht das Kreuz auf 0, 1, 1, 2, 2 – es rückt nur in jedem zweiten Bild vor, im sechsten also auf 3. Der Kreis springt abwechselnd um ein und zwei Plätze und kehrt an der Ecke um: 3, 2, 0, dann 1, 3 – als Nächstes 4. Kreuz auf 3 und Kreis auf 4 zeigt nur C.'],
+    [F18, O18, 3, 'Zwei verschränkte Reihen: Die Bilder 1, 3, 5 zeigen den Punkt links Mitte, links unten, unten Mitte; die Bilder 2 und 4 zeigen ihn links oben und oben Mitte. Beide Reihen laufen am Rand entlang ein Achtel weiter. Bild 6 gehört zur zweiten Reihe, der Punkt steht also rechts oben (D).'],
+    [F19, O19, 3, 'In jedem Schritt tauschen zwei benachbarte Felder ihren Inhalt. Das getauschte Paar wandert reihum: obere Zeile, linke Spalte, untere Zeile, rechte Spalte – danach wieder die obere Zeile. Tauscht man in Bild 5 die beiden oberen Felder, ergibt sich D (Dreieck links oben, Punkt rechts oben, Kreis rechts unten).'],
+    [F20, O20, 2, 'Der Kreis wandert im Uhrzeigersinn von Ecke zu Ecke (links oben, rechts oben, rechts unten, links unten, links oben) – als Nächstes rechts oben. Der Pfeil pendelt um die Richtung „links“ mit wachsendem Ausschlag: 0°, +45°, −45°, +90°, −90°, als Nächstes +135°, also nach rechts oben. Beides erfüllt nur C.'],
+  ];
+
+  const L = ['A', 'B', 'C', 'D', 'E'];
+  const out = [];
+  V.forEach((v, i) => out.push({
+    id: 'off-v-' + (i + 1), section: 'verbal', source: 'official', sourceLabel: SRC, officialNo: i + 1,
+    topic: v[0], passage: v[1], stem: STEM_V, options: v[2], correct: v[3], explanation: v[4], fixedOrder: true,
+  }));
+  N.forEach((n, i) => out.push({
+    id: 'off-n-' + (i + 1), section: 'numerical', source: 'official', sourceLabel: SRC, officialNo: 11 + i,
+    data: n[0], stem: n[1], options: n[2], correct: n[3], explanation: n[4], fixedOrder: true,
+  }));
+  ABS.forEach((a, i) => out.push({
+    id: 'off-a-' + (i + 1), section: 'abstract', source: 'official', sourceLabel: SRC, officialNo: 16 + i,
+    data: '<div class="fig-series">' + a[0].map((f) => '<figure class="fig-cell">' + box(f) + '</figure>').join('') + '</div>',
+    stem: '', options: a[1].map(box), optionsAreFigures: true, correct: a[2], explanation: a[3] + ' Richtig ist ' + L[a[2]] + '.', fixedOrder: true,
+  }));
+
+  root.EPSO_OFFICIAL = out;
+  if (typeof module !== 'undefined') module.exports = out;
+})(typeof window !== 'undefined' ? window : globalThis);
+
 /* app.js */
-/* EPSO-Logiktrainer: Ablaufsteuerung, Darstellung, Speicherung. */
+/* EPSO-Logiktrainer: Ablaufsteuerung, Darstellung, Speicherung.
+   Die Testansicht bildet die EPSO-Testplattform (TAO) nach, wie sie der offizielle Beispieltest zeigt:
+   Kopfzeile mit Pfad und Countdown, Werkzeuge oben rechts (Notizblock, Textmarker, Taschenrechner,
+   Zeilenlineal, Einstellungen), Fragenleiste unten, Lesezeichen, Übersicht mit Abgabe. */
 (function () {
   'use strict';
   const U = window.EPSO_UTIL;
   const esc = U.esc;
   const LETTERS = ['A', 'B', 'C', 'D', 'E'];
 
-  // Testformat AD/427/26 (Quelle: EPSO-Unterlagen zur ersten Testphase, siehe README)
+  // Testformat laut Bekanntmachung EPSO/AD/427/26 (ABl. C/2026/711 vom 5.2.2026), Abschnitt 4.3.2 b, Tabelle 2
   const SECTIONS = {
     verbal: { title: 'Sprachlogisches Denken', short: 'Sprachlogik', n: 20, minutes: 35 },
-    numerical: { title: 'Zahlenlogisches Denken', short: 'Zahlenlogik', n: 10, minutes: 20 },
-    abstract: { title: 'Abstraktes Denken', short: 'Abstrakte Logik', n: 10, minutes: 10 },
+    numerical: { title: 'Zahlenverständnis', short: 'Zahlen', n: 10, minutes: 20 },
+    abstract: { title: 'Abstraktes Denken', short: 'Abstrakt', n: 10, minutes: 10 },
   };
+  const SEC_ORDER = ['verbal', 'numerical', 'abstract'];
   const PASS = { verbal: 10, numAbs: 10 };
   const COMPETITION = 'EPSO/AD/427/26';
+  const NOTICE_URL = 'https://eur-lex.europa.eu/legal-content/DE/TXT/HTML/?uri=OJ:C_202600711';
+  const SAMPLE_MINUTES = 30; // offizieller Beispieltest: 20 Fragen, ein Countdown von 30 Minuten
 
+  // Fragestamm wie im offiziellen Beispieltest („zutreffend“); f/h nur im Übungsmodus
+  const STEM_TRUE = 'Welche der folgenden Aussagen ist zutreffend?';
   const QTYPE = {
-    r: 'Welche der folgenden Aussagen ist richtig?',
-    f: 'Welche der folgenden Aussagen ist falsch?',
-    a: 'Welche der folgenden Aussagen lässt sich aus dem Text ableiten?',
+    r: STEM_TRUE,
+    a: STEM_TRUE,
+    f: 'Welche der folgenden Aussagen ist nicht zutreffend?',
     h: 'Welche Aussage gibt die Kernaussage des Textes am besten wieder?',
   };
 
   // ---------- Speicher ----------
   const KEY = 'epso-logiktrainer-v1';
   function blankStore() {
-    return { history: [], wrong: {}, seen: {}, imported: [], settings: { scale: 1 } };
+    return { history: [], wrong: {}, seen: {}, imported: [], settings: { scale: 1, elim: false } };
   }
   function loadStore() {
     try {
       const raw = localStorage.getItem(KEY);
       if (!raw) return blankStore();
-      return Object.assign(blankStore(), JSON.parse(raw));
+      const st = Object.assign(blankStore(), JSON.parse(raw));
+      st.settings = Object.assign({ scale: 1, elim: false }, st.settings || {});
+      return st;
     } catch (e) {
       return blankStore();
     }
@@ -4487,7 +4946,11 @@ EPSO_VERBAL_ADD('l', [
     } catch (e) { /* Speicher nicht verfügbar: Sitzung läuft trotzdem */ }
   }
 
-  const S = { store: loadStore(), session: null, view: 'home', timer: null, calcOpen: false, confirmEnd: false, homeTab: null };
+  const S = {
+    store: loadStore(), session: null, view: 'home', timer: null, homeTab: null,
+    tools: { notes: false, hl: false, calc: false, ruler: false, settings: false },
+    overview: false, ovTab: 'all', confirm: false,
+  };
 
   // ---------- Fragenquellen ----------
   // Antwortreihenfolge mischen; Buchstabenverweise in der Erklärung werden mit umgestellt.
@@ -4514,6 +4977,7 @@ EPSO_VERBAL_ADD('l', [
       id: v.id,
       section: 'verbal',
       source: 'pool',
+      qtype: v.qtype,
       topic: v.topic,
       passage: v.passage,
       stem: QTYPE[v.qtype] || v.qtype,
@@ -4522,7 +4986,9 @@ EPSO_VERBAL_ADD('l', [
       explanation: v.explanation,
     }));
   }
-
+  function officialPool(section) {
+    return (window.EPSO_OFFICIAL || []).filter((q) => !section || q.section === section);
+  }
   function importedPool(section) {
     return (S.store.imported || []).filter((q) => q.section === section);
   }
@@ -4533,6 +4999,7 @@ EPSO_VERBAL_ADD('l', [
       const p = id.split('-');
       return window.EPSO_ABSTRACT.generate(parseInt(p[1], 10), parseInt(p[2], 10));
     }
+    if (id.startsWith('off-')) return officialPool().find((q) => q.id === id) || null;
     if (id.startsWith('imp-')) return (S.store.imported || []).find((q) => q.id === id) || null;
     const v = verbalPool().find((q) => q.id === id);
     return v ? shuffleOptions(v) : null;
@@ -4540,22 +5007,23 @@ EPSO_VERBAL_ADD('l', [
 
   function pickQuestions(section, n, opts) {
     opts = opts || {};
-    const src = opts.sources || { pool: true, generated: true, imported: true };
+    const src = opts.sources || { pool: true, generated: true, imported: true, official: false };
+    const seen = S.store.seen || {};
+    const extra = (src.imported ? importedPool(section) : []).concat(src.official ? officialPool(section) : []);
     let list = [];
-    const imp = src.imported ? importedPool(section) : [];
     if (section === 'verbal') {
-      const pool = src.pool || src.generated ? verbalPool() : [];
-      const cand = pool.concat(imp);
+      let pool = src.pool ? verbalPool() : [];
+      // Prüfungsnah: nur Fragen im Format des offiziellen Tests („Welche Aussage ist zutreffend?“)
+      if (opts.examFormat) pool = pool.filter((q) => q.qtype === 'r' || q.qtype === 'a');
+      const cand = pool.concat(extra);
       // Selten gesehene Fragen zuerst, innerhalb gleicher Häufigkeit zufällig
-      const seen = S.store.seen || {};
       const shuffled = cand.map((q) => ({ q, k: (seen[q.id] || 0) + Math.random() * 0.9 }));
       shuffled.sort((a, b) => a.k - b.k);
       list = shuffled.slice(0, n).map((x) => shuffleOptions(x.q));
     } else {
-      const impShare = src.generated ? Math.min(imp.length, Math.round(n * 0.3)) : Math.min(imp.length, n);
-      const seen = S.store.seen || {};
-      const impSorted = imp.slice().sort((a, b) => (seen[a.id] || 0) - (seen[b.id] || 0) + Math.random() - 0.5);
-      list = impSorted.slice(0, impShare);
+      const share = src.generated ? Math.min(extra.length, Math.round(n * 0.3)) : Math.min(extra.length, n);
+      const sorted = extra.slice().sort((a, b) => (seen[a.id] || 0) - (seen[b.id] || 0) + Math.random() - 0.5);
+      list = sorted.slice(0, share);
       if (src.generated) {
         while (list.length < n) {
           const seed = U.newSeed();
@@ -4586,16 +5054,18 @@ EPSO_VERBAL_ADD('l', [
   }
 
   // ---------- Sitzungen ----------
-  function makePart(section, questions, timed, feedback, minutesOverride) {
+  function makePart(section, questions, timed, feedback, minutesOverride, title) {
     const cfg = SECTIONS[section];
     return {
       section,
-      title: cfg.title,
+      title: title || (cfg ? cfg.title : 'Beispieltest'),
       questions,
       answers: questions.map(() => null),
       flags: questions.map(() => false),
       elim: questions.map(() => []),
       checked: questions.map(() => false),
+      visited: questions.map((_, i) => i === 0),
+      hl: questions.map(() => null),
       times: questions.map(() => 0),
       current: 0,
       timeLimit: timed ? (minutesOverride || cfg.minutes) * 60 : null,
@@ -4606,33 +5076,37 @@ EPSO_VERBAL_ADD('l', [
     };
   }
 
+  function newSession(mode, label, parts) {
+    S.session = { mode, label, parts, pi: 0, notes: '' };
+    S.overview = false;
+    S.confirm = false;
+    Object.keys(S.tools).forEach((k) => (S.tools[k] = false));
+  }
+
   function startExam() {
-    S.session = {
-      mode: 'exam',
-      label: 'Prüfungssimulation',
-      parts: ['verbal', 'numerical', 'abstract'].map((s) => makePart(s, pickQuestions(s, SECTIONS[s].n), true, false)),
-      pi: 0,
-    };
+    newSession('exam', 'Prüfungssimulation', SEC_ORDER.map((s) => makePart(s, pickQuestions(s, SECTIONS[s].n, { examFormat: true }), true, false)));
     go('intro');
+  }
+
+  function startSample(practice) {
+    const qs = officialPool();
+    newSession(practice ? 'practice' : 'sample', practice ? 'Beispieltest – Übungsmodus' : 'EPSO-Beispieltest',
+      [makePart('mixed', qs, !practice, !!practice, SAMPLE_MINUTES, 'Beispieltest')]);
+    if (practice) { go('test'); beginPart(); } else go('intro');
   }
 
   function startSingle(section, opts) {
     const n = opts.n || SECTIONS[section].n;
-    const qs = pickQuestions(section, n, opts);
+    const qs = pickQuestions(section, n, Object.assign({ examFormat: opts.mode === 'test' }, opts));
     if (!qs.length) {
       flash('Für diese Auswahl gibt es keine Fragen. Aktiviere eine weitere Quelle.');
       return;
     }
     const timed = opts.mode === 'test';
     const minutes = timed ? Math.max(1, Math.round((SECTIONS[section].minutes * qs.length) / SECTIONS[section].n)) : null;
-    S.session = {
-      mode: opts.mode,
-      label: opts.mode === 'test' ? 'Einzeltest' : 'Übungsmodus',
-      parts: [makePart(section, qs, timed, opts.mode === 'practice', minutes)],
-      pi: 0,
-    };
-    go(timed ? 'intro' : 'test');
-    if (!timed) beginPart();
+    newSession(opts.mode, opts.mode === 'test' ? 'Einzeltest' : 'Übungsmodus', [makePart(section, qs, timed, opts.mode === 'practice', minutes)]);
+    if (timed) go('intro');
+    else { go('test'); beginPart(); }
   }
 
   function startWrongReview() {
@@ -4646,16 +5120,19 @@ EPSO_VERBAL_ADD('l', [
       const q = questionById(id);
       if (q && bySec[q.section]) bySec[q.section].push(q);
     });
-    const parts = Object.keys(bySec)
-      .filter((s) => bySec[s].length)
-      .map((s) => makePart(s, bySec[s].slice(0, 20), false, true));
-    S.session = { mode: 'wrong', label: 'Fehler wiederholen', parts, pi: 0 };
+    const parts = SEC_ORDER.filter((s) => bySec[s].length).map((s) => makePart(s, bySec[s].slice(0, 20), false, true));
+    if (!parts.length) { flash('Die gespeicherten Fragen sind nicht mehr verfügbar.'); return; }
+    newSession('wrong', 'Fehler wiederholen', parts);
     go('test');
     beginPart();
   }
 
   function part() {
     return S.session.parts[S.session.pi];
+  }
+  function curQ() {
+    const p = part();
+    return p.questions[p.current];
   }
 
   let lastTick = 0;
@@ -4684,15 +5161,15 @@ EPSO_VERBAL_ADD('l', [
     const el = document.getElementById('timer-val');
     if (el) {
       el.textContent = timerText(p);
-      const box = document.getElementById('timer');
-      if (box && p.timeLimit) box.classList.toggle('low', p.timeLimit - p.elapsed <= 120);
+      el.classList.toggle('low', !!p.timeLimit && p.timeLimit - p.elapsed <= 120);
     }
   }
 
+  // Anzeige wie in TAO: „29min 57s“
   function timerText(p) {
     const secs = p.timeLimit ? Math.max(0, Math.ceil(p.timeLimit - p.elapsed)) : Math.floor(p.elapsed);
     const m = Math.floor(secs / 60), s = secs % 60;
-    return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    return m + 'min ' + String(s).padStart(2, '0') + 's';
   }
 
   function submitPart(auto) {
@@ -4700,40 +5177,40 @@ EPSO_VERBAL_ADD('l', [
     p.submitted = true;
     p.autoSubmitted = !!auto;
     clearInterval(S.timer);
-    S.confirmEnd = false;
+    S.confirm = false;
+    S.overview = false;
     recordPart(p);
     if (S.session.pi < S.session.parts.length - 1) {
       S.session.pi++;
       if (S.session.mode === 'exam') go('intro');
-      else {
-        go('test');
-        beginPart();
-      }
+      else { go('test'); beginPart(); }
     } else {
+      Object.keys(S.tools).forEach((k) => (S.tools[k] = false));
       go('results');
     }
   }
 
   function recordPart(p) {
     const store = S.store;
-    let correct = 0;
+    const bySec = {};
     p.questions.forEach((q, i) => {
       store.seen[q.id] = (store.seen[q.id] || 0) + 1;
       const ok = p.answers[i] === q.correct;
-      if (ok) correct++;
-      if (!ok && p.answers[i] !== null) store.wrong[q.id] = { section: q.section, n: ((store.wrong[q.id] || {}).n || 0) + 1 };
-      if (!ok && p.answers[i] === null && S.session.mode !== 'practice') store.wrong[q.id] = { section: q.section, n: ((store.wrong[q.id] || {}).n || 0) + 1 };
+      const b = bySec[q.section] || (bySec[q.section] = { total: 0, correct: 0, answered: 0, seconds: 0 });
+      b.total++;
+      if (ok) b.correct++;
+      if (p.answers[i] !== null) b.answered++;
+      b.seconds += p.times[i];
+      const counts = !ok && (p.answers[i] !== null || S.session.mode !== 'practice');
+      if (counts) store.wrong[q.id] = { section: q.section, n: ((store.wrong[q.id] || {}).n || 0) + 1 };
       if (ok && store.wrong[q.id]) delete store.wrong[q.id];
     });
-    store.history.push({
-      date: new Date().toISOString(),
-      mode: S.session.mode,
-      section: p.section,
-      total: p.questions.length,
-      correct,
-      answered: p.answers.filter((a) => a !== null).length,
-      seconds: Math.round(p.elapsed),
-      timed: !!p.timeLimit,
+    Object.keys(bySec).forEach((sec) => {
+      const b = bySec[sec];
+      store.history.push({
+        date: new Date().toISOString(), mode: S.session.mode, section: sec,
+        total: b.total, correct: b.correct, answered: b.answered, seconds: Math.round(b.seconds), timed: !!p.timeLimit,
+      });
     });
     if (store.history.length > 500) store.history = store.history.slice(-500);
     // Generierte Aufgaben nicht dauerhaft als "gesehen" sammeln – Pool bleibt klein
@@ -4748,6 +5225,16 @@ EPSO_VERBAL_ADD('l', [
     window.scrollTo(0, 0);
   }
 
+  function gotoQ(i) {
+    const p = part();
+    if (i < 0 || i >= p.questions.length) return;
+    p.current = i;
+    p.visited[i] = true;
+    S.overview = false;
+    render();
+    window.scrollTo(0, 0);
+  }
+
   function flash(msg) {
     const el = document.getElementById('flash');
     if (!el) return;
@@ -4757,14 +5244,24 @@ EPSO_VERBAL_ADD('l', [
     flash.t = setTimeout(() => (el.hidden = true), 4200);
   }
 
-  // ---------- Darstellung ----------
+  // ---------- Symbole ----------
+  const SV = (d, extra) => '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"' + (extra || '') + '>' + d + '</svg>';
   const ICON = {
-    flag: '<svg viewBox="0 0 16 16" aria-hidden="true"><path class="flagicon" d="M3 1h10v14l-5-3.6L3 15z"/></svg>',
-    calc: '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2.5" y="1.5" width="11" height="13" rx="1.5"/><rect x="4.5" y="3.5" width="7" height="3"/><path d="M5 9h1M8 9h1M11 9h.5M5 12h1M8 12h1M11 12h.5"/></svg>',
-    elim: '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6"/><path d="M3.8 12.2 12.2 3.8"/></svg>',
-    zoomIn: '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5M5 7h4M7 5v4"/></svg>',
-    zoomOut: '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5M5 7h4"/></svg>',
-    list: '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 4h9M5 8h9M5 12h9M2 4h.5M2 8h.5M2 12h.5"/></svg>',
+    notes: SV('<rect x="5" y="3.5" width="14" height="17" rx="1.5"/><path d="M9 3.5V2.5h6v1M8.5 9h7M8.5 12.5h7M8.5 16h4.5"/>'),
+    hl: SV('<path d="M14.5 4.5l5 5L10 19H5v-5z"/><path d="M4 21.5h16" stroke-width="1.2"/>'),
+    calc: SV('<rect x="5" y="2.5" width="14" height="19" rx="1.5"/><rect x="7.5" y="5" width="9" height="3.5"/><path d="M8 12h.01M12 12h.01M16 12h.01M8 15.5h.01M12 15.5h.01M16 15.5h.01M8 19h.01M12 19h.01M16 19h.01" stroke-width="2.4"/>'),
+    ruler: SV('<rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M6.5 9h11M6.5 12.5h11M6.5 16h7"/>'),
+    settings: SV('<circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v2.6M12 18.9v2.6M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12h2.6M18.9 12h2.6M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"/>'),
+    bookmark: SV('<path d="M7 3.5h10v17l-5-3.8-5 3.8z"/>'),
+    bookmarkOn: SV('<path d="M7 3.5h10v17l-5-3.8-5 3.8z" fill="currentColor"/>'),
+    prev: SV('<path d="M19 12H5.5M11 6l-6 6 6 6" stroke-width="2.2"/>'),
+    next: SV('<path d="M5 12h13.5M13 6l6 6-6 6" stroke-width="2.2"/>'),
+    up: SV('<path d="M6 15l6-6 6 6" stroke-width="2.2"/>'),
+    close: SV('<path d="M5 5l14 14M19 5L5 19" stroke-width="1.8"/>'),
+    back: SV('<path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-2"/>'),
+    send: SV('<path d="M3 11.5L21 3l-6.5 18-3-7.5z"/><path d="M11.5 13.5L21 3"/>'),
+    elim: SV('<circle cx="12" cy="12" r="8"/><path d="M6.5 17.5l11-11"/>'),
+    min: SV('<path d="M5 12h14" stroke-width="2.2"/>'),
     stars: '<svg class="stars" width="30" height="30" viewBox="0 0 30 30" aria-hidden="true">' +
       Array.from({ length: 12 }, (_, i) => {
         const a = (i * 30 * Math.PI) / 180;
@@ -4780,14 +5277,19 @@ EPSO_VERBAL_ADD('l', [
   function render() {
     const app = document.getElementById('app');
     document.documentElement.style.setProperty('--text-scale', S.store.settings.scale || 1);
+    document.body.classList.toggle('in-test', S.view === 'test');
     let html = '';
     if (S.view === 'home') html = viewHome();
     else if (S.view === 'intro') html = viewIntro();
     else if (S.view === 'test') html = viewTest();
-    else if (S.view === 'review') html = viewReview();
     else if (S.view === 'results') html = viewResults();
-    app.innerHTML = html + '<div id="flash" class="notice" hidden style="position:fixed;left:16px;right:16px;bottom:80px;z-index:40;max-width:520px;margin:0 auto"></div>';
-    if (S.view === 'test' && S.calcOpen && part().section === 'numerical') mountCalc();
+    app.innerHTML = html + '<div id="flash" class="notice flash" hidden></div>';
+    if (S.view === 'test') {
+      mountFloating();
+      // aktuelle Frage in der Leiste sichtbar halten (wichtig auf schmalen Bildschirmen)
+      const tr = app.querySelector('.tao-track'), cur = tr && tr.querySelector('.tdot.current');
+      if (tr && cur && tr.scrollWidth > tr.clientWidth) tr.scrollLeft = cur.offsetLeft - tr.clientWidth / 2 + cur.offsetWidth / 2;
+    } else removeFloating();
   }
 
   // ----- Startseite -----
@@ -4796,17 +5298,18 @@ EPSO_VERBAL_ADD('l', [
     const wrongN = Object.keys(S.store.wrong || {}).length;
     const pool = verbalPool().length;
     const imp = (S.store.imported || []).length;
+    const off = officialPool().length;
     const tab = S.homeTab || 'start';
-    let h = topbar('EPSO Logiktrainer', COMPETITION + ' · Erste Testphase', '<button class="tb-btn" data-act="theme">Hell/Dunkel</button>');
+    let h = topbar('EPSO Logiktrainer', COMPETITION + ' · Tests zum logischen Denken', '<button class="tb-btn" data-act="theme">Hell/Dunkel</button>');
     h += '<main class="page">';
-    h += '<section class="hero"><div class="eyebrow">Concours 2026 · Logiktests im November</div><h1>Training für die drei Logiktests im TAO-Format</h1>' +
-      '<p>Sprachlogik zählt allein 35 % der Gesamtpunkte. Übe unter echten Zeitbedingungen oder in Ruhe mit Lösungsweg. Alle Tests laufen auf Deutsch.</p></section>';
-    h += '<section class="facts">' + ['verbal', 'numerical', 'abstract'].map((s) => {
+    h += '<section class="hero"><div class="eyebrow">Auswahlverfahren ' + COMPETITION + ' · Beamte AD 5</div><h1>Training für die drei Logiktests im Format der EPSO-Testplattform</h1>' +
+      '<p>Wer die Mindestpunktzahlen verfehlt, scheidet aus. Das sprachlogische Denken zählt außerdem 40 % der vorläufigen und 35 % der endgültigen Gesamtpunktzahl. Übe unter Prüfungsbedingungen oder in Ruhe mit Lösungsweg.</p></section>';
+    h += '<section class="facts">' + SEC_ORDER.map((s) => {
       const c = SECTIONS[s];
       const x = st[s];
       const acc = x.total ? Math.round((x.correct / x.total) * 100) : null;
       return '<div class="fact"><h3>' + c.title + '</h3><div class="small">' + c.n + ' Fragen · ' + c.minutes + ' Minuten · ' +
-        (s === 'verbal' ? 'bestanden ab 10/20' : 'mit ' + (s === 'numerical' ? 'Abstraktem Denken' : 'Zahlenlogik') + ' zusammen ab 10/20') + '</div>' +
+        (s === 'verbal' ? 'Mindestpunktzahl 10/20' : 'mit ' + (s === 'numerical' ? 'Abstraktem Denken' : 'Zahlenverständnis') + ' zusammen 10/20') + '</div>' +
         '<div class="big">' + (acc === null ? '–' : acc + ' %') + '</div><div class="small">' + (x.total ? x.correct + ' von ' + x.total + ' richtig in ' + x.sessions + ' Durchgängen' : 'Noch keine Durchgänge') + '</div></div>';
     }).join('') + '</section>';
 
@@ -4814,19 +5317,23 @@ EPSO_VERBAL_ADD('l', [
       .map(([k, l]) => '<button class="btn' + (tab === k ? ' primary' : '') + '" data-act="tab" data-tab="' + k + '">' + l + '</button>').join('') + '</nav>';
 
     if (tab === 'start') {
-      h += '<section class="panel"><h2>Prüfung simulieren</h2><p class="lead">Alle drei Tests nacheinander mit Originalzeiten: 20 Fragen Sprachlogik in 35 Minuten, 10 Fragen Zahlenlogik in 20 Minuten und 10 Fragen Abstraktes Denken in 10 Minuten. Die Lösungen siehst du erst nach dem Ende.</p>' +
+      h += '<section class="panel"><h2>Prüfung simulieren</h2><p class="lead">Alle drei Tests nacheinander mit den Zeiten aus der Bekanntmachung: 20 Fragen Sprachlogik in 35 Minuten, 10 Fragen Zahlenverständnis in 20 Minuten, 10 Fragen Abstraktes Denken in 10 Minuten. Lösungen gibt es erst am Ende.</p>' +
         '<div class="btnrow"><button class="btn primary" data-act="exam">Prüfungssimulation starten (65 Minuten)</button>' +
         (wrongN ? '<button class="btn" data-act="wrong">Fehler wiederholen (' + wrongN + ')</button>' : '') + '</div></section>';
 
-      h += '<section class="panel"><h2>Einzeln üben</h2><p class="lead">Im Übungsmodus prüfst du jede Antwort sofort und siehst den Lösungsweg. Im Einzeltest läuft die Zeit wie in der Prüfung.</p>' +
+      h += '<section class="panel official-panel"><h2>Offizieller EPSO-Beispieltest</h2><p class="lead">Die ' + off + ' Aufgaben aus dem deutschen Beispieltest der EPSO-Website, im Original-Wortlaut: 10 Sprachlogik, 5 Zahlenverständnis, 5 Abstraktes Denken, wie dort mit einem gemeinsamen Countdown von 30 Minuten. Gut als Einstieg, um das Niveau der echten Fragen zu sehen.</p>' +
+        '<div class="btnrow"><button class="btn primary" data-act="sample">Beispieltest starten (30 Minuten)</button><button class="btn" data-act="sample-practice">Mit Lösungen durchgehen</button></div></section>';
+
+      h += '<section class="panel"><h2>Einzeln üben</h2><p class="lead">Im Übungsmodus prüfst du jede Antwort sofort und siehst den Lösungsweg. Im Einzeltest läuft die Zeit wie in der Prüfung, und es kommen nur Sprachlogik-Fragen im Prüfungsformat („zutreffend“) vor.</p>' +
         '<div class="form">' +
-        field('f-section', 'Test', '<select id="f-section"><option value="verbal">Sprachlogisches Denken</option><option value="numerical">Zahlenlogisches Denken</option><option value="abstract">Abstraktes Denken</option></select>') +
+        field('f-section', 'Test', '<select id="f-section"><option value="verbal">Sprachlogisches Denken</option><option value="numerical">Zahlenverständnis</option><option value="abstract">Abstraktes Denken</option></select>') +
         field('f-mode', 'Modus', '<select id="f-mode"><option value="practice">Übungsmodus (mit Lösungen)</option><option value="test">Einzeltest (mit Zeitlimit)</option></select>') +
         field('f-n', 'Anzahl Fragen', '<select id="f-n"><option value="5">5</option><option value="10" selected>10</option><option value="20">20</option><option value="30">30</option></select>') +
         field('f-diff', 'Schwierigkeit (Abstrakt)', '<select id="f-diff"><option value="0">Gemischt wie in der Prüfung</option><option value="1">Leicht (eine Regel)</option><option value="2">Mittel (zwei Regeln)</option><option value="3">Schwer (drei Regeln)</option></select>') +
-        '</div><fieldset style="border:none;padding:0;margin:0;display:grid;gap:6px"><legend class="small" style="font-weight:600;padding:0;margin-bottom:4px">Fragenquellen</legend><div class="checks">' +
+        '</div><fieldset class="srcset"><legend class="small">Fragenquellen</legend><div class="checks">' +
         '<label><input type="checkbox" id="src-pool" checked> Fragenpool Sprachlogik (' + pool + ' Texte)</label>' +
         '<label><input type="checkbox" id="src-gen" checked> Generierte Aufgaben (Zahlen/Abstrakt, unbegrenzt)</label>' +
+        '<label><input type="checkbox" id="src-off"> Offizielle Beispielaufgaben (' + off + ')</label>' +
         '<label><input type="checkbox" id="src-imp"' + (imp ? ' checked' : '') + '> Importierte Fragen (' + imp + ')</label></div></fieldset>' +
         '<div class="btnrow"><button class="btn primary" data-act="single">Starten</button></div></section>';
     }
@@ -4843,7 +5350,7 @@ EPSO_VERBAL_ADD('l', [
 
   function sectionStats() {
     const out = {};
-    ['verbal', 'numerical', 'abstract'].forEach((s) => (out[s] = { total: 0, correct: 0, sessions: 0, seconds: 0, answered: 0 }));
+    SEC_ORDER.forEach((s) => (out[s] = { total: 0, correct: 0, sessions: 0, seconds: 0, answered: 0 }));
     (S.store.history || []).forEach((h) => {
       const o = out[h.section];
       if (!o) return;
@@ -4858,9 +5365,9 @@ EPSO_VERBAL_ADD('l', [
 
   function viewStats() {
     const st = sectionStats();
-    let h = '<section class="panel"><h2>Statistik</h2><p class="lead">Die orangefarbene Markierung zeigt die Bestehensgrenze von 50 %. Das Tempo vergleicht deine Zeit pro Frage mit der Zeit, die in der Prüfung pro Frage zur Verfügung steht.</p>';
+    let h = '<section class="panel"><h2>Statistik</h2><p class="lead">Die orangefarbene Markierung zeigt die Mindestpunktzahl von 50 %. Das Tempo vergleicht deine Zeit pro Frage mit der Zeit, die in der Prüfung pro Frage zur Verfügung steht.</p>';
     h += '<div class="data-wrap"><table class="stats-table"><thead><tr><th>Test</th><th class="num">Durchgänge</th><th class="num">Fragen</th><th class="num">Richtig</th><th>Trefferquote</th><th class="num">Ø Zeit/Frage</th><th class="num">Vorgabe</th></tr></thead><tbody>';
-    ['verbal', 'numerical', 'abstract'].forEach((s) => {
+    SEC_ORDER.forEach((s) => {
       const x = st[s];
       const acc = x.total ? (x.correct / x.total) * 100 : 0;
       const per = x.total ? x.seconds / x.total : 0;
@@ -4873,7 +5380,7 @@ EPSO_VERBAL_ADD('l', [
     const recent = (S.store.history || []).slice(-15).reverse();
     if (recent.length) {
       h += '<h3 style="font-size:1rem">Letzte Durchgänge</h3><div class="data-wrap"><table class="stats-table"><thead><tr><th>Datum</th><th>Test</th><th>Modus</th><th class="num">Ergebnis</th><th class="num">Zeit</th></tr></thead><tbody>' +
-        recent.map((r) => '<tr><td>' + new Date(r.date).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' }) + '</td><td>' + SECTIONS[r.section].short + '</td><td>' + modeName(r.mode) + '</td><td class="num">' + r.correct + '/' + r.total + '</td><td class="num">' + fmtSec(r.seconds) + '</td></tr>').join('') +
+        recent.map((r) => '<tr><td>' + new Date(r.date).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' }) + '</td><td>' + ((SECTIONS[r.section] || {}).short || r.section) + '</td><td>' + modeName(r.mode) + '</td><td class="num">' + r.correct + '/' + r.total + '</td><td class="num">' + fmtSec(r.seconds) + '</td></tr>').join('') +
         '</tbody></table></div>';
     }
     h += '<h3 style="font-size:1rem">Fortschritt sichern</h3><p class="lead">Dein Fortschritt liegt nur in diesem Browser. Kopiere den Text, um ihn auf einem anderen Gerät unter „Fragen importieren“ einzufügen.</p>' +
@@ -4883,7 +5390,7 @@ EPSO_VERBAL_ADD('l', [
   }
 
   function modeName(m) {
-    return { exam: 'Simulation', test: 'Einzeltest', practice: 'Übung', wrong: 'Fehler' }[m] || m;
+    return { exam: 'Simulation', test: 'Einzeltest', practice: 'Übung', wrong: 'Fehler', sample: 'Beispieltest' }[m] || m;
   }
 
   function fmtSec(s) {
@@ -4893,8 +5400,8 @@ EPSO_VERBAL_ADD('l', [
 
   function viewImport() {
     return '<section class="panel"><h2>Fragen importieren</h2>' +
-      '<p class="lead">Füge hier eigene oder offizielle Beispielfragen als JSON ein, etwa aus dem EPSO-Beispieltest, den euphorum-Unterlagen oder Webinaren. Importierte Fragen erscheinen mit dem Etikett „Importiert“ und lassen sich als Quelle getrennt auswählen. Hier kannst du auch einen gesicherten Fortschritt wiederherstellen.</p>' +
-      '<details><summary class="small" style="cursor:pointer;font-weight:600">Format anzeigen</summary><pre class="small" style="white-space:pre-wrap;background:var(--surface-2);padding:10px;border-radius:6px">[\n  {\n    "section": "verbal",\n    "source": "EPSO-Beispieltest",\n    "passage": "Text …",\n    "stem": "Welche der folgenden Aussagen ist richtig?",\n    "options": ["…", "…", "…", "…"],\n    "correct": 2,\n    "explanation": "…"\n  },\n  {\n    "section": "numerical",\n    "data": "&lt;table&gt;…&lt;/table&gt; (HTML, optional)",\n    "stem": "…", "options": ["…"], "correct": 0\n  }\n]\n\ncorrect = Index der richtigen Antwort, beginnend bei 0.</pre></details>' +
+      '<p class="lead">Füge hier eigene Übungsfragen als JSON ein. Importierte Fragen erscheinen mit dem Etikett „Importiert“ und lassen sich als Quelle getrennt auswählen. Hier kannst du auch einen gesicherten Fortschritt wiederherstellen.</p>' +
+      '<details><summary class="small" style="cursor:pointer;font-weight:600">Format anzeigen</summary><pre class="small" style="white-space:pre-wrap;background:var(--surface-2);padding:10px;border-radius:6px">[\n  {\n    "section": "verbal",\n    "source": "Webinar März",\n    "passage": "Text …",\n    "stem": "' + STEM_TRUE + '",\n    "options": ["…", "…", "…", "…"],\n    "correct": 2,\n    "explanation": "…"\n  },\n  {\n    "section": "numerical",\n    "data": "&lt;table&gt;…&lt;/table&gt; (HTML, optional)",\n    "stem": "…", "options": ["…", "…", "…", "…", "Keine der oben genannten"], "correct": 0\n  }\n]\n\ncorrect = Index der richtigen Antwort, beginnend bei 0.</pre></details>' +
       '<label for="imp-text" class="small" style="font-weight:600">JSON einfügen</label><textarea id="imp-text" placeholder="[ { &quot;section&quot;: &quot;verbal&quot;, … } ]"></textarea>' +
       '<div class="btnrow"><label class="btn" for="imp-file" style="display:inline-block">Datei wählen</label><input type="file" id="imp-file" accept=".json,application/json,text/plain" hidden>' +
       '<button class="btn primary" data-act="import">Importieren</button>' +
@@ -4902,140 +5409,203 @@ EPSO_VERBAL_ADD('l', [
   }
 
   function viewInfo() {
+    const a = (href, text) => '<a href="' + href + '" target="_blank" rel="noopener">' + text + '</a>';
     return '<section class="panel"><h2>Testformat ' + COMPETITION + '</h2>' +
-      '<div class="data-wrap"><table class="stats-table"><thead><tr><th>Test</th><th class="num">Fragen</th><th class="num">Zeit</th><th>Mindestpunktzahl</th><th>Gewichtung</th></tr></thead><tbody>' +
-      '<tr><td>Sprachlogisches Denken</td><td class="num">20</td><td class="num">35 min</td><td>10/20</td><td>35 % der Gesamtpunkte</td></tr>' +
-      '<tr><td>Zahlenlogisches Denken</td><td class="num">10</td><td class="num">20 min</td><td rowspan="2">zusammen 10/20</td><td rowspan="2">nur bestanden/nicht bestanden</td></tr>' +
+      '<div class="data-wrap"><table class="stats-table"><thead><tr><th>Test (Sprache 1)</th><th class="num">Fragen</th><th class="num">Zeit</th><th>Mindestpunktzahl</th><th>Gewichtung</th></tr></thead><tbody>' +
+      '<tr><td>Sprachlogisches Denken</td><td class="num">20</td><td class="num">35 min</td><td>10 von 20</td><td>40 % der vorläufigen, 35 % der endgültigen Gesamtpunktzahl</td></tr>' +
+      '<tr><td>Zahlenverständnis</td><td class="num">10</td><td class="num">20 min</td><td rowspan="2">zusammen 10 von 20</td><td rowspan="2">fließt nicht in die Gesamtpunktzahl ein</td></tr>' +
       '<tr><td>Abstraktes Denken</td><td class="num">10</td><td class="num">10 min</td></tr></tbody></table></div>' +
-      '<div class="notice">Die Zahlen stammen aus Vorbereitungsunterlagen zu AD/427/26. Maßgeblich ist die Bekanntmachung des Auswahlverfahrens (ABl. C/2026/00711). Prüfe sie dort und in deiner Einladung im Candidate Portal.</div>' +
-      '<h3 style="font-size:1rem">So funktioniert die Oberfläche (wie in TAO)</h3><ul class="small" style="margin:0;padding-left:1.2em;display:grid;gap:4px">' +
-      '<li>Jeder Test hat einen eigenen Countdown. Wenn die Zeit abläuft, wird der Test automatisch abgegeben.</li>' +
-      '<li>Über die Navigationsleiste springst du direkt zu jeder Frage. Ausgefüllte Kreise sind beantwortet, das orange Fähnchen markiert Fragen zur Überprüfung.</li>' +
-      '<li>Mit dem Durchstreich-Symbol neben einer Antwort schließt du Optionen aus.</li>' +
-      '<li>In der Zahlenlogik gibt es einen einfachen Taschenrechner auf dem Bildschirm, keinen wissenschaftlichen.</li>' +
-      '<li>Vor der Abgabe siehst du eine Übersicht mit unbeantworteten und markierten Fragen. Abgegebene Tests lassen sich nicht mehr öffnen.</li>' +
-      '<li>Falsche Antworten geben keinen Punktabzug. Beantworte deshalb immer alle Fragen.</li></ul>' +
-      '<h3 style="font-size:1rem">Tastatur</h3><p class="small muted" style="margin:0">A–E oder 1–5 wählen eine Antwort · ← → blättern · M markiert die Frage · R öffnet den Taschenrechner</p>' +
-      '<h3 style="font-size:1rem">Offizielle Übungsquellen</h3><ul class="small" style="margin:0;padding-left:1.2em;display:grid;gap:4px">' +
-      '<li><a href="https://eu-careers.europa.eu/de/sample-tests/reasoning-tests-ad" target="_blank" rel="noopener">EPSO-Beispieltest in TAO (20 Fragen)</a></li>' +
-      '<li><a href="https://www.euphorum.org/" target="_blank" rel="noopener">European Career Portal 2.0 (euphorum), Demobereich</a></li>' +
-      '<li><a href="https://eu-karriere.org/veranstaltungen/logiktest" target="_blank" rel="noopener">Webinare des Seminarbüros</a></li></ul></section>';
+      '<p class="small muted" style="margin:0">Quelle: Bekanntmachung des Auswahlverfahrens ' + COMPETITION + ', ' + a(NOTICE_URL, 'ABl. C/2026/711 vom 5.2.2026') + ', Abschnitt 4.3.2 Buchstabe b (Tabelle 2) und 4.3.3 (Tabelle 6). Die Tests werden online mit Fernbeaufsichtigung abgelegt. Wer die Mindestpunktzahl verfehlt, wird in den übrigen Tests nicht weiter bewertet.</p>' +
+      '<h3 style="font-size:1rem">Die Testoberfläche (wie im offiziellen Beispieltest)</h3><ul class="small" style="margin:0;padding-left:1.2em;display:grid;gap:4px">' +
+      '<li>Oben links stehen der Name des Tests, der Countdown und der aktuelle Abschnitt. Läuft die Zeit ab, wird automatisch abgegeben.</li>' +
+      '<li>Oben rechts liegen die Werkzeuge: Notizblock, Textmarker, Taschenrechner (Grundrechenarten, Prozent, Vorzeichen), Zeilenlineal und Einstellungen. Der Taschenrechner steht in allen Abschnitten zur Verfügung.</li>' +
+      '<li>„Antworten ausschließen“ ist eine Einstellung und standardmäßig ausgeschaltet. Eingeschaltet erscheint neben jeder Option ein Symbol zum Durchstreichen.</li>' +
+      '<li>Unten sind alle Fragen als nummerierte Kreise aufgereiht. Mit dem Lesezeichen-Symbol rechts markierst du eine Frage.</li>' +
+      '<li>„Übersicht“ zeigt alle Fragen nach Abschnitten, dazu die Filter „Markiert“ und „Unvollständig“. Von dort gibst du den Teil ab; danach lässt sich nichts mehr ändern.</li>' +
+      '<li>Sprachlogik: vier Antwortoptionen (A–D), gefragt ist, welche Aussage zutreffend ist. Zahlenverständnis: fünf Optionen, E ist häufig „Keine der oben genannten“. Abstraktes Denken: fünf Bilder einer Reihe und fünf Figuren A–E.</li>' +
+      '<li>Beantworte alle Fragen – eine unbeantwortete Frage bringt sicher keinen Punkt.</li></ul>' +
+      '<h3 style="font-size:1rem">Tastatur</h3><p class="small muted" style="margin:0">A–E oder 1–5 wählen eine Antwort · ← → blättern · M setzt ein Lesezeichen · R öffnet den Taschenrechner · Esc schließt Fenster</p>' +
+      '<h3 style="font-size:1rem">Offizielle Quellen</h3><ul class="small" style="margin:0;padding-left:1.2em;display:grid;gap:4px">' +
+      '<li>' + a('https://selection.eu-careers.europa.eu/en/graduates-administrators-ad5', 'EPSO: Tests für AD 5 mit Beispieltests in allen 24 Sprachen') + '</li>' +
+      '<li>' + a('https://selection.eu-careers.europa.eu/en/ad5-graduates-selection-process-how-you-are-assessed', 'EPSO: So wird im AD5-Verfahren bewertet') + '</li>' +
+      '<li>Barrierefreie Fassungen (Englisch): ' + a('https://selection.eu-careers.europa.eu/system/files/2024-05/AD_Verbal_10Q_DA2.pdf', 'Verbal Reasoning (PDF)') + ', ' + a('https://selection.eu-careers.europa.eu/system/files/2024-05/AD_Numerical_5Q_DA2.pdf', 'Numerical Reasoning (PDF)') + '</li>' +
+      '<li>' + a(NOTICE_URL, 'Bekanntmachung EPSO/AD/427/26 auf EUR-Lex') + '</li></ul></section>';
   }
 
   // ----- Einleitung vor jedem Test -----
   function viewIntro() {
     const p = part();
-    const cfg = SECTIONS[p.section];
     const idx = S.session.pi + 1, tot = S.session.parts.length;
-    let h = topbar(COMPETITION + ' – ' + cfg.title, S.session.label + (tot > 1 ? ' · Test ' + idx + ' von ' + tot : ''));
-    h += '<main class="page"><section class="panel"><div class="eyebrow">' + (tot > 1 ? 'Test ' + idx + ' von ' + tot : 'Einzeltest') + '</div><h2 style="font-size:1.6rem">' + cfg.title + '</h2>';
-    h += '<p>Dieser Test umfasst <strong>' + p.questions.length + ' Fragen</strong>. Du hast <strong>' + Math.round(p.timeLimit / 60) + ' Minuten</strong> Zeit.</p>';
-    const hint = {
-      verbal: 'Lies jeden Text und wähle die Aussage, die sich allein aus dem Text ergibt. Verwende kein Vorwissen. Achte auf Einschränkungen wie „einige“, „meist“ oder „bisher“.',
-      numerical: 'Beantworte die Fragen anhand der Tabellen und Diagramme. Der Taschenrechner öffnet sich über das Symbol in der Werkzeugleiste oder mit der Taste R.',
-      abstract: 'Jede Reihe folgt einer oder mehreren Regeln. Wähle die Figur, die die Reihe fortsetzt.',
-    }[p.section];
+    const mixed = p.section === 'mixed';
+    let h = topbar(COMPETITION + ' – ' + p.title, S.session.label + (tot > 1 ? ' · Test ' + idx + ' von ' + tot : ''));
+    h += '<main class="page"><section class="panel"><div class="eyebrow">' + (tot > 1 ? 'Test ' + idx + ' von ' + tot : esc(S.session.label)) + '</div><h2 style="font-size:1.6rem">' + esc(mixed ? 'Offizieller EPSO-Beispieltest' : p.title) + '</h2>';
+    h += '<p>Dieser Teil umfasst <strong>' + p.questions.length + ' Fragen</strong>. Du hast <strong>' + Math.round(p.timeLimit / 60) + ' Minuten</strong> Zeit.</p>';
+    const hint = mixed
+      ? 'Der Beispieltest besteht aus drei Abschnitten: 10 Fragen Sprachlogik, 5 Fragen Zahlenverständnis und 5 Fragen Abstraktes Denken. Alle Aufgaben stammen wörtlich aus dem deutschen EPSO-Beispieltest.'
+      : {
+        verbal: 'Lies jeden Text und wähle die Aussage, die zutreffend ist, also sich allein aus dem Text ergibt. Verwende kein Vorwissen. Achte auf Einschränkungen wie „einige“, „meist“, „nicht immer“ oder „nach eigenen Aussagen“.',
+        numerical: 'Beantworte die Fragen anhand der Tabellen und Diagramme. Der Taschenrechner öffnet sich über das Symbol oben rechts oder mit der Taste R. Prüfe bei „Keine der oben genannten“, ob dein Ergebnis wirklich nicht unter A–D steht.',
+        abstract: 'Jede Aufgabe zeigt fünf Bilder einer Reihe. Wähle unter A–E die Figur, die die Reihe fortsetzt. Oft laufen zwei Regeln gleichzeitig oder zwei Reihen verschränkt.',
+      }[p.section];
     h += '<p class="muted">' + hint + '</p>';
-    h += '<p class="small muted">Die Zeit läuft ab dem Klick auf „Test beginnen“. Wenn sie abläuft, wird der Test automatisch abgegeben. Für falsche Antworten gibt es keinen Punktabzug.</p>';
+    h += '<p class="small muted">Die Zeit läuft ab dem Klick auf „Test beginnen“. Wenn sie abläuft, wird automatisch abgegeben. Werkzeuge findest du oben rechts, die Fragen unten.</p>';
     h += '<div class="btnrow"><button class="btn primary" data-act="begin">Test beginnen</button>' + (S.session.pi === 0 ? '<button class="btn" data-act="home">Abbrechen</button>' : '') + '</div></section></main>';
     return h;
   }
 
-  // ----- Testansicht -----
+  // ----- Testansicht (TAO) -----
+  function secOf(q) {
+    return SECTIONS[q.section] ? SECTIONS[q.section].title : q.section;
+  }
+
   function viewTest() {
     const p = part();
-    const q = p.questions[p.current];
-    const cfg = SECTIONS[p.section];
+    const q = curQ();
     const practice = p.feedback;
-    const timerHtml = '<div class="timer' + (p.timeLimit && p.timeLimit - p.elapsed <= 120 ? ' low' : '') + '" id="timer" title="' + (p.timeLimit ? 'Verbleibende Zeit' : 'Verstrichene Zeit') + '">' +
-      '<span class="small" style="font-weight:400">' + (p.timeLimit ? 'Verbleibend' : 'Zeit') + '</span><span id="timer-val">' + timerText(p) + '</span></div>';
-    const endBtn = '<button class="tb-btn" data-act="to-review">' + (practice ? 'Beenden' : 'Test beenden') + '</button>';
-    let h = topbar(COMPETITION + ' – ' + cfg.title, S.session.label + (S.session.parts.length > 1 ? ' · Test ' + (S.session.pi + 1) + ' von ' + S.session.parts.length : ''), timerHtml + endBtn);
+    const tot = S.session.parts.length;
+    const T = S.tools;
+    const tool = (k, label, icon) => '<button class="tao-tool" data-act="tool" data-tool="' + k + '" aria-pressed="' + !!T[k] + '" title="' + label + '" aria-label="' + label + '">' + icon + '</button>';
 
-    h += '<div class="navbar"><div class="qnav" role="navigation" aria-label="Fragen">' + p.questions.map((qq, i) => {
-      let cls = 'qdot';
-      if (practice && p.checked[i]) cls += p.answers[i] === qq.correct ? ' right' : ' wrong';
-      else if (p.answers[i] !== null) cls += ' answered';
-      if (p.flags[i]) cls += ' flagged';
-      if (i === p.current) cls += ' current';
-      return '<button class="' + cls + '" data-act="goto" data-i="' + i + '" aria-label="Frage ' + (i + 1) + (p.answers[i] !== null ? ', beantwortet' : '') + (p.flags[i] ? ', markiert' : '') + '"' + (i === p.current ? ' aria-current="true"' : '') + '>' + (i + 1) + '</button>';
-    }).join('') + '</div><div class="legend"><span><i></i>offen</span><span><i class="fill"></i>beantwortet</span><span><i class="flag"></i>markiert</span></div></div>';
+    let h = '<header class="tao-head">' +
+      '<div class="tao-logo" aria-hidden="true">' + ICON.stars + '</div>' +
+      '<nav class="tao-crumbs" aria-label="Position im Test">' +
+      '<span class="crumb">' + esc(S.session.label) + '</span><span class="sep">/</span>' +
+      '<span class="crumb stack"><span>Teil ' + (S.session.pi + 1) + '</span><span class="tao-timer' + (p.timeLimit && p.timeLimit - p.elapsed <= 120 ? ' low' : '') + '" id="timer-val" title="' + (p.timeLimit ? 'Verbleibende Zeit' : 'Verstrichene Zeit') + '">' + timerText(p) + '</span></span><span class="sep">/</span>' +
+      '<span class="crumb">' + esc(secOf(q)) + '</span></nav>' +
+      '<div class="tao-tools" role="toolbar" aria-label="Werkzeuge">' +
+      tool('notes', 'Notizblock', ICON.notes) + tool('hl', 'Textmarker', ICON.hl) + tool('calc', 'Taschenrechner', ICON.calc) +
+      tool('ruler', 'Zeilenlineal', ICON.ruler) + tool('settings', 'Einstellungen', ICON.settings) +
+      '</div></header>';
 
-    h += '<div class="toolbar">' +
-      '<button class="tool" data-act="flag" aria-pressed="' + p.flags[p.current] + '">' + ICON.flag + (p.flags[p.current] ? 'Markierung entfernen' : 'Zur Überprüfung markieren') + '</button>' +
-      (p.section === 'numerical' ? '<button class="tool" data-act="calc" aria-pressed="' + S.calcOpen + '">' + ICON.calc + 'Taschenrechner</button>' : '') +
-      '<button class="tool" data-act="zoom-out" aria-label="Schrift kleiner">' + ICON.zoomOut + '</button><button class="tool" data-act="zoom-in" aria-label="Schrift größer">' + ICON.zoomIn + '</button>' +
-      (!practice ? '<button class="tool" data-act="to-review">' + ICON.list + 'Übersicht</button>' : '') +
-      (q.source && q.source !== 'generiert' && q.source !== 'pool' ? '<span class="pill src">' + esc(q.sourceLabel || q.source) + '</span>' : '') +
-      '<span class="qcounter">Frage ' + (p.current + 1) + ' von ' + p.questions.length + '</span></div>';
+    if (T.hl) h += '<div class="tao-hint">Textmarker aktiv: Text markieren zum Hervorheben, auf eine Markierung klicken zum Entfernen.</div>';
 
-    h += '<main class="stage">' + questionHtml(q, p, p.current, practice) + '</main>';
+    h += '<main class="tao-stage' + (T.hl ? ' hl-on' : '') + '"><div class="sr-only" aria-live="polite">Frage ' + (p.current + 1) + ' von ' + p.questions.length + '</div>' + questionHtml(q, p, p.current, practice) + '</main>';
 
-    const isLast = p.current === p.questions.length - 1;
-    let right = '';
-    if (practice && !p.checked[p.current]) right = '<button class="btn primary" data-act="check"' + (p.answers[p.current] === null ? ' disabled' : '') + '>Antwort prüfen</button>';
-    else if (isLast) right = '<button class="btn primary" data-act="to-review">' + (practice ? 'Auswertung' : 'Zur Übersicht') + '</button>';
-    else right = '<button class="btn primary" data-act="next">Weiter</button>';
-    h += '<footer class="footer"><button class="btn" data-act="prev"' + (p.current === 0 ? ' disabled' : '') + '>Zurück</button>' + right + '</footer>';
+    h += '<button class="tao-bookmark" data-act="flag" aria-pressed="' + p.flags[p.current] + '" title="' + (p.flags[p.current] ? 'Lesezeichen entfernen' : 'Lesezeichen setzen') + '" aria-label="' + (p.flags[p.current] ? 'Lesezeichen entfernen' : 'Lesezeichen setzen') + '">' + (p.flags[p.current] ? ICON.bookmarkOn : ICON.bookmark) + '</button>';
+
+    h += '<footer class="tao-nav">' +
+      (p.current > 0 ? '<button class="tao-round" data-act="prev" aria-label="Vorherige Frage">' + ICON.prev + '</button>' : '<span class="tao-round-ph"></span>') +
+      '<div class="tao-track" role="navigation" aria-label="Fragen">' + p.questions.map((qq, i) => dotHtml(p, qq, i, practice)).join('') + '</div>' +
+      '<button class="tao-ovbtn" data-act="overview" aria-expanded="' + S.overview + '">' + ICON.up + '<span>Übersicht (' + p.questions.length + ')</span></button>' +
+      '<button class="tao-round primary" data-act="next" aria-label="' + (p.current === p.questions.length - 1 ? 'Zur Übersicht' : 'Nächste Frage') + '">' + ICON.next + '</button>' +
+      '</footer>';
+
+    if (S.overview) h += overviewHtml(p);
+    if (S.confirm) h += confirmHtml(p);
+    if (T.settings) h += settingsHtml();
     return h;
   }
 
-  function passageHtml(text) {
-    return String(text).split(/\n\s*\n/).map((para) => '<p>' + esc(para.trim()) + '</p>').join('');
+  function dotHtml(p, qq, i, practice) {
+    let cls = 'tdot';
+    if (practice && p.checked[i]) cls += p.answers[i] === qq.correct ? ' right' : ' wrong';
+    else if (p.answers[i] !== null) cls += ' answered';
+    else if (p.visited[i]) cls += ' seen';
+    if (p.flags[i]) cls += ' flagged';
+    if (i === p.current) cls += ' current';
+    const state = p.answers[i] !== null ? 'beantwortet' : p.visited[i] ? 'nicht beantwortet' : 'noch nicht gesehen';
+    return '<button class="' + cls + '" data-act="goto" data-i="' + i + '" aria-label="Frage ' + (i + 1) + ', ' + state + (p.flags[i] ? ', mit Lesezeichen' : '') + '"' + (i === p.current ? ' aria-current="step"' : '') + '>' + (i + 1) + '</button>';
   }
 
+  function overviewHtml(p) {
+    const flagged = p.flags.filter(Boolean).length;
+    const open = p.answers.filter((a) => a === null).length;
+    const tab = S.ovTab;
+    const show = (i) => tab === 'all' || (tab === 'flag' && p.flags[i]) || (tab === 'open' && p.answers[i] === null);
+    const groups = [];
+    p.questions.forEach((q, i) => {
+      let g = groups[groups.length - 1];
+      if (!g || g.sec !== q.section) groups.push((g = { sec: q.section, items: [] }));
+      g.items.push(i);
+    });
+    let h = '<section class="tao-overlay" role="dialog" aria-label="Übersicht">' +
+      '<div class="tao-bar"><button class="tao-x" data-act="overview" aria-label="Übersicht schließen">' + ICON.close + '</button><h2>Übersicht – Teil ' + (S.session.pi + 1) + '</h2></div>' +
+      '<div class="tao-ovbody"><div class="tao-tabs" role="tablist">' +
+      [['all', 'Alle Fragen'], ['flag', 'Markiert (' + flagged + ')'], ['open', 'Unvollständig (' + open + ')']]
+        .map(([k, l]) => '<button role="tab" class="tao-tab" data-act="ovtab" data-tab="' + k + '" aria-selected="' + (tab === k) + '">' + l + '</button>').join('') + '</div>';
+    groups.forEach((g) => {
+      const items = g.items.filter(show);
+      if (!items.length) return;
+      h += '<h3 class="tao-group">' + esc(SECTIONS[g.sec] ? SECTIONS[g.sec].title : g.sec) + '</h3><div class="tao-ovdots">' + items.map((i) => dotHtml(p, p.questions[i], i, p.feedback)).join('') + '</div>';
+    });
+    if (!groups.some((g) => g.items.some(show))) h += '<p class="muted">Keine Fragen in dieser Ansicht.</p>';
+    h += '</div><div class="tao-ovfoot"><button class="tao-link" data-act="overview">' + ICON.back + 'Zurück zur Frage</button>' +
+      '<button class="tao-pill" data-act="ask-submit">' + (p.feedback ? 'Beenden und auswerten' : 'Diesen Teil abgeben') + ICON.send + '</button></div></section>';
+    return h;
+  }
+
+  function confirmHtml(p) {
+    const open = p.answers.filter((a) => a === null).length;
+    const last = S.session.pi === S.session.parts.length - 1;
+    return '<div class="tao-modal-bg"><div class="tao-modal" role="alertdialog" aria-labelledby="cf-t">' +
+      '<p id="cf-t"><strong>' + (last ? 'Du hast das Ende des Tests erreicht. Möchtest du ' + (p.feedback ? 'die Übung beenden?' : 'den Test wirklich zur Bewertung abgeben?') : 'Möchtest du diesen Teil wirklich abgeben? Danach beginnt der nächste Teil.') + '</strong></p>' +
+      (open ? '<p>Du hast noch ' + open + ' unvollständige Frage' + (open === 1 ? '' : 'n') + '. ' + (p.feedback ? '' : 'Nach der Abgabe kannst du keine Antworten mehr ergänzen oder ändern.') + '</p>' : (p.feedback ? '' : '<p>Nach der Abgabe kannst du keine Antworten mehr ändern.</p>')) +
+      '<div class="tao-modal-btns"><button class="tao-pill inv" data-act="submit">' + (p.feedback ? 'Beenden' : 'Test abgeben') + '</button><button class="tao-pill fill" data-act="cancel-submit" autofocus>Weiter beantworten</button></div></div></div>';
+  }
+
+  function settingsHtml() {
+    const st = S.store.settings;
+    return '<section class="tao-overlay" role="dialog" aria-label="Einstellungen">' +
+      '<div class="tao-bar"><button class="tao-x" data-act="tool" data-tool="settings" aria-label="Einstellungen schließen">' + ICON.close + '</button><h2>Testkonfiguration</h2></div>' +
+      '<div class="tao-ovbody narrow"><h3 class="tao-group">Meine Einstellungen</h3>' +
+      '<div class="set-row"><div><strong>Antworten ausschließen</strong><p class="small muted">Blendet neben jeder Option ein Symbol ein, mit dem du Antworten durchstreichen kannst.</p></div>' +
+      '<button class="switch" role="switch" aria-checked="' + !!st.elim + '" data-act="set-elim"><span class="knob"></span><span class="lbl">' + (st.elim ? 'An' : 'Aus') + '</span></button></div>' +
+      '<div class="set-row"><div><strong>Schriftgröße</strong><p class="small muted">Aktuell ' + Math.round((st.scale || 1) * 100) + ' %</p></div><div class="btnrow"><button class="btn" data-act="zoom-out" aria-label="Schrift kleiner">A−</button><button class="btn" data-act="zoom-in" aria-label="Schrift größer">A+</button></div></div>' +
+      '<div class="set-row"><div><strong>Darstellung</strong><p class="small muted">Hell oder dunkel (die Aufgaben selbst bleiben auf weißem Grund).</p></div><button class="btn" data-act="theme">Hell/Dunkel</button></div>' +
+      '<div class="set-row"><div><strong>Test verlassen</strong><p class="small muted">Bricht den Durchgang ohne Wertung ab.</p></div><button class="btn danger" data-act="quit">Abbrechen</button></div>' +
+      '</div></section>';
+  }
+
+  // Einspaltiges Layout wie im Beispieltest: Material oben, Frage, Antwortfelder darunter
   function questionHtml(q, p, i, practice) {
     const ans = p ? p.answers[i] : null;
     const checked = p ? p.checked[i] : true;
     const elim = p ? p.elim[i] : [];
     const showSol = practice && checked;
     const figs = !!q.optionsAreFigures;
-    const opts = '<ol class="options' + (figs ? ' figs' : '') + '" role="radiogroup" aria-label="Antwortmöglichkeiten">' + q.options.map((o, k) => {
-      let cls = 'opt';
+    const elimOn = p && !showSol && S.store.settings.elim && S.view === 'test';
+    const opts = '<ol class="tao-options" role="radiogroup" aria-label="Antwortmöglichkeiten">' + q.options.map((o, k) => {
+      let cls = 'tao-opt';
       if (ans === k) cls += ' selected';
       if (elim.includes(k)) cls += ' eliminated';
       if (showSol && k === q.correct) cls += ' correct';
       if (showSol && ans === k && k !== q.correct) cls += ' incorrect';
-      const content = figs || q.htmlOptions ? o : esc(o);
-      const elimBtn = p && !showSol ? '<button class="elim" data-act="elim" data-k="' + k + '" title="Antwort ausschließen" aria-label="Antwort ' + LETTERS[k] + ' ausschließen">' + ICON.elim + '</button>' : '<span></span>';
-      if (figs) {
-        return '<li class="' + cls + '" data-act="answer" data-k="' + k + '" role="radio" aria-checked="' + (ans === k) + '" tabindex="0"><span class="otext">' + content + '</span><span class="optfoot"><span class="letter">' + LETTERS[k] + '</span>' + elimBtn + '</span></li>';
-      }
-      return '<li class="' + cls + '" data-act="answer" data-k="' + k + '" role="radio" aria-checked="' + (ans === k) + '" tabindex="0"><span class="letter">' + LETTERS[k] + '</span><span class="otext">' + content + '</span>' + elimBtn + '</li>';
+      const content = figs ? LETTERS[k] : q.htmlOptions ? o : esc(o);
+      const elimBtn = elimOn ? '<button class="elim" data-act="elim" data-k="' + k + '" title="Antwort ausschließen" aria-label="Antwort ' + LETTERS[k] + ' ausschließen" aria-pressed="' + elim.includes(k) + '">' + ICON.elim + '</button>' : '';
+      return '<li class="' + cls + '" data-act="answer" data-k="' + k + '" role="radio" aria-checked="' + (ans === k) + '" tabindex="0"><span class="radio" aria-hidden="true"></span><span class="letter">' + LETTERS[k] + ')</span><span class="otext">' + content + '</span>' + elimBtn + '</li>';
     }).join('') + '</ol>';
 
     let fb = '';
     if (showSol) {
       const ok = ans === q.correct;
       fb = '<div class="feedback ' + (ok ? 'good' : 'badf') + '" role="status"><h3>' + (ok ? 'Richtig' : ans === null ? 'Nicht beantwortet' : 'Falsch') + ' – richtig ist ' + LETTERS[q.correct] + '</h3><p>' + esc(q.explanation || 'Keine Erklärung hinterlegt.') + '</p></div>';
+    } else if (practice && p) {
+      fb = '<div class="btnrow check-row"><button class="btn primary" data-act="check"' + (ans === null ? ' disabled' : '') + '>Antwort prüfen</button></div>';
     }
+    const srcTag = q.source === 'official' ? '<span class="pill src">' + esc(q.sourceLabel) + (q.officialNo ? ', Aufgabe ' + q.officialNo : '') + '</span>'
+      : q.source === 'import' ? '<span class="pill src">' + esc(q.sourceLabel || 'Importiert') + '</span>' : '';
 
-    const stem = '<p class="stem">' + esc(q.stem) + '</p>';
-    if (q.section === 'verbal') {
-      return '<div class="split"><article class="pane material"><div class="passage">' + passageHtml(q.passage) + '</div></article><section class="pane">' + stem + opts + fb + '</section></div>';
+    // Markierbarer Bereich (Textmarker): Text und Fragestellung
+    let zone = '';
+    if (q.section === 'verbal' || q.passage) zone += '<div class="passage">' + passageHtml(q.passage || '') + '</div>';
+    if (q.stem) zone += '<p class="stem">' + esc(q.stem) + '</p>';
+    const hl = p && p.hl ? p.hl[i] : null;
+    const zoneHtml = zone ? '<div class="hl-zone" data-i="' + i + '">' + (hl || zone) + '</div>' : '';
+
+    let material = '';
+    if (q.section === 'numerical') material = '<div class="tao-data">' + (q.data || '') + '</div>';
+    if (figs) {
+      material = '<div class="tao-figs">' + (q.data || '') +
+        '<div class="fig-options">' + q.options.map((o, k) => '<figure class="fig-opt' + (showSol && k === q.correct ? ' correct' : '') + (ans === k ? ' selected' : '') + '" data-act="answer" data-k="' + k + '"><figcaption>' + LETTERS[k] + '</figcaption>' + o.replace(/^<figure class="fig-cell">|<\/figure>$/g, '') + '</figure>').join('') + '</div></div>';
+    } else if (q.section === 'abstract' && q.data) {
+      material = '<div class="tao-figs">' + q.data + '</div>';
     }
-    if (q.section === 'numerical') {
-      return '<div class="split"><article class="pane material">' + (q.data || '') + (q.passage ? '<div class="passage">' + passageHtml(q.passage) + '</div>' : '') + '</article><section class="pane">' + stem + opts + fb + '</section></div>';
-    }
-    return '<div class="split single"><section class="pane" style="display:grid;gap:16px">' + (q.data || '') + stem + opts + fb + '</section></div>';
+    return '<div class="tao-q">' + (srcTag ? '<div class="srcline">' + srcTag + '</div>' : '') + material + zoneHtml + opts + fb + '</div>';
   }
 
-  // ----- Übersicht vor Abgabe -----
-  function viewReview() {
-    const p = part();
-    const cfg = SECTIONS[p.section];
-    const unanswered = p.answers.filter((a) => a === null).length;
-    const flagged = p.flags.filter(Boolean).length;
-    const timerHtml = '<div class="timer' + (p.timeLimit && p.timeLimit - p.elapsed <= 120 ? ' low' : '') + '" id="timer"><span class="small" style="font-weight:400">' + (p.timeLimit ? 'Verbleibend' : 'Zeit') + '</span><span id="timer-val">' + timerText(p) + '</span></div>';
-    let h = topbar(COMPETITION + ' – ' + cfg.title, 'Übersicht vor der Abgabe', timerHtml);
-    h += '<main class="page"><section class="panel"><h2>Übersicht</h2><p class="lead">' + (p.questions.length - unanswered) + ' von ' + p.questions.length + ' Fragen beantwortet · ' + flagged + ' markiert. Klicke auf eine Frage, um zu ihr zurückzukehren.</p>';
-    h += '<div class="review-grid">' + p.questions.map((q, i) => '<button class="review-cell' + (p.answers[i] === null ? ' unanswered' : '') + '" data-act="goto" data-i="' + i + '"><span>Frage ' + (i + 1) + (p.flags[i] ? ' <span style="color:var(--flag)">⚑</span>' : '') + '</span><span class="st">' + (p.answers[i] === null ? 'offen' : 'Antwort ' + LETTERS[p.answers[i]]) + '</span></button>').join('') + '</div>';
-    if (S.confirmEnd) {
-      h += '<div class="confirm" role="alert"><strong>Test wirklich abgeben?</strong><span class="small">' + (unanswered ? unanswered + ' Frage(n) sind noch unbeantwortet. ' : '') + 'Danach kannst du nichts mehr ändern.</span><div class="btnrow"><button class="btn primary" data-act="submit">Ja, abgeben</button><button class="btn" data-act="cancel-submit">Weiter bearbeiten</button></div></div>';
-    }
-    h += '<div class="btnrow"><button class="btn" data-act="back-to-test">Zurück zum Test</button><button class="btn primary" data-act="ask-submit">Test abgeben</button>' +
-      (S.session.mode !== 'exam' ? '' : '') + '</div></section></main>';
-    return h;
+  // Der offizielle Test zeigt jeden Text als einen Absatz im Blocksatz
+  function passageHtml(text) {
+    return '<p>' + esc(String(text).replace(/\s*\n\s*\n\s*/g, ' ').trim()) + '</p>';
   }
 
   // ----- Ergebnisse -----
@@ -5044,32 +5614,42 @@ EPSO_VERBAL_ADD('l', [
     let h = topbar('Ergebnis – ' + sess.label, COMPETITION, '<button class="tb-btn" data-act="home">Zur Startseite</button>');
     h += '<main class="page">';
     const score = {};
-    sess.parts.forEach((p) => (score[p.section] = { c: p.answers.filter((a, i) => a === p.questions[i].correct).length, n: p.questions.length }));
+    sess.parts.forEach((p) => p.questions.forEach((q, i) => {
+      const s = score[q.section] || (score[q.section] = { c: 0, n: 0 });
+      s.n++;
+      if (p.answers[i] === q.correct) s.c++;
+    }));
+    const sc = (k) => score[k] || { c: 0, n: 0 };
     if (sess.mode === 'exam') {
-      const v = score.verbal.c, na = score.numerical.c + score.abstract.c;
+      const v = sc('verbal').c, na = sc('numerical').c + sc('abstract').c;
       const pv = v >= PASS.verbal, pn = na >= PASS.numAbs;
       h += '<section class="panel"><div class="eyebrow">Prüfungssimulation</div><h2 style="font-size:1.6rem">' + (pv && pn ? 'Mindestpunktzahlen erreicht' : 'Mindestpunktzahl nicht erreicht') + '</h2>' +
         '<div class="facts">' +
-        '<div class="fact"><h3>Sprachlogisches Denken</h3><div class="big">' + v + '/20</div><div><span class="pill ' + (pv ? 'pass' : 'fail') + '">' + (pv ? 'bestanden' : 'nicht bestanden') + '</span> <span class="small muted">Grenze 10/20</span></div></div>' +
-        '<div class="fact"><h3>Zahlen- + Abstraktes Denken</h3><div class="big">' + na + '/20</div><div><span class="pill ' + (pn ? 'pass' : 'fail') + '">' + (pn ? 'bestanden' : 'nicht bestanden') + '</span> <span class="small muted">Grenze 10/20 zusammen</span></div></div>' +
-        '<div class="fact"><h3>Einzelwerte</h3><div class="small">Zahlenlogik ' + score.numerical.c + '/10 · Abstrakt ' + score.abstract.c + '/10</div><div class="small muted">In der Rangliste zählt nur die Sprachlogik (35 % der Gesamtpunkte).</div></div>' +
+        '<div class="fact"><h3>Sprachlogisches Denken</h3><div class="big">' + v + '/20</div><div><span class="pill ' + (pv ? 'pass' : 'fail') + '">' + (pv ? 'bestanden' : 'nicht bestanden') + '</span> <span class="small muted">Mindestens 10/20</span></div></div>' +
+        '<div class="fact"><h3>Zahlenverständnis + Abstraktes Denken</h3><div class="big">' + na + '/20</div><div><span class="pill ' + (pn ? 'pass' : 'fail') + '">' + (pn ? 'bestanden' : 'nicht bestanden') + '</span> <span class="small muted">Mindestens 10/20 zusammen</span></div></div>' +
+        '<div class="fact"><h3>Einzelwerte</h3><div class="small">Zahlenverständnis ' + sc('numerical').c + '/10 · Abstrakt ' + sc('abstract').c + '/10</div><div class="small muted">In die Rangliste geht nur die Sprachlogik ein (40 % vorläufig, 35 % endgültig).</div></div>' +
         '</div></section>';
+    } else if (sess.parts[0].section === 'mixed') {
+      const tot = SEC_ORDER.reduce((a, k) => a + sc(k).c, 0);
+      h += '<section class="panel"><div class="eyebrow">' + esc(sess.label) + '</div><h2 style="font-size:1.6rem">' + tot + ' von ' + sess.parts[0].questions.length + ' richtig</h2>' +
+        '<div class="facts">' + SEC_ORDER.map((k) => '<div class="fact"><h3>' + SECTIONS[k].title + '</h3><div class="big">' + sc(k).c + '/' + sc(k).n + '</div><div class="small muted">' + Math.round((sc(k).c / Math.max(1, sc(k).n)) * 100) + ' %</div></div>').join('') + '</div>' +
+        '<p class="small muted" style="margin:0">Zeit: ' + fmtSec(sess.parts[0].elapsed) + '. In der echten Prüfung hat jeder Test einen eigenen Countdown (35, 20 und 10 Minuten).</p></section>';
     } else {
       sess.parts.forEach((p) => {
-        const s = score[p.section];
-        h += '<section class="panel"><div class="eyebrow">' + esc(sess.label) + '</div><h2 style="font-size:1.4rem">' + p.title + ': ' + s.c + ' von ' + s.n + ' richtig</h2>' +
-          '<p class="lead">Trefferquote ' + Math.round((s.c / s.n) * 100) + ' % · Zeit ' + fmtSec(p.elapsed) + ' · im Schnitt ' + fmtSec(p.elapsed / s.n) + ' pro Frage (Vorgabe ' + fmtSec((SECTIONS[p.section].minutes * 60) / SECTIONS[p.section].n) + ')</p></section>';
+        const s = sc(p.section);
+        h += '<section class="panel"><div class="eyebrow">' + esc(sess.label) + '</div><h2 style="font-size:1.4rem">' + esc(p.title) + ': ' + s.c + ' von ' + s.n + ' richtig</h2>' +
+          '<p class="lead">Trefferquote ' + Math.round((s.c / Math.max(1, s.n)) * 100) + ' % · Zeit ' + fmtSec(p.elapsed) + ' · im Schnitt ' + fmtSec(p.elapsed / Math.max(1, s.n)) + ' pro Frage (Vorgabe ' + fmtSec((SECTIONS[p.section].minutes * 60) / SECTIONS[p.section].n) + ')</p></section>';
       });
     }
     sess.parts.forEach((p) => {
-      h += '<section class="panel"><h2>' + p.title + ' – Lösungen</h2>' + (p.autoSubmitted ? '<div class="notice">Die Zeit war abgelaufen. Der Test wurde automatisch abgegeben.</div>' : '') + '<div class="reslist">';
+      h += '<section class="panel"><h2>' + esc(p.title) + ' – Lösungen</h2>' + (p.autoSubmitted ? '<div class="notice">Die Zeit war abgelaufen. Der Test wurde automatisch abgegeben.</div>' : '') + '<div class="reslist">';
       p.questions.forEach((q, i) => {
         const a = p.answers[i];
         const ok = a === q.correct;
         const mk = a === null ? 'n' : ok ? 'r' : 'w';
-        const label = q.section === 'verbal' ? (q.topic || 'Text') : (q.stem.length > 90 ? q.stem.slice(0, 88) + '…' : q.stem);
+        const label = q.section === 'verbal' ? (q.topic || 'Text') : q.section === 'abstract' ? 'Figurenreihe' : (q.stem.length > 90 ? q.stem.slice(0, 88) + '…' : q.stem);
         h += '<details class="resitem"><summary><span class="mark ' + mk + '">' + (mk === 'r' ? '✓' : mk === 'w' ? '✗' : '–') + '</span><strong>Frage ' + (i + 1) + '</strong><span class="muted small" style="min-width:0;flex:1">' + esc(label) + '</span><span class="small tabular">' + (a === null ? 'keine Antwort' : 'deine: ' + LETTERS[a]) + ' · richtig: ' + LETTERS[q.correct] + ' · ' + fmtSec(p.times[i]) + '</span></summary>' +
-          '<div class="body">' + questionHtml(q, { answers: p.answers, checked: p.questions.map(() => true), elim: p.questions.map(() => []) }, i, true).replace('pane material', 'pane') + '</div></details>';
+          '<div class="body">' + questionHtml(q, { answers: p.answers, checked: p.questions.map(() => true), elim: p.questions.map(() => []), hl: null }, i, true) + '</div></details>';
       });
       h += '</div></section>';
     });
@@ -5077,25 +5657,58 @@ EPSO_VERBAL_ADD('l', [
     return h;
   }
 
-  // ---------- Taschenrechner ----------
-  const calc = { expr: '', val: '0', fresh: true, acc: null, op: null, x: null, y: null };
-  function mountCalc() {
-    let el = document.getElementById('calc');
-    if (!el) {
+  // ---------- Schwebende Werkzeuge: Taschenrechner, Notizblock, Zeilenlineal ----------
+  const pos = {}; // gemerkte Fensterpositionen
+  function panelShell(id, title, body, extraCls) {
+    let el = document.getElementById(id);
+    const fresh = !el;
+    if (fresh) {
       el = document.createElement('div');
-      el.id = 'calc';
-      el.className = 'calc';
+      el.id = id;
+      el.className = 'tao-float ' + (extraCls || '');
       el.setAttribute('role', 'dialog');
-      el.setAttribute('aria-label', 'Taschenrechner');
-      document.getElementById('app').appendChild(el);
+      el.setAttribute('aria-label', title);
+      document.body.appendChild(el);
     }
-    const keys = [['C', 'clear'], ['←', 'back'], ['%', 'pct'], ['÷', '/'], ['7'], ['8'], ['9'], ['×', '*'], ['4'], ['5'], ['6'], ['−', '-'], ['1'], ['2'], ['3'], ['+', '+'], ['±', 'neg'], ['0'], [',', '.'], ['=', '=']];
-    el.innerHTML = '<header data-drag="1"><span>Taschenrechner</span><button data-act="calc" aria-label="Taschenrechner schließen">×</button></header>' +
-      '<div class="disp"><div class="expr" id="calc-expr">' + esc(calc.expr) + '</div><div class="val" id="calc-val">' + esc(calc.val.replace('.', ',')) + '</div></div>' +
-      '<div class="keys">' + keys.map(([l, k]) => '<button data-calc="' + (k || l) + '" class="' + (['/', '*', '-', '+', 'pct'].includes(k) ? 'op' : k === '=' ? 'eq' : '') + '">' + l + '</button>').join('') + '</div>';
-    if (calc.x !== null) { el.style.left = calc.x + 'px'; el.style.top = calc.y + 'px'; el.style.right = 'auto'; el.style.bottom = 'auto'; }
+    el.innerHTML = '<header class="tao-float-head" data-drag="' + id + '"><button data-act="tool" data-tool="' + (id === 'calc' ? 'calc' : 'notes') + '" aria-label="' + title + ' schließen">' + ICON.min + '</button><span>' + title + '</span><span></span></header>' + body;
+    if (pos[id]) Object.assign(el.style, { left: pos[id].x + 'px', top: pos[id].y + 'px', right: 'auto', bottom: 'auto' });
+    return el;
   }
 
+  function mountFloating() {
+    const T = S.tools;
+    // Taschenrechner
+    if (T.calc) {
+      const keys = [['AC', 'clear', 'fn'], ['±', 'neg', 'fn'], ['%', 'pct', 'fn'], ['÷', '/', 'op'], ['7'], ['8'], ['9'], ['×', '*', 'op'], ['4'], ['5'], ['6'], ['−', '-', 'op'], ['1'], ['2'], ['3'], ['+', '+', 'op'], ['0'], ['.', '.'], ['=', '=', 'eq']];
+      panelShell('calc', 'Taschenrechner', '<div class="disp"><div class="expr" id="calc-expr">' + esc(calc.expr) + '</div><div class="val" id="calc-val">' + esc(fmtShown()) + '</div></div>' +
+        '<div class="keys">' + keys.map(([l, k, c]) => '<button data-calc="' + (k || l) + '" class="' + (c || 'num') + '">' + l + '</button>').join('') + '</div>', 'calc');
+    } else removeEl('calc');
+    // Notizblock
+    if (T.notes) {
+      const el = panelShell('notes', 'Notizblock', '<textarea id="notes-ta" aria-label="Notizen" placeholder="Notizen für diesen Durchgang …"></textarea>', 'notes');
+      el.querySelector('textarea').value = S.session ? S.session.notes || '' : '';
+    } else removeEl('notes');
+    // Zeilenlineal
+    if (T.ruler) {
+      if (!document.getElementById('ruler')) {
+        const r = document.createElement('div');
+        r.id = 'ruler';
+        r.className = 'tao-ruler';
+        r.style.top = (rulerY - 24) + 'px';
+        document.body.appendChild(r);
+      }
+    } else removeEl('ruler');
+  }
+  function removeFloating() { ['calc', 'notes', 'ruler'].forEach(removeEl); }
+  function removeEl(id) { const el = document.getElementById(id); if (el) el.remove(); }
+  let rulerY = 260;
+
+  // ---------- Taschenrechner (wie TAO: AC, ±, %, Grundrechenarten) ----------
+  const calc = { expr: '', val: '0', fresh: true, acc: null, op: null };
+  function fmtShown() {
+    const v = parseFloat(calc.val);
+    return isNaN(v) ? 'Fehler' : calc.fresh ? fmtCalc(v) : calc.val.replace('.', ',');
+  }
   function calcPress(k) {
     const num = () => parseFloat(calc.val);
     const apply = (a, b, op) => (op === '+' ? a + b : op === '-' ? a - b : op === '*' ? a * b : op === '/' ? (b === 0 ? NaN : a / b) : b);
@@ -5132,22 +5745,71 @@ EPSO_VERBAL_ADD('l', [
         calc.fresh = true;
       }
     }
-    const v = parseFloat(calc.val);
-    const shown = isNaN(v) ? 'Fehler' : calc.fresh ? fmtCalc(v) : calc.val.replace('.', ',');
     const ev = document.getElementById('calc-val'), ee = document.getElementById('calc-expr');
-    if (ev) ev.textContent = shown;
+    if (ev) ev.textContent = fmtShown();
     if (ee) ee.textContent = calc.expr;
   }
   function fmtCalc(v) {
     if (!isFinite(v)) return 'Fehler';
-    const r = Math.round(v * 1e10) / 1e10;
+    const r = Math.round(v * 1e8) / 1e8;
     return String(r).replace('.', ',');
   }
 
+  // ---------- Textmarker ----------
+  function applyHighlight() {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !sel.rangeCount) return false;
+    const range = sel.getRangeAt(0);
+    const zone = (range.commonAncestorContainer.nodeType === 1 ? range.commonAncestorContainer : range.commonAncestorContainer.parentNode).closest('.hl-zone');
+    if (!zone) return false;
+    const walker = document.createTreeWalker(zone, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) { const n = walker.currentNode; if (range.intersectsNode(n) && n.nodeValue.length) nodes.push(n); }
+    const sc = range.startContainer, so = range.startOffset, ec = range.endContainer, eo = range.endOffset;
+    nodes.forEach((n) => {
+      let s = 0, e = n.nodeValue.length;
+      if (n === sc) s = so;
+      if (n === ec) e = eo;
+      if (e <= s || !n.nodeValue.slice(s, e).trim()) return;
+      if (n.parentNode.closest('mark.hl')) return;
+      const mid = n.splitText(s);
+      mid.splitText(e - s);
+      const m = document.createElement('mark');
+      m.className = 'hl';
+      mid.parentNode.insertBefore(m, mid);
+      m.appendChild(mid);
+    });
+    sel.removeAllRanges();
+    saveHighlight(zone);
+    return true;
+  }
+  function saveHighlight(zone) {
+    const p = part();
+    p.hl[parseInt(zone.dataset.i, 10)] = zone.innerHTML;
+  }
+
   // ---------- Ereignisse ----------
+  function closeTransient() {
+    if (S.confirm) { S.confirm = false; return true; }
+    if (S.tools.settings) { S.tools.settings = false; return true; }
+    if (S.overview) { S.overview = false; return true; }
+    return false;
+  }
+
   document.addEventListener('click', (e) => {
     const c = e.target.closest('[data-calc]');
     if (c) { calcPress(c.dataset.calc); return; }
+    // Textmarker: Klick auf Markierung entfernt sie
+    if (S.view === 'test' && S.tools.hl) {
+      const m = e.target.closest('.hl-zone mark.hl');
+      if (m && window.getSelection().isCollapsed) {
+        const zone = m.closest('.hl-zone');
+        m.replaceWith(...m.childNodes);
+        zone.normalize();
+        saveHighlight(zone);
+        return;
+      }
+    }
     const t = e.target.closest('[data-act]');
     if (!t) return;
     const act = t.dataset.act;
@@ -5161,22 +5823,23 @@ EPSO_VERBAL_ADD('l', [
       }
       case 'tab': S.homeTab = t.dataset.tab; render(); break;
       case 'exam': startExam(); break;
+      case 'sample': startSample(false); break;
+      case 'sample-practice': startSample(true); break;
       case 'wrong': startWrongReview(); break;
       case 'single': {
-        const section = val('f-section');
-        const mode = val('f-mode');
-        startSingle(section, {
-          mode,
+        startSingle(val('f-section'), {
+          mode: val('f-mode'),
           n: parseInt(val('f-n'), 10),
           difficulty: parseInt(val('f-diff'), 10) || 0,
-          sources: { pool: chk('src-pool'), generated: chk('src-gen'), imported: chk('src-imp') },
+          sources: { pool: chk('src-pool'), generated: chk('src-gen'), imported: chk('src-imp'), official: chk('src-off') },
         });
         break;
       }
       case 'begin': go('test'); beginPart(); break;
-      case 'home': clearInterval(S.timer); S.session = null; S.calcOpen = false; go('home'); break;
+      case 'home': clearInterval(S.timer); S.session = null; go('home'); break;
+      case 'quit': clearInterval(S.timer); S.session = null; Object.keys(S.tools).forEach((k) => (S.tools[k] = false)); go('home'); break;
       case 'answer': {
-        if (!p || p.submitted) return;
+        if (!p || p.submitted || S.view !== 'test') return;
         if (e.target.closest('.elim')) return;
         if (p.feedback && p.checked[p.current]) return;
         const k = parseInt(t.dataset.k, 10);
@@ -5195,19 +5858,27 @@ EPSO_VERBAL_ADD('l', [
         break;
       }
       case 'flag': p.flags[p.current] = !p.flags[p.current]; render(); break;
-      case 'calc': S.calcOpen = !S.calcOpen; if (!S.calcOpen) { const el = document.getElementById('calc'); if (el) el.remove(); } render(); break;
-      case 'zoom-in': S.store.settings.scale = Math.min(1.4, (S.store.settings.scale || 1) + 0.1); saveStore(); render(); break;
-      case 'zoom-out': S.store.settings.scale = Math.max(0.8, (S.store.settings.scale || 1) - 0.1); saveStore(); render(); break;
-      case 'prev': if (p.current > 0) { p.current--; render(); window.scrollTo(0, 0); } break;
-      case 'next': if (p.current < p.questions.length - 1) { p.current++; render(); window.scrollTo(0, 0); } break;
-      case 'goto': p.current = parseInt(t.dataset.i, 10); if (S.view !== 'test') S.view = 'test'; render(); window.scrollTo(0, 0); break;
+      case 'tool': {
+        const k = t.dataset.tool;
+        S.tools[k] = !S.tools[k];
+        if (k === 'settings') S.overview = false;
+        render();
+        break;
+      }
+      case 'set-elim': S.store.settings.elim = !S.store.settings.elim; saveStore(); render(); break;
+      case 'zoom-in': S.store.settings.scale = Math.min(1.4, Math.round(((S.store.settings.scale || 1) + 0.1) * 10) / 10); saveStore(); render(); break;
+      case 'zoom-out': S.store.settings.scale = Math.max(0.8, Math.round(((S.store.settings.scale || 1) - 0.1) * 10) / 10); saveStore(); render(); break;
+      case 'prev': gotoQ(p.current - 1); break;
+      case 'next':
+        if (p.current < p.questions.length - 1) gotoQ(p.current + 1);
+        else { S.overview = true; S.ovTab = 'all'; render(); } // wie TAO: nach der letzten Frage öffnet die Übersicht
+        break;
+      case 'goto': gotoQ(parseInt(t.dataset.i, 10)); break;
       case 'check': p.checked[p.current] = true; render(); break;
-      case 'to-review':
-        if (p.feedback) { submitPart(false); break; }
-        S.confirmEnd = false; go('review'); break;
-      case 'back-to-test': go('test'); break;
-      case 'ask-submit': S.confirmEnd = true; render(); break;
-      case 'cancel-submit': S.confirmEnd = false; render(); break;
+      case 'overview': S.overview = !S.overview; S.tools.settings = false; S.ovTab = S.overview ? S.ovTab : 'all'; render(); break;
+      case 'ovtab': S.ovTab = t.dataset.tab; render(); break;
+      case 'ask-submit': S.confirm = true; render(); break;
+      case 'cancel-submit': S.confirm = false; render(); break;
       case 'submit': submitPart(false); break;
       case 'import': doImport(); break;
       case 'clear-imp': S.store.imported = []; saveStore(); flash('Importierte Fragen gelöscht.'); render(); break;
@@ -5218,8 +5889,8 @@ EPSO_VERBAL_ADD('l', [
       }
       case 'copy-export': {
         const ta = document.getElementById('export-text');
-        navigator.clipboard && navigator.clipboard.writeText(ta.value).then(() => flash('Kopiert.'), () => { ta.select(); flash('Text markiert – bitte mit Strg+C kopieren.'); });
-        if (!navigator.clipboard) { ta.select(); flash('Text markiert – bitte mit Strg+C kopieren.'); }
+        if (navigator.clipboard) navigator.clipboard.writeText(ta.value).then(() => flash('Kopiert.'), () => { ta.select(); flash('Text markiert – bitte mit Strg+C kopieren.'); });
+        else { ta.select(); flash('Text markiert – bitte mit Strg+C kopieren.'); }
         break;
       }
       case 'reset': {
@@ -5228,6 +5899,17 @@ EPSO_VERBAL_ADD('l', [
         break;
       }
     }
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (S.view === 'test' && S.tools.hl) setTimeout(applyHighlight, 0);
+  });
+  document.addEventListener('touchend', () => {
+    if (S.view === 'test' && S.tools.hl) setTimeout(applyHighlight, 250);
+  });
+
+  document.addEventListener('input', (e) => {
+    if (e.target.id === 'notes-ta' && S.session) S.session.notes = e.target.value;
   });
 
   document.addEventListener('change', (e) => {
@@ -5243,39 +5925,46 @@ EPSO_VERBAL_ADD('l', [
       if (e.key === 'Enter' && e.target.matches && e.target.matches('[data-act]')) e.target.click();
       return;
     }
+    if (e.key === 'Escape') { if (closeTransient()) render(); return; }
     if (e.target.matches && e.target.matches('input, textarea, select')) return;
+    if (e.target.closest && e.target.closest('#calc')) return;
+    if (S.confirm || S.tools.settings) return;
     const p = part();
     const k = e.key.toLowerCase();
-    if (S.calcOpen && p.section === 'numerical' && e.target.closest && e.target.closest('#calc')) {
-      return;
-    }
+    const q = curQ();
     const idx = 'abcde'.indexOf(k) >= 0 ? 'abcde'.indexOf(k) : '12345'.indexOf(k);
-    if (idx >= 0 && idx < p.questions[p.current].options.length && !(p.feedback && p.checked[p.current])) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (idx >= 0 && idx < q.options.length && !(p.feedback && p.checked[p.current])) {
       p.answers[p.current] = idx;
       render();
-    } else if (e.key === 'ArrowRight' && p.current < p.questions.length - 1) { p.current++; render(); }
-    else if (e.key === 'ArrowLeft' && p.current > 0) { p.current--; render(); }
+    } else if (e.key === 'ArrowRight') { if (p.current < p.questions.length - 1) gotoQ(p.current + 1); }
+    else if (e.key === 'ArrowLeft') { if (p.current > 0) gotoQ(p.current - 1); }
     else if (k === 'm') { p.flags[p.current] = !p.flags[p.current]; render(); }
-    else if (k === 'r' && p.section === 'numerical') { S.calcOpen = !S.calcOpen; if (!S.calcOpen) { const el = document.getElementById('calc'); if (el) el.remove(); } render(); }
+    else if (k === 'r') { S.tools.calc = !S.tools.calc; render(); }
     else if (e.key === 'Enter' && e.target.matches && e.target.matches('[data-act]')) e.target.click();
   });
 
-  // Taschenrechner verschieben
+  // Fenster verschieben (Taschenrechner, Notizblock) und Zeilenlineal führen
   let drag = null;
   document.addEventListener('pointerdown', (e) => {
     const hd = e.target.closest('[data-drag]');
     if (!hd || e.target.closest('button')) return;
-    const el = document.getElementById('calc');
+    const el = document.getElementById(hd.dataset.drag);
     const r = el.getBoundingClientRect();
-    drag = { dx: e.clientX - r.left, dy: e.clientY - r.top };
+    drag = { id: hd.dataset.drag, el, dx: e.clientX - r.left, dy: e.clientY - r.top };
     hd.setPointerCapture(e.pointerId);
   });
   document.addEventListener('pointermove', (e) => {
+    if (S.tools.ruler) {
+      const r = document.getElementById('ruler');
+      rulerY = e.clientY;
+      if (r) r.style.top = (e.clientY - r.offsetHeight / 2) + 'px';
+    }
     if (!drag) return;
-    const el = document.getElementById('calc');
-    calc.x = Math.max(0, Math.min(window.innerWidth - 60, e.clientX - drag.dx));
-    calc.y = Math.max(0, Math.min(window.innerHeight - 60, e.clientY - drag.dy));
-    Object.assign(el.style, { left: calc.x + 'px', top: calc.y + 'px', right: 'auto', bottom: 'auto' });
+    const x = Math.max(0, Math.min(window.innerWidth - 80, e.clientX - drag.dx));
+    const y = Math.max(0, Math.min(window.innerHeight - 50, e.clientY - drag.dy));
+    pos[drag.id] = { x, y };
+    Object.assign(drag.el.style, { left: x + 'px', top: y + 'px', right: 'auto', bottom: 'auto' });
   });
   document.addEventListener('pointerup', () => (drag = null));
 
@@ -5289,6 +5978,7 @@ EPSO_VERBAL_ADD('l', [
     try { data = JSON.parse(text); } catch (err) { flash('Das ist kein gültiges JSON: ' + err.message); return; }
     if (data && data.epsoTrainerBackup && data.store) {
       S.store = Object.assign(blankStore(), data.store);
+      S.store.settings = Object.assign({ scale: 1, elim: false }, S.store.settings || {});
       saveStore();
       flash('Fortschritt wiederhergestellt.');
       render();
@@ -5307,7 +5997,7 @@ EPSO_VERBAL_ADD('l', [
         topic: q.topic || q.source || 'Importiert',
         passage: q.passage || '',
         data: q.data || '',
-        stem: q.stem || (q.section === 'abstract' ? 'Welche Figur setzt die Reihe fort?' : QTYPE.r),
+        stem: q.stem || (q.section === 'abstract' ? '' : STEM_TRUE),
         options: q.options,
         htmlOptions: !!q.htmlOptions,
         optionsAreFigures: !!q.optionsAreFigures,

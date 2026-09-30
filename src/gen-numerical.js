@@ -537,7 +537,32 @@
     out.id = 'num-' + seed;
     out.seed = seed;
     out.source = 'generiert';
-    return out;
+    return withNone(out, seed);
+  }
+
+  // Im EPSO-Beispieltest ist Option E oft „Keine der oben genannten“. Bei gut der Hälfte der
+  // Zahlenaufgaben wird E dadurch ersetzt; in etwa jedem fünften dieser Fälle ist E die Lösung,
+  // weil der richtige Wert dann nicht unter A–D steht.
+  const NONE = 'Keine der oben genannten';
+  function withNone(q, seed) {
+    if (!q.options.every((o) => /\d/.test(o))) return q; // nur bei Zahlenantworten
+    const r = U.rng(seed * 7 + 13);
+    if (!r.chance(0.55)) return q;
+    const keep = q.options.map((o, i) => i);
+    let correct;
+    if (r.chance(0.2)) {
+      // Lösung entfernen: E ist richtig
+      keep.splice(q.correct, 1);
+      correct = 4;
+    } else {
+      const wrong = keep.filter((i) => i !== q.correct);
+      keep.splice(keep.indexOf(r.pick(wrong)), 1);
+      correct = keep.indexOf(q.correct);
+    }
+    const options = keep.map((i) => q.options[i]).concat([NONE]);
+    let explanation = q.explanation;
+    if (correct === 4) explanation += ' Dieser Wert steht nicht unter A–D, deshalb ist E („' + NONE + '“) richtig.';
+    return Object.assign({}, q, { options, correct, explanation, fixedOrder: true });
   }
 
   const API = { generate, count: TEMPLATES.length };

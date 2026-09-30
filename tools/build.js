@@ -9,8 +9,10 @@ fs.mkdirSync(dist, { recursive: true });
 
 const read = (f) => fs.readFileSync(path.join(src, f), 'utf8');
 const verbalFiles = fs.readdirSync(path.join(src, 'data')).filter((f) => /^verbal-.*\.js$/.test(f)).sort();
+const extraData = ['data/official-sample.js'];
 const scripts = ['util.js', 'gen-numerical.js', 'gen-abstract.js', 'data/verbal-core.js']
   .concat(verbalFiles.filter((f) => f !== 'verbal-core.js').map((f) => 'data/' + f))
+  .concat(extraData)
   .concat(['app.js']);
 // Skript-Tags für die Entwicklungsversion aktualisieren
 let index = read('index.html');

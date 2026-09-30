@@ -99,7 +99,7 @@
   }
 
   function renderFigure(layers, states, label) {
-    let s = '<svg class="fig" viewBox="0 0 100 100" aria-hidden="true"><rect x="1" y="1" width="98" height="98" fill="#ffffff" stroke="#8a8f99" stroke-width="1"/>';
+    let s = '<svg class="fig" viewBox="0 0 100 100" aria-hidden="true"><rect x="1.5" y="1.5" width="97" height="97" fill="#ffffff" stroke="#111111" stroke-width="2"/>';
     layers.forEach((L, i) => (s += renderLayer(L, states[i])));
     s += '</svg>';
     return '<figure class="fig-cell">' + s + (label ? '<figcaption>' + label + '</figcaption>' : '') + '</figure>';
@@ -348,8 +348,8 @@
     const correct = all.findIndex((s) => key(s) === key(answer));
     const letters = ['A', 'B', 'C', 'D', 'E'];
 
-    const seriesHtml = '<div class="fig-series">' + seq.map((s, i) => renderFigure(layers, s, String(i + 1))).join('') +
-      '<figure class="fig-cell fig-q"><svg class="fig" viewBox="0 0 100 100" aria-hidden="true"><rect x="1" y="1" width="98" height="98" fill="#ffffff" stroke="#8a8f99" stroke-dasharray="4 3"/><text x="50" y="62" text-anchor="middle" font-size="34" fill="#4a5261" font-family="Arial, sans-serif">?</text></svg><figcaption>6</figcaption></figure></div>';
+    // Wie im EPSO-Test: fünf Bilder der Reihe, kein Platzhalter für das sechste
+    const seriesHtml = '<div class="fig-series">' + seq.map((s) => renderFigure(layers, s, '')).join('') + '</div>';
 
     const rules = [];
     layers.forEach((L) => Object.keys(L.attrs).forEach((k) => { const a = L.attrs[k]; if (!a.constant && a.text) rules.push(a.text + '.'); }));
@@ -360,7 +360,7 @@
       difficulty,
       section: 'abstract',
       source: 'generiert',
-      stem: 'Welche Figur setzt die Reihe fort?',
+      stem: '', // wie im EPSO-Test: keine Frage, nur Reihe und Optionen A–E
       data: seriesHtml,
       options: all.map((s) => renderFigure(layers, s, '')),
       optionsAreFigures: true,

@@ -15,7 +15,8 @@ V.forEach(q => {
   if (!(q.correct >= 0 && q.correct < 4)) err('ungültiger Index');
   if (!'rfah'.includes(q.qtype)) err('Fragetyp');
   const words = q.passage.split(/\s+/).length;
-  if (words < 70 || words > 280) err('Textlänge ' + words + ' Wörter');
+  // Offizielle deutsche Beispieltexte haben 63–129 Wörter
+  if (words < 55 || words > 280) err('Textlänge ' + words + ' Wörter');
   const L = 'ABCD'[q.correct];
   const first = (q.explanation.match(/\b([A-D])\b/) || [])[1];
   if (q.qtype !== 'f' && first !== L) err('Erklärung nennt zuerst ' + first + ', richtig ist ' + L);
@@ -31,4 +32,25 @@ for (let s = 1; s <= 2000; s++) {
   [q, a].forEach(x => { if (x.options.length !== 5 || x.correct < 0 || new Set(x.options).size !== 5) bad++; });
 }
 console.log('Generatoren: 4000 Aufgaben geprüft, fehlerhaft:', bad);
+
+// Offizieller Beispieltest: Lösungsschlüssel laut Auswertungsansicht der TAO-Plattform (DE, Aufgaben 1–20)
+const O = require(path.join(src, 'data', 'official-sample.js'));
+const KEY = 'BCACDCCBAADCDDBDCDDC';
+let offBad = 0;
+if (O.length !== 20) { offBad++; console.log('Beispieltest: erwartet 20 Aufgaben, gefunden', O.length); }
+O.forEach((q, i) => {
+  const L = 'ABCDE'[q.correct];
+  if (L !== KEY[i]) { offBad++; console.log(q.id, 'Lösung', L, 'statt', KEY[i]); }
+  const n = q.section === 'verbal' ? 4 : 5;
+  if (q.options.length !== n) { offBad++; console.log(q.id, 'Optionen', q.options.length); }
+  if (new Set(q.options).size !== n) { offBad++; console.log(q.id, 'doppelte Option'); }
+});
+// Zahlenaufgaben nachrechnen
+const gdp = (rd, pct) => rd / (pct / 100);
+const nlfi = gdp(6075, 1.82) / gdp(3725, 3.34), defr = gdp(41100, 2.45) / gdp(24075, 2.15);
+const de = (1.02 * (2.52 / 2.45) * (31.2 / 31.4) - 1) * 100, be = (1.03 * (1.89 / 1.97) * (23.5 / 22.9) - 1) * 100;
+const checks = [[Math.round(nlfi), 3], [Math.round(defr * 2), 3], [de.toFixed(2), '4.25'], [be.toFixed(2), '1.41'], [24256000 + 17819000, 42075000]];
+checks.forEach(([got, want], i) => { if (String(got) !== String(want)) { offBad++; console.log('Zahlenaufgabe', 11 + i, 'ergibt', got, 'erwartet', want); } });
+console.log('Beispieltest: 20 Aufgaben, Abweichungen vom offiziellen Schlüssel:', offBad);
+bad += offBad;
 process.exit(problems || bad ? 1 : 0);
